@@ -42,14 +42,13 @@ function createStandardResponse(key) {
   const { status, message } = standardResponses.get(key);
   return (res, details = "") => {
     res.status(status);
-    res.send(message + details ? `<p>${details}</p>` : "");
+    res.send(message + ((details) ? `<p>${details}</p>` : ""));
     res.end();
   };
 }
 
-
 app.listen(PORT, () => {
-  console.log(`Example app listening on ${PORT}!`);
+  console.log(`Listening on ${PORT}!`);
 });
 
 app.get("/", (req, res) => {
