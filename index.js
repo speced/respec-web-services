@@ -1,7 +1,7 @@
 "use strict";
 const async = require("marcosc-async");
 const app = require("express")();
-const PORT = 3000;
+const PORT = 8000;
 const { fetchAndWrite } = require("respec/tools/respecDocWriter");
 const { URL } = require('url');
 
@@ -40,13 +40,15 @@ app.get("/build/", (req, res) => {
   } catch (err) {
     return invalidSrc("Could not parse src param into URL.");
   }
-  if(!src.startsWith(http)){
+  if(!src.startsWith("http")){
     return invalidSrc("Only http(s) URLs allowed");
   }
   async.task(function* run() {
     const haltOnWarn = false;
     const haltOnError = false;
+    console.log("... trying to generate ..." + src);
     const result = yield fetchAndWrite(src, "", haltOnWarn, haltOnError);
+    console.log("... done! Returning result.");
     res.send(result);
     res.end();
   });
