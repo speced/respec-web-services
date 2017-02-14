@@ -25,9 +25,9 @@ const standardResponses = new Map([
     }
   }],
   ["timeout", {
-    status: 408,
+    status: 504,
     get message() {
-      return `<h1>${this.status} - Timeout error</h1>`;
+      return `<h1>${this.status} - Gateway Time-out</h1>`;
     }
   }],
   ["unknown", {
@@ -77,12 +77,12 @@ app.get("/build/", (req, res) => {
     const haltOnWarn = false;
     const haltOnError = false;
     const whenToHalt = { haltOnWarn, haltOnError };
-    const timeout = 10000;
+    const timeout = 30000;
     try {
       console.log("... trying to generate ..." + src);
       const result = yield new Promise((resove, reject) => {
         setTimeout(() => {
-          reject(new Error("Took took long"));
+          reject(new Error(`Took took long (${timeout}ms).`));
         }, timeout);
         return fetchAndWrite(src.href, "", whenToHalt, timeout)
           .then(resove)
