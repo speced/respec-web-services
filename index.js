@@ -38,7 +38,10 @@ app.get("/build/", (req, res) => {
   try {
     src = new URL(req.query.src).href;
   } catch (err) {
-    return invalidSrc("Could not parse src param into URL.")
+    return invalidSrc("Could not parse src param into URL.");
+  }
+  if(!src.startsWith(http)){
+    return invalidSrc("Only http(s) URLs allowed");
   }
   async.task(function* run() {
     const haltOnWarn = false;
