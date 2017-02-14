@@ -81,17 +81,19 @@ app.get("/build/", (req, res) => {
     const timeout = 10000;
     try {
       console.log("... trying to generate ..." + src);
-      console.log("... done! Returning result.");
       const result = yield new Promise((resove, reject) => {
-        fetchAndWrite(src.href, "", whenToHalt, timeout).then(resove).catch(reject);
         setTimeout(() => {
           reject(new Error("Took took long"));
         }, timeout);
+        return fetchAndWrite(src.href, "", whenToHalt, timeout)
+          .then(resove)
+          .catch(reject);
       });
+      console.log("... done! Returning result.");
       res.send(result);
       res.end();
     } catch (err) {
-      if (err.message.startsWith("took")) {
+      if (err.message.startsWith("Took")) {
         return timeoutError(res, err.message);
       }
       return unknowError(res, err.message);
