@@ -6,16 +6,44 @@ const { fetchAndWrite } = require("respec/tools/respecDocWriter");
 const { URL } = require('url');
 
 const standardResponses = new Map([
-  ["missing-src-query", { status: 400, message: "<h1>Missing src param</h1>"}],
-  ["bad-src-url", { status: 400, message: "<h1>Bad src param</h1>"}],
+  ["missing-src-query", {
+    status: 400,
+    get message() {
+      return `<h1>${this.status} - Missing src param</h1>`;
+    }
+  }],
+  ["bad-src-url", {
+    status: 400,
+    get message() {
+      return `<h1>${this.status} - Bad src param</h1>`;
+    }
+  }],
+  ["insecure-src-url", {
+    status: 403,
+    get message() {
+      return `<h1>${this.status} - Forbidden scheme</h1>`;
+    }
+  }],
+  ["timeout", {
+    status: 408,
+    get message() {
+      return `<h1>${this.status} - Timeout error</h1>`;
+    }
+  }],
+  ["unknown", {
+    status: 500,
+    get message() {
+      return `<h1>${this.status} - Unknown error</h1>`;
+    }
+  }],
 ]);
 
 function createStandardResponse(key) {
   const { status, message } = standardResponses.get(key);
   return (res, details = "") => {
     res.status(status);
-    res.send(message);
-    res.end(details ? `<p>${details}</p>` : "");
+    res.send(message + details ? `<p>${details}</p>` : "");
+    res.end();
   };
 }
 
@@ -30,26 +58,43 @@ app.get("/", (req, res) => {
 
 const missingSrcError = createStandardResponse("missing-src-query");
 const invalidSrc = createStandardResponse("bad-src-url");
+const insecureSrc = createStandardResponse("insecure-src-url");
+const timeoutError = createStandardResponse("timeout");
+const unknowError = createStandardResponse("unknown");
 app.get("/build/", (req, res) => {
   if (!req.query.src) {
     return missingSrcError(res);
   }
-  let src = "";
+  let src;
   try {
-    src = new URL(req.query.src).href;
+    src = new URL(req.query.src);
   } catch (err) {
-    return invalidSrc("Could not parse src param into URL.");
+    return invalidSrc(res, "Could not parse src param into URL.");
   }
-  if(!src.startsWith("http")){
-    return invalidSrc("Only http(s) URLs allowed");
+  if (!["https:", "https:"].includes(src.protocol)) {
+    return insecureSrc(res, "Only http(s) URLs allowed.");
   }
   async.task(function* run() {
     const haltOnWarn = false;
     const haltOnError = false;
-    console.log("... trying to generate ..." + src);
-    const result = yield fetchAndWrite(src, "", haltOnWarn, haltOnError);
-    console.log("... done! Returning result.");
-    res.send(result);
-    res.end();
+    const whenToHalt = { haltOnWarn, haltOnError };
+    const timeout = 10000;
+    try {
+      console.log("... trying to generate ..." + src);
+      console.log("... done! Returning result.");
+      const result = yield new Promise((resove, reject) => {
+        fetchAndWrite(src.href, "", whenToHalt, timeout).then(resove).catch(reject);
+        setTimeout(() => {
+          reject(new Error("Took took long"));
+        }, timeout);
+      });
+      res.send(result);
+      res.end();
+    } catch (err) {
+      if (err.message.startsWith("took")) {
+        return timeoutError(res, err.message);
+      }
+      return unknowError(res, err.message);
+    }
   });
 });
