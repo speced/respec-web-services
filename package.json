@@ -8,9 +8,11 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.3",
-    "express": "^4.14.1"
+    "express": "^4.14.1",
+    "respec-xref-route": "^1.0.0"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "get-xref-data": "fetch-bs-data && convert-bs-data"
   }
 }
