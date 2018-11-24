@@ -1,15 +1,14 @@
 {
   "name": "respec.org",
   "version": "0.0.0",
-  "description": "respec.org website and REST API",
+  "description": "respec.org website and HTTP APIs",
   "main": "index.js",
   "repository": "git@github.com:marcoscaceres/respec.org.git",
   "author": "Marcos Caceres <marcos@marcosc.com>",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.14.1",
-    "marcosc-async": "^4.0.0",
-    "respec": "^10.1.5"
+    "body-parser": "^1.18.3",
+    "express": "^4.14.1"
   },
   "scripts": {
     "start": "node index.js"
