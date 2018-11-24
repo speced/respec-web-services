@@ -8,8 +8,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.post("/xref", (req, res) => {
-  const response = xrefResponseBody(req.body, xrefData);
-  res.json(response);
+  const body = xrefResponseBody(req.body, xrefData);
+  res.json(body);
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
