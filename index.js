@@ -40,20 +40,21 @@ function handleBikeshedUpdate(req, res) {
     .digest("hex");
 
   if (req.get("X-Hub-Signature") !== `sha1=${hash}`) {
-    res.status(403);
+    res.status(403); // Forbidden
     return res.send("Failed to authenticate GitHub hook Signature");
   }
 
   if (req.body.refs !== "refs/heads/master") {
-    res.status(202);
+    res.status(202); // Accepted
     return res.send("Payload was not for master, aborted.");
   }
 
-  exec("npm run get-xref-data", (error) => {
+  exec("npm run get-xref-data", error => {
     if (error) {
-      console.log({ GUID: req.get("X-GitHub-Delivery") });
+      console.error("X-GitHub-Delivery", req.get("X-GitHub-Delivery"));
       console.error(error);
-      return res.status(503).send("Error");
+      res.status(503); // Service Unavailable
+      return res.send("Error");
     }
 
     res.send("OK");
