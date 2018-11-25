@@ -15,7 +15,7 @@ let lastUpdateTime = new Date(0);
 function validateGithubSignature(req, res, next) {
   // see: https://developer.github.com/webhooks/securing/
   const hash = crypto
-    .createHmac("sha1", "")
+    .createHmac("sha1", bikeshedSecret)
     .update(req.rawBody)
     .digest("hex");
 
