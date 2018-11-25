@@ -4,7 +4,7 @@ const { exec } = require("child_process");
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
-  throw new ReferenceError("env variable `BIKESHED_SECRET` is not set.")
+  throw new Error("env variable `BIKESHED_SECRET` is not set.")
 }
 
 // minimum delay between subsequent updates
