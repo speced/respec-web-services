@@ -6,7 +6,7 @@ if (!bikeshedSecret) {
   throw new Error("env variable `BIKESHED_SECRET` is not set.");
 }
 
-module.exports.route = function route(req, res, next) {
+module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
     return res.send("Failed to authenticate GitHub hook Signature");
