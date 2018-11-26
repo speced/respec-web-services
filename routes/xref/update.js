@@ -8,16 +8,17 @@ if (!bikeshedSecret) {
 
 module.exports.route = function route(req, res, next) {
   if (!isValidGithubSignature(req)) {
-    return next("Failed to authenticate GitHub hook Signature")
+    res.status(401); // Unauthorized
+    return res.send("Failed to authenticate GitHub hook Signature")
   }
 
   if (req.body.refs !== "refs/heads/master") {
-    res.status(202); // Accepted
+    res.status(400); // Bad request
     return res.send("Payload was not for master, ignored it.");
   }
 
   if (!hasAnchorUpdate(req.body.commits)) {
-    res.status(202); // Accepted
+    res.status(400); // Bad request
     return res.send("Anchors were not modified, ignored it.");
   }
 
