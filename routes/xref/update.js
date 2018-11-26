@@ -13,12 +13,12 @@ module.exports.route = function route(req, res, next) {
 
   if (req.body.refs !== "refs/heads/master") {
     res.status(202); // Accepted
-    return res.send("Payload was not for master, aborted.");
+    return res.send("Payload was not for master, ignored it.");
   }
 
   if (!hasAnchorUpdate(req.body.commits)) {
     res.status(202); // Accepted
-    return res.send("Anchors were not modified, aborted.");
+    return res.send("Anchors were not modified, ignored it.");
   }
 
   exec("npm run get-xref-data", error => {
