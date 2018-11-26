@@ -10,7 +10,7 @@ module.exports.route = function route(req, res) {
   res.json(body);
 };
 
-// reload xref data if ref-data.json is modified
+// reload xref data if xref-data.json is modified
 watch(dataFile, eventType => {
   if (eventType === "change") {
     console.log("xref-data.json modified");
