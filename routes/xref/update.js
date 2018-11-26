@@ -3,13 +3,13 @@ const { exec } = require("child_process");
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
-  throw new Error("env variable `BIKESHED_SECRET` is not set.")
+  throw new Error("env variable `BIKESHED_SECRET` is not set.");
 }
 
 module.exports.route = function route(req, res, next) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
-    return res.send("Failed to authenticate GitHub hook Signature")
+    return res.send("Failed to authenticate GitHub hook Signature");
   }
 
   if (req.body.refs !== "refs/heads/master") {
