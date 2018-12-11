@@ -25,7 +25,7 @@ module.exports.route = function route(req, res) {
 
   const taskId = `[/xref/update]: ${req.get("X-GitHub-Delivery")}`;
   queue.add(updateData, taskId);
-  res.status(201); // Accepted
+  res.status(202); // Accepted
   res.send();
 };
 

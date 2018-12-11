@@ -6,7 +6,7 @@ class BackgroundTaskQueue extends Set {
   }
 
   /**
-   * @param {function} handler () => Promise<any>
+   * @param {() => Promise<any>} handler
    * @param {string} id unique task ID
    */
   add(handler, id) {
@@ -17,7 +17,6 @@ class BackgroundTaskQueue extends Set {
   async runTasks() {
     this.isActive = true;
     for (const task of this.values()) {
-      this.delete(task);
       try {
         const result = await task.handler();
         task.status = "success";
@@ -29,6 +28,7 @@ class BackgroundTaskQueue extends Set {
           task.message = err.message;
         }
       } finally {
+        this.delete(task);
         this.completed.push(task);
       }
     }
