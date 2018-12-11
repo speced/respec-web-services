@@ -2,7 +2,8 @@ class BackgroundTaskQueue extends Set {
   constructor(...args) {
     super(...args);
     this.isActive = false;
-    this.completed = [];
+    /** @type Map<string, { status: string, message?: string }> */
+    this.tasks = new Map();
   }
 
   /**
@@ -11,6 +12,7 @@ class BackgroundTaskQueue extends Set {
    */
   add(handler, id) {
     super.add({ id, handler });
+    this.tasks.set(id, { status: "pending" });
     if (!this.isActive) this.runTasks();
   }
 
@@ -18,18 +20,13 @@ class BackgroundTaskQueue extends Set {
     this.isActive = true;
     for (const task of this.values()) {
       try {
-        const result = await task.handler();
-        task.status = "success";
-        task.message = result;
-      } catch (err) {
-        task.status = "failed";
-        if (err) {
-          console.error(`Task ${task.id} failed: ${err.message}`);
-          task.message = err.message;
-        }
+        const message = await task.handler();
+        this.tasks.set(id, { status: "success", message });
+      } catch ({ message }) {
+        console.error(`Task ${task.id} failed: ${message}`);
+        this.tasks.set(id, { status: "failed", message });
       } finally {
         this.delete(task);
-        this.completed.push(task);
       }
     }
     this.isActive = false;
