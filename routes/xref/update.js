@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { exec } = require("child_process");
+const { queue } = require("../../utils/background-task-queue");
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
@@ -22,16 +23,10 @@ module.exports.route = function route(req, res) {
     return res.send("Anchors were not modified, ignored it.");
   }
 
-  exec("npm run get-xref-data", error => {
-    if (error) {
-      console.error("X-GitHub-Delivery", req.get("X-GitHub-Delivery"));
-      console.error(error);
-      res.status(500); // Internal Server Error
-      return res.send("Error while updating data. See server logs.");
-    }
-
-    res.send("Updated.");
-  });
+  const taskId = `[/xref/update]: ${req.get("X-GitHub-Delivery")}`;
+  queue.add(updateData, taskId);
+  res.status(201); // Accepted
+  res.send();
 };
 
 function isValidGithubSignature(req) {
@@ -47,4 +42,16 @@ function isValidGithubSignature(req) {
 function hasAnchorUpdate(commits) {
   if (!Array.isArray(commits)) return false;
   return commits.some(commit => commit.message.includes("anchors/"));
+}
+
+function updateData() {
+  return new Promise((resolve, reject) => {
+    exec("npm run get-xref-data", error => {
+      if (error) {
+        console.error(error);
+        reject(new Error("Error while updating data. See server logs."));
+      }
+      resolve("Succesfully updated.");
+    });
+  });
 }
