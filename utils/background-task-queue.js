@@ -19,11 +19,12 @@ class BackgroundTaskQueue extends Set {
   async runTasks() {
     this.isActive = true;
     for (const task of this.values()) {
+      const { id, handler } = task;
       try {
-        const message = await task.handler();
+        const message = await handler();
         this.tasks.set(id, { status: "success", message });
       } catch ({ message }) {
-        console.error(`Task ${task.id} failed: ${message}`);
+        console.error(`Task ${id} failed: ${message}`);
         this.tasks.set(id, { status: "failed", message });
       } finally {
         this.delete(task);
