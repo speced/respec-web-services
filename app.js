@@ -1,4 +1,4 @@
-const port = parseInt(process.env.PORT, 10) || 3000;
+const port = parseInt(process.env.PORT, 10) || 8000;
 const app = require("express")();
 const bodyParser = require("body-parser");
 const cors = require("cors");
