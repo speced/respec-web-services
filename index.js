@@ -9,7 +9,7 @@ const morgan = require("morgan");
 
 // loggin
 app.use(
-  morgan(":date[iso] - :method :status :remote-addr :url :res[content-length] - :response-time ms (:referrer)")
+  morgan(":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms")
 );
 
 // for preflight request
