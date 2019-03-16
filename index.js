@@ -5,6 +5,10 @@ const cors = require("cors");
 const compression = require("compression");
 app.use(compression());
 const rawBodyParser = require("./utils/raw-body-parser");
+const morgan = require("morgan");
+
+// logs
+app.use(morgan('combined'));
 
 // for preflight request
 app.options("/xref", cors({ methods: ["POST"] }));
