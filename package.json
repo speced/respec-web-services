@@ -9,8 +9,8 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
-    "express": "^4.14.1",
-    "respec-xref-route": "^1.0.0"
+    "express": "^4.16.4",
+    "respec-xref-route": "^2.1.0"
   },
   "scripts": {
     "start": "node index.js",
