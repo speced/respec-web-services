@@ -1,8 +1,8 @@
 {
   "name": "respec.org",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "respec.org website and HTTP APIs",
-  "main": "index.js",
+  "main": "app.js",
   "repository": "git@github.com:marcoscaceres/respec.org.git",
   "author": "Marcos Caceres <marcos@marcosc.com>",
   "license": "MIT",
@@ -15,7 +15,7 @@
     "respec-xref-route": "^2.1.0"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node app.js",
     "get-xref-data": "fetch-bs-data && convert-bs-data"
   }
 }
