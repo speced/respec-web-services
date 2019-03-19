@@ -7,7 +7,7 @@ module.exports.route = async function route(req, res) {
     versions: parseInt(req.query.versions, 10),
   };
   if (!options.feature) {
-    res.send(400);
+    res.sendStatus(400);
     return;
   }
   if (Number.isNaN(options.versions)) {
