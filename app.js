@@ -21,7 +21,8 @@ app.post(
   require("./routes/xref/update").route
 );
 
-app.get("/caniuse", require("./routes/caniuse/").route);
+app.options("/caniuse", cors({ methods: ["GET"] }));
+app.get("/caniuse", cors(), require("./routes/caniuse/").route);
 app.post(
   "/caniuse/update",
   bodyParser.json({ verify: rawBodyParser }),
