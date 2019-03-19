@@ -12,7 +12,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "morgan": "^1.9.1",
-    "respec-caniuse-route": "^1.0.2",
+    "respec-caniuse-route": "^1.0.3",
     "respec-xref-route": "^2.3.0"
   },
   "scripts": {
