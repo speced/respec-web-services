@@ -2,7 +2,7 @@ const xrefResponseBody = require("respec-xref-route");
 const { readFileSync, watch } = require("fs");
 const path = require("path");
 
-const dataFile = path.join(process.cwd(), "xref-data.json");
+const dataFile = path.join(__dirname, "../../../xref-data.json");
 let xrefData = JSON.parse(readFileSync(dataFile, "utf8"));
 
 module.exports.route = function route(req, res) {
