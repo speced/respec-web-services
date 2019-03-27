@@ -16,9 +16,10 @@
     "respec-xref-route": "^2.3.0"
   },
   "scripts": {
-    "start": "node app.js",
+    "start": "npm run update-data-sources && node app.js",
     "start:server": "pm2 start ecosystem.config.js --env production",
     "get-caniuse-data": "fetch-caniuse-data && convert-caniuse-data",
-    "get-xref-data": "fetch-bs-data && convert-bs-data"
+    "get-xref-data": "fetch-bs-data && convert-bs-data",
+    "update-data-sources": "npm run get-xref-data && npm run get-caniuse-data"
   }
 }
