@@ -17,6 +17,7 @@
   },
   "scripts": {
     "start": "node app.js",
+    "start:server": "pm2 start ecosystem.config.js --env production",
     "get-caniuse-data": "fetch-caniuse-data && convert-caniuse-data",
     "get-xref-data": "fetch-bs-data && convert-bs-data"
   }
