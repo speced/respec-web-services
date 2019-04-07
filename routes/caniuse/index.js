@@ -19,5 +19,7 @@ module.exports.route = async function route(req, res) {
     return;
   }
 
+  // cache for 24hours (86400 seconds)
+  res.set('Cache-Control', 'max-age=86400');
   res.json(body);
 };
