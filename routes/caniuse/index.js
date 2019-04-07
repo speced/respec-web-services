@@ -14,5 +14,10 @@ module.exports.route = async function route(req, res) {
     options.versions = 0;
   }
   const body = await createResponseBody(options);
+  if (body === null) {
+    res.sendStatus(404);
+    return;
+  }
+
   res.json(body);
 };

@@ -1,8 +1,8 @@
 .DS_Store
+.vscode
 bikeshed-data
-caniuse-data
-caniuse-data-respec
 node_modules
 xref-data.json
 ecosystem.config.js
 public/
+data
