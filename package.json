@@ -13,7 +13,7 @@
     "express": "^4.16.4",
     "morgan": "^1.9.1",
     "npm-check-updates": "^3.1.2",
-    "respec-caniuse-route": "^1.0.4",
+    "respec-caniuse-route": "^2.0.1",
     "respec-xref-route": "^2.3.0"
   },
   "scripts": {
