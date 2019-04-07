@@ -1,8 +1,6 @@
 .DS_Store
 .vscode
-bikeshed-data
 node_modules
-xref-data.json
 ecosystem.config.js
 public/
 data
