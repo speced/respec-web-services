@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { exec } = require("child_process");
 const { queue } = require("../../utils/background-task-queue");
+const { cache } = require("respec-xref-route");
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
@@ -51,6 +52,7 @@ function updateData() {
         console.error(error);
         reject(new Error("Error while updating data. See server logs."));
       }
+      cache.clear();
       resolve("Succesfully updated.");
     });
   });
