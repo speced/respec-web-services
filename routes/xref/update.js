@@ -52,7 +52,7 @@ function updateData() {
         console.error(error);
         reject(new Error("Error while updating data. See server logs."));
       }
-      cache.clear();
+      cache.reset();
       resolve("Succesfully updated.");
     });
   });
