@@ -13,7 +13,7 @@
     "express": "^4.16.4",
     "morgan": "^1.9.1",
     "respec-caniuse-route": "^2.0.1",
-    "respec-xref-route": "^5.2.0"
+    "respec-xref-route": "^5.2.1"
   },
   "scripts": {
     "start": "npm run update-data-sources && node app.js",
