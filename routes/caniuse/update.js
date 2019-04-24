@@ -11,12 +11,16 @@ if (!caniuseSecret) {
 module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
-    return res.send("Failed to authenticate GitHub hook Signature");
+    const msg = "Failed to authenticate GitHub hook Signature";
+    console.error(msg);
+    return res.send(msg);
   }
 
   if (req.body.refs !== "refs/heads/master") {
     res.status(400); // Bad request
-    return res.send("Payload was not for master, ignored it.");
+    const msg = "Payload was not for master, ignored it.";
+    console.error(msg);
+    return res.send(msg);
   }
 
   const taskId = `[/caniuse/update]: ${req.get("X-GitHub-Delivery")}`;

@@ -13,6 +13,7 @@ class BackgroundTaskQueue extends Set {
   add(handler, id) {
     super.add({ id, handler });
     this.tasks.set(id, { status: "pending" });
+    console.log(`Task ${id} added to queue.`);
     if (!this.isActive) this.runTasks();
   }
 
@@ -21,8 +22,10 @@ class BackgroundTaskQueue extends Set {
     for (const task of this.values()) {
       const { id, handler } = task;
       try {
+        console.log(`Task ${id} started.`);
         const message = await handler();
         this.tasks.set(id, { status: "success", message });
+        console.log(`Task ${id} finished.`);
       } catch ({ message }) {
         console.error(`Task ${id} failed: ${message}`);
         this.tasks.set(id, { status: "failed", message });

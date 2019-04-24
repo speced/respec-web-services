@@ -11,17 +11,23 @@ if (!bikeshedSecret) {
 module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
-    return res.send("Failed to authenticate GitHub hook Signature");
+    const msg = "Failed to authenticate GitHub hook Signature";
+    console.error(msg);
+    return res.send(msg);
   }
 
   if (req.body.refs !== "refs/heads/master") {
     res.status(400); // Bad request
-    return res.send("Payload was not for master, ignored it.");
+    const msg = "Payload was not for master, ignored it.";
+    console.error(msg);
+    return res.send(msg);
   }
 
   if (!hasAnchorUpdate(req.body.commits)) {
     res.status(400); // Bad request
-    return res.send("Anchors were not modified, ignored it.");
+    const msg = "Anchors were not modified, ignored it.";
+    console.error(msg);
+    return res.send(msg);
   }
 
   const taskId = `[/xref/update]: ${req.get("X-GitHub-Delivery")}`;
