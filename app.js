@@ -13,8 +13,9 @@ app.use(
 );
 
 // for preflight request
-app.options("/xref", cors({ methods: ["POST"] }));
+app.options("/xref", cors({ methods: ["POST", "GET"] }));
 app.post("/xref", bodyParser.json(), cors(), require("./routes/xref/").route);
+app.get("/xref/meta", cors(), require("./routes/xref/meta").route);
 app.post(
   "/xref/update",
   bodyParser.json({ verify: rawBodyParser }),
