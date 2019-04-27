@@ -16,9 +16,9 @@ module.exports.route = function route(req, res) {
     return res.send(msg);
   }
 
-  if (req.body.refs !== "refs/heads/master") {
+  if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
-    const msg = "Payload was not for master, ignored it.";
+    const msg = `Caniuse payload was for ${req.body.ref}, ignored it.`;
     console.error(msg);
     return res.send(msg);
   }
