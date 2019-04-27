@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Xref UI</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main>
+      <form action="/xref" id="xref-search" name="xref-search" method="post">
+        <div class="field">
+          <label for="term">Term</label> <input name="term" placeholder=
+          "target">
+        </div>
+        <div class="field">
+          <label for="cite">Shortnames</label>
+          <div class="selections" data-for="cite"></div><input name="cite"
+          placeholder="html,webidl,payment-request">
+        </div>
+        <div class="field">
+          <label for="types">Types</label>
+          <div class="selections" data-for="types"></div><input name="types"
+          placeholder="dfn,interface,_IDL_">
+        </div>
+        <div class="field">
+        </div>
+        <button>Search</button>
+          <label for="for">For</label> <input name="for" placeholder=
+          "ResizeObservation">
+      </form>
+      <section id="output"></section>
+      <template id="table">
+        <table>
+          <thead>
+            <tr>
+              <th>Spec</th>
+              <th>Type</th>
+              <th>URI</th>
+              <th>for</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </template>
+    </main>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,16 +1,20 @@
 const port = parseInt(process.env.PORT, 10) || 8000;
-const app = require("express")();
+const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const compression = require("compression");
-app.use(compression());
 const rawBodyParser = require("./utils/raw-body-parser");
 const morgan = require("morgan");
+const app = express();
+
+app.use(compression());
 
 // loggin
 app.use(
   morgan(":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms")
 );
+
+app.use(express.static("static"));
 
 // for preflight request
 app.options("/xref", cors({ methods: ["POST", "GET"] }));

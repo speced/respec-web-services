@@ -1,0 +1,96 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+form,
+form input,
+form button,
+table {
+  font-family: monospace;
+}
+
+form,
+#output {
+  padding: 1rem;
+  max-width: 90vw;
+  margin: 1em auto;
+}
+
+form .field {
+  margin: 0.5rem 0;
+}
+
+form label {
+  line-height: 1.5;
+}
+
+form input {
+  padding: 0.5rem;
+  width: 100%;
+  border: 1px solid #005a9c;
+  border-radius: 2px;
+}
+
+form button {
+  border: none;
+  background: #005a9c;
+  color: #fff;
+  border-radius: 2px;
+}
+
+form > button {
+  padding: 1rem;
+}
+
+form button:hover,
+form button:focus {
+  background: #08314f;
+  cursor: pointer;
+}
+
+.selections button {
+  padding: 0.2rem 1rem 0.2rem 0.5rem;
+  margin: 2px 0;
+  margin-right: 0.5rem;
+  position: relative;
+}
+
+.selections button:after {
+  position: absolute;
+  display: flex;
+  right: -0.25rem;
+  top: -0.25rem;
+  background: #f44336;
+  border-radius: 50%;
+  content: "x";
+  font-size: 60%;
+  padding: 0.2rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+table {
+  width: 100%;
+}
+
+table tr {
+  background: #eee;
+}
+
+table tr:nth-child(2n) {
+  background: #fafafa;
+}
+
+table thead tr {
+  background: aliceblue;
+}
+
+table td,
+table th {
+  padding: 0.5rem;
+  text-align: left;
+}
