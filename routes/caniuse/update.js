@@ -18,7 +18,7 @@ module.exports.route = function route(req, res) {
 
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
-    const msg = `Payload was for ${req.body.ref}, ignored it.`;
+    const msg = `Xref Payload was for ${req.body.ref}, ignored it.`;
     console.error(msg);
     return res.send(msg);
   }
