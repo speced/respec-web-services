@@ -91,6 +91,9 @@ function getFormData() {
 async function onSubmit(event) {
   event.preventDefault();
   const data = getFormData();
+  if (data.term === "") {
+    return;
+  }
   const body = {
     keys: [data],
     options: {
