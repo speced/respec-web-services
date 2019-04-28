@@ -1,21 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Xref UI</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search cross references</title>
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <main>
       <form action="/xref" id="xref-search" name="xref-search" method="post">
         <div class="field">
-          <label for="term">Term</label> <input name="term" placeholder=
-          "target">
+          <label for="term">Terms, concept, or WebIDL</label> <input name="term" placeholder=
+          "EventTarget, event target">
         </div>
         <div class="field">
-          <label for="cite">Shortnames</label>
+          <label for="cite">Specification(s) short name</label>
           <div class="selections" data-for="cite"></div><input name="cite"
           placeholder="html,webidl,payment-request">
         </div>
@@ -37,14 +35,12 @@
             <tr>
               <th>Spec</th>
               <th>Type</th>
-              <th>URI</th>
               <th>for</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </template>
-    </main>
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
   </body>
 </html>
