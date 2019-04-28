@@ -1,46 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search cross references</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
   </head>
   <body>
-      <form action="/xref" id="xref-search" name="xref-search" method="post">
-        <div class="field">
-          <label for="term">Terms, concept, or WebIDL</label> <input name="term" placeholder=
-          "EventTarget, event target">
-        </div>
-        <div class="field">
-          <label for="cite">Specification(s) short name</label>
-          <div class="selections" data-for="cite"></div><input name="cite"
-          placeholder="html,webidl,payment-request">
-        </div>
-        <div class="field">
-          <label for="types">Types</label>
-          <div class="selections" data-for="types"></div><input name="types"
-          placeholder="dfn,interface,_IDL_">
-        </div>
-        <div class="field">
-        </div>
-        <button>Search</button>
-          <label for="for">For</label> <input name="for" placeholder=
-          "ResizeObservation">
-      </form>
-      <section id="output"></section>
-      <template id="table">
-        <table>
-          <thead>
-            <tr>
-              <th>Spec</th>
-              <th>Type</th>
-              <th>for</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </template>
-    <script src="script.js" defer></script>
+    <form action="/xref" id="xref-search" name="xref-search" method="post">
+      <div class="field">
+        <label for="term">Terms, concept, or WebIDL</label>
+        <input name="term" placeholder="EventTarget, event target" />
+      </div>
+      <div class="field">
+        <label for="cite">Specification(s) short name</label>
+        <div class="selections" data-for="cite"></div>
+        <input name="cite" placeholder="html,webidl,payment-request" />
+      </div>
+      <div class="field">
+        <label for="types">Types</label>
+        <div class="selections" data-for="types"></div>
+        <input name="types" placeholder="dfn,interface,_IDL_" />
+      </div>
+      <div class="field"></div>
+      <button>Search</button>
+      <label for="for">For</label>
+      <input name="for" placeholder="ResizeObservation" />
+    </form>
+    <section id="output"></section>
+    <template id="table">
+      <table>
+        <thead>
+          <tr>
+            <th>Spec</th>
+            <th>Type</th>
+            <th>for</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </template>
   </body>
 </html>
