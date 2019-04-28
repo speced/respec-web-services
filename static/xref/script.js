@@ -72,15 +72,14 @@ class OptionSelector extends HTMLInputElement {
 }
 
 const form = document.getElementById("xref-search");
-const termElement = document.querySelector("input[name='term']");
-const forElement = document.querySelector("input[name='for']");
-const outputElement = document.getElementById("output");
+const output = document.getElementById("output");
+let metadata;
 
 function getFormData() {
-  const term = termElement.value;
-  const specs = document.querySelector("input[name='cite']").values;
-  const types = document.querySelector("input[name='types']").values;
-  const forContext = forElement.value;
+  const term = form.querySelector("input[name='term']").value;
+  const specs = form.querySelector("input[name='cite']").values;
+  const types = form.querySelector("input[name='types']").values;
+  const forContext = form.querySelector("input[name='for']").value;
   return {
     term,
     ...(specs.length && { specs }),
@@ -89,79 +88,81 @@ function getFormData() {
   };
 }
 
-(async function ready() {
-  const createInput = (name, placeholder, values) => {
+async function onSubmit(event) {
+  event.preventDefault();
+  const data = getFormData();
+  const body = {
+    keys: [data],
+    options: {
+      fields: ["shortname", "spec", "uri", "type"],
+    },
+  };
+  const response = await fetch(form.action, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then(res => res.json());
+  const result = response.result[0][1];
+  renderResults(result, data);
+}
+
+function renderResults(entries, query) {
+  if (!entries.length) {
+    output.innerHTML = `<tr><td colspan="3">No results found.</td></tr>`;
+    return;
+  }
+
+  let html = "";
+  for (const entry of entries) {
+    const link = metadata.specs[entry.spec].url + entry.uri;
+    const title = metadata.specs[entry.spec].title;
+    let howToCite = ""; // TODO
+    let row = "<tr>";
+    row += `<td><a href="${link}">${title}</a></td>`;
+    row += `<td>${entry.type}</td>`;
+    row += `<td>${howToCite}</td>`;
+    row += "</tr>";
+    html += row;
+  }
+  output.innerHTML = html;
+}
+
+async function ready() {
+  const createInput = (name, values) => {
     const el = document.createElement("input", { is: "option-selector" });
     el.setAttribute("type", "text");
     el.setAttribute("name", name);
-    el.setAttribute("placeholder", placeholder);
+    el.setAttribute("placeholder", values.slice(0, 5).join(","));
     el.dataset.values = values.join("|");
     return el;
   };
 
-  const metaURL = new URL(`${form.action}/meta?fields=allTypes,specs`).href;
-  const metadata = await (await fetch(metaURL)).json();
+  const metaURL = new URL(`${form.action}/meta?fields=types,specs`).href;
+  const { specs, types } = await fetch(metaURL).then(res => res.json());
 
-  const newCiteElement = createInput(
-    "cite",
-    metadata.specs.slice(0, 5).join(","),
-    metadata.specs,
-  );
+  const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
+  const newCiteElement = createInput("cite", shortnames.sort());
   document.querySelector("input[name='cite']").replaceWith(newCiteElement);
 
-  const newTypesElement = createInput(
-    "types",
-    metadata.allTypes
-      .sort()
-      .slice(0, 5)
-      .join(","),
-    metadata.allTypes,
-  );
+  const allTypes = [].concat(...Object.values(types)).sort();
+  const newTypesElement = createInput("types", allTypes);
   document.querySelector("input[name='types']").replaceWith(newTypesElement);
-})();
 
-function renderTable(entries) {
-  const table = document.getElementById("table").content.cloneNode(true);
+  form.querySelector("button[type='submit']").removeAttribute("disabled");
+  form.addEventListener("submit", onSubmit);
 
-  while (outputElement.firstChild) {
-    outputElement.removeChild(outputElement.firstChild);
-  }
-  const td = textContent => {
-    const el = document.createElement("td");
-    if (textContent) el.textContent = textContent;
-    return el;
-  };
-  for (const entry of entries) {
-    const tr = document.createElement("tr");
-    tr.append(td(entry.shortname));
-    tr.append(td(entry.type));
-    tr.append(td(entry.uri));
-
-    const forContext = td();
-    forContext.innerHTML = (entry.for || []).join("<br>");
-    tr.append(forContext);
-
-    table.querySelector("tbody").append(tr);
-  }
-  outputElement.appendChild(table);
-}
-
-form.addEventListener("submit", async ev => {
-  ev.preventDefault();
-  const data = getFormData();
-
-  const response = await fetch(form.action, {
-    method: "POST",
-    body: JSON.stringify({ keys: [data] }),
-    headers: {
-      "Content-Type": "application/json",
+  metadata = {
+    types: {
+      idl: new Set(types.idl),
+      concept: new Set(types.concept),
     },
-  });
-  const json = await response.json();
-  const result = json.result[0][1];
-  renderTable(result);
-});
+    specs,
+  };
+}
 
 customElements.define("option-selector", OptionSelector, {
   extends: "input",
 });
+ready();

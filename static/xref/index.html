@@ -27,20 +27,23 @@
         <label for="for">For</label>
         <input name="for" placeholder="ResizeObservation" />
       </div>
-      <button>Search</button>
+      <button type="submit" disabled>Search</button>
     </form>
-    <section id="output"></section>
-    <template id="table">
+    <section>
       <table>
         <thead>
           <tr>
-            <th>Spec</th>
-            <th>Type</th>
-            <th>for</th>
+            <th width="20%">Link</th>
+            <th width="15%">Type</th>
+            <th>How to Cite?</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="output">
+          <tr>
+            <td colspan="3">Search results will appear here</td>
+          </tr>
+        </tbody>
       </table>
-    </template>
+    </section>
   </body>
 </html>

@@ -42,10 +42,16 @@ form button {
 
 form > button {
   padding: 1rem;
+  width: 100%;
 }
 
-form button:hover,
-form button:focus {
+form > button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+form button:not(:disabled):hover,
+form button:not(:disabled):focus {
   background: #08314f;
   cursor: pointer;
 }
