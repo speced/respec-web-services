@@ -73,6 +73,8 @@ class OptionSelector extends HTMLInputElement {
 
 const form = document.getElementById("xref-search");
 const output = document.getElementById("output");
+const caption = document.querySelector("table caption");
+
 let metadata;
 
 function getFormData() {
@@ -112,8 +114,9 @@ async function onSubmit(event) {
 }
 
 function renderResults(entries, query) {
+  caption.innerText = `Searched for "${query.term}".`;
   if (!entries.length) {
-    output.innerHTML = `<tr><td colspan="3">No results found.</td></tr>`;
+    output.innerHTML = `<tr><td colspan="4">No results found.</td></tr>`;
     return;
   }
 
@@ -121,12 +124,14 @@ function renderResults(entries, query) {
   for (const entry of entries) {
     const link = metadata.specs[entry.spec].url + entry.uri;
     const title = metadata.specs[entry.spec].title;
-    let howToCite = ""; // TODO
-    let row = "<tr>";
-    row += `<td><a href="${link}">${title}</a></td>`;
-    row += `<td>${entry.type}</td>`;
-    row += `<td>${howToCite}</td>`;
-    row += "</tr>";
+    let howToCite = "...coming soon..."; // TODO
+    let row =`
+      <tr>
+        <td><a href="${link}">${title}</a></td>
+        <td>${entry.shortname}</td>
+        <td>${entry.type}</td>
+        <td>${howToCite}</td>
+      </tr>`;
     html += row;
   }
   output.innerHTML = html;
