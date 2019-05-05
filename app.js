@@ -8,6 +8,7 @@ const rawBodyParser = require("./utils/raw-body-parser");
 const morgan = require("morgan");
 
 // loggin
+app.enable("trust proxy"); // for :remote-addr
 app.use(
   morgan(":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms")
 );
