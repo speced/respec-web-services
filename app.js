@@ -1,12 +1,14 @@
 const port = parseInt(process.env.PORT, 10) || 8000;
-const app = require("express")();
+const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const compression = require("compression");
-app.use(compression());
 const rawBodyParser = require("./utils/raw-body-parser");
 const morgan = require("morgan");
+const app = express();
 const helmet = require("helmet");
+app.use(compression());
+
 
 // loggin
 app.enable("trust proxy"); // for :remote-addr
@@ -16,6 +18,7 @@ app.use(
   )
 );
 
+app.use(express.static("static"));
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
 app.use(helmet({
