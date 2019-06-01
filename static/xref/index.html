@@ -11,7 +11,8 @@
     <form action="/xref" id="xref-search" name="xref-search" method="post">
       <div class="field">
         <label for="term">Terms, concept, or WebIDL</label>
-        <input name="term" placeholder="EventTarget, event target" />
+        <input name="term" list="term-list" placeholder="EventTarget, event target" />
+        <datalist id="term-list"></datalist>
       </div>
       <div class="field">
         <label for="cite">Specification(s) short name</label>
