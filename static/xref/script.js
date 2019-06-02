@@ -158,14 +158,13 @@ async function ready() {
   const newTypesElement = createInput("types", allTypes);
   document.querySelector("input[name='types']").replaceWith(newTypesElement);
 
-  const termsList = document.createElement("datalist");
-  termsList.id = "term-list";
+  const termsList = document.createDocumentFragment();
   for (const term of terms) {
     const option = document.createElement("option");
     option.value = term;
     termsList.appendChild(option);
   }
-  document.querySelector("#term-list").replaceWith(termsList);
+  document.querySelector("#term-list").appendChild(termsList);
 
   form.querySelector("button[type='submit']").removeAttribute("disabled");
   form.addEventListener("submit", onSubmit);
