@@ -147,8 +147,8 @@ async function ready() {
     return el;
   };
 
-  const metaURL = new URL(`${form.action}/meta?fields=types,specs`).href;
-  const { specs, types } = await fetch(metaURL).then(res => res.json());
+  const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
+  const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
 
   const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
   const newCiteElement = createInput("cite", shortnames.sort());
@@ -157,6 +157,14 @@ async function ready() {
   const allTypes = [].concat(...Object.values(types)).sort();
   const newTypesElement = createInput("types", allTypes);
   document.querySelector("input[name='types']").replaceWith(newTypesElement);
+
+  const termsList = document.createDocumentFragment();
+  for (const term of terms) {
+    const option = document.createElement("option");
+    option.value = term;
+    termsList.appendChild(option);
+  }
+  document.querySelector("#term-list").appendChild(termsList);
 
   form.querySelector("button[type='submit']").removeAttribute("disabled");
   form.addEventListener("submit", onSubmit);
