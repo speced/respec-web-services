@@ -26,11 +26,15 @@ form label {
   line-height: 1.5;
 }
 
-form input {
+form input:not([type="checkbox"]) {
   padding: 0.5rem;
   width: 100%;
   border: 1px solid #005a9c;
   border-radius: 2px;
+}
+
+form input[type="checkbox"] {
+  vertical-align: middle;
 }
 
 form button {
