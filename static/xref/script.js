@@ -123,7 +123,23 @@ function renderResults(entries, query) {
   for (const entry of entries) {
     const link = metadata.specs[entry.spec].url + entry.uri;
     const title = metadata.specs[entry.spec].title;
-    let howToCite = "...coming soon..."; // TODO
+
+    let howToCite = "";
+    const isIDL = metadata.types.idl.has(entry.type);
+    if (isIDL) {
+      if (entry.for) {
+        howToCite = entry.for.map(f => `{{ ${f}.${query.term} }}`).join("<br>")
+      } else {
+        howToCite = `{{ ${query.term} }}`
+      }
+    } else {
+      if (entry.for) {
+        howToCite = entry.for.map(f => `[= ${f}/${query.term} =]`).join("<br>")
+      } else {
+        howToCite = `&lt;a data-cite="${entry.shortname}">${query.term}&lt;/a>`
+      }
+    }
+
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
