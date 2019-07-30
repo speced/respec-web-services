@@ -94,11 +94,7 @@ function getFormData() {
   };
 }
 
-async function onSubmit(event) {
-  // allow onSubmit to be called without the event argument
-  if (event && typeof event.preventDefault === "function") {
-    event.preventDefault();
-  }
+async function handleSubmit() {
   const data = getFormData();
   if (data.term === "") {
     return;
@@ -185,7 +181,10 @@ async function ready() {
   document.querySelector("#term-list").appendChild(termsList);
 
   form.querySelector("button[type='submit']").removeAttribute("disabled");
-  form.addEventListener("submit", onSubmit);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleSubmit();
+  });
   form.querySelector("input[name='all']").addEventListener("change", ev => {
     options.all = ev.target.checked;
   });
@@ -204,7 +203,7 @@ async function ready() {
     }
   }
   if (searchParams.has("term")) {
-    onSubmit();
+    handleSubmit();
   }
 
   metadata = {
