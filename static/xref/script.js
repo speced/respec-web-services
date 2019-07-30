@@ -95,6 +95,7 @@ function getFormData() {
 }
 
 async function onSubmit(event) {
+  // allow onSubmit to be called without the event argument
   if (event && typeof event.preventDefault === "function") {
     event.preventDefault();
   }
