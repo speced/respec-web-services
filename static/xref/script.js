@@ -94,8 +94,7 @@ function getFormData() {
   };
 }
 
-async function onSubmit(event) {
-  event.preventDefault();
+async function handleSubmit() {
   const data = getFormData();
   if (data.term === "") {
     return;
@@ -182,10 +181,30 @@ async function ready() {
   document.querySelector("#term-list").appendChild(termsList);
 
   form.querySelector("button[type='submit']").removeAttribute("disabled");
-  form.addEventListener("submit", onSubmit);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    handleSubmit();
+  });
   form.querySelector("input[name='all']").addEventListener("change", ev => {
     options.all = ev.target.checked;
   });
+
+  const { searchParams } = new URL(window.location.href);
+  for (const [field, value] of searchParams) {
+    switch (field) {
+      case "term":
+      case "for":
+        form[field].value = value;
+        break;
+      case "cite":
+      case "types":
+        value.split(",").forEach(val => form[field].select(val));
+        break;
+    }
+  }
+  if (searchParams.has("term")) {
+    handleSubmit();
+  }
 
   metadata = {
     types: {
