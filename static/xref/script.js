@@ -96,9 +96,6 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === "") {
-    return;
-  }
   const body = { keys: [data], options };
   const response = await fetch(form.action, {
     method: "POST",
