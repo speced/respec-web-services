@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search cross references</title>
     <link rel="stylesheet" href="style.css" />
+    <script>
+      try{customElements.define('built-in',document.createElement('p').constructor,{'extends':'p'})}
+      catch(e){document.write('<script src="//unpkg.com/@ungap/custom-elements-builtin"><\x2fscript>')}
+    </script>
     <script src="script.js" defer></script>
   </head>
   <body>
