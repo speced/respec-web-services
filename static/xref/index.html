@@ -14,24 +14,25 @@
         <input name="term" list="term-list" placeholder="EventTarget, event target" />
         <datalist id="term-list"></datalist>
       </div>
-      <div class="field">
+      <div class="field advanced" hidden>
         <label for="cite">Specification(s) short name</label>
         <div class="selections" data-for="cite"></div>
         <input name="cite" placeholder="html,webidl,infra..." />
       </div>
-      <div class="field">
+      <div class="field advanced" hidden>
         <label for="types">Types</label>
         <div class="selections" data-for="types"></div>
         <input name="types" placeholder="dfn,interface,_IDL_" />
       </div>
-      <div class="field">
+      <div class="field advanced" hidden>
         <label for="for">For</label>
         <input name="for" placeholder="ResizeObservation" />
       </div>
-      <div class="field">
-        <label> <input type="checkbox" name="all" checked /> Bypass explicit for context (disabled in ReSpec) </label>
-      </div>
       <button type="submit" disabled>Search</button>
+      <div class="field">
+        <label> <input type="checkbox" name="all" checked /> Show every match (ignore "for" context). </label>
+        <label> <input type="checkbox" name="advanced" /> Advanced Search. </label>
+      </div>
     </form>
     <section>
       <table>

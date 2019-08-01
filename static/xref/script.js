@@ -147,6 +147,21 @@ function renderResults(entries, query) {
 }
 
 async function ready() {
+  // set up Advanced Search toggle
+  const advancedSearchToggle = document.querySelector("input[name='advanced']");
+  advancedSearchToggle.onchange = () => {
+    document.querySelectorAll('.advanced').forEach(input => {
+      input.hidden = !input.hidden;
+    });
+    // remember choice
+    localStorage.setItem('showAdvanced', advancedSearchToggle.checked ? 'checked' : '');
+  };
+
+  if (!advancedSearchToggle.checked && localStorage.getItem('showAdvanced')) {
+    advancedSearchToggle.checked = true;
+    advancedSearchToggle.onchange();
+  }
+
   const createInput = (name, values) => {
     const el = document.createElement('input', { is: 'option-selector' });
     el.setAttribute('type', 'text');
