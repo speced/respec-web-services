@@ -122,13 +122,13 @@ function renderResults(entries, query) {
     const isIDL = metadata.types.idl.has(entry.type);
     if (isIDL) {
       if (entry.for) {
-        howToCite = entry.for.map(f => `{{ ${f}.${query.term} }}`).join('<br>');
+        howToCite = entry.for.map(f => `{{${f}.${query.term}}}`).join("<br>")
       } else {
-        howToCite = `{{ ${query.term} }}`;
+        howToCite = `{{${query.term}}}`
       }
     } else {
       if (entry.for) {
-        howToCite = entry.for.map(f => `[= ${f}/${query.term} =]`).join('<br>');
+        howToCite = entry.for.map(f => `[=${f}/${query.term}=]`).join("<br>")
       } else {
         howToCite = `&lt;a data-cite="${entry.shortname}">${query.term}&lt;/a>`;
       }
