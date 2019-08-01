@@ -147,21 +147,6 @@ function renderResults(entries, query) {
 }
 
 async function ready() {
-  // set up Advanced Search toggle
-  const advancedSearchToggle = document.querySelector("input[name='advanced']");
-  advancedSearchToggle.onchange = () => {
-    document.querySelectorAll('.advanced').forEach(input => {
-      input.hidden = !input.hidden;
-    });
-    // remember choice
-    localStorage.setItem('showAdvanced', advancedSearchToggle.checked ? 'checked' : '');
-  };
-
-  if (!advancedSearchToggle.checked && localStorage.getItem('showAdvanced')) {
-    advancedSearchToggle.checked = true;
-    advancedSearchToggle.onchange();
-  }
-
   const createInput = (name, values) => {
     const el = document.createElement('input', { is: 'option-selector' });
     el.setAttribute('type', 'text');
@@ -214,6 +199,25 @@ async function ready() {
   }
   if (searchParams.has('term')) {
     handleSubmit();
+  }
+
+  // set up Advanced Search toggle
+  /** @type {HTMLInputElement} */
+  const advancedSearchToggle = form.querySelector("input[name='advanced']");
+  advancedSearchToggle.onchange = () => {
+    form.querySelectorAll('.advanced').forEach(input => {
+      input.hidden = !advancedSearchToggle.checked;
+    });
+    // remember choice
+    localStorage.setItem('showAdvanced', advancedSearchToggle.checked ? 'checked' : '');
+  };
+
+  if (
+    localStorage.getItem('showAdvanced') ||
+    [...searchParams.keys()].some(k => ['for', 'cite', 'types'].includes(k))
+  ) {
+    advancedSearchToggle.checked = true;
+    advancedSearchToggle.onchange();
   }
 
   metadata = {
