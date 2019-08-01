@@ -205,11 +205,12 @@ async function ready() {
   /** @type {HTMLInputElement} */
   const advancedSearchToggle = form.querySelector("input[name='advanced']");
   advancedSearchToggle.onchange = () => {
+    const showAdvanced = advancedSearchToggle.checked;
     form.querySelectorAll('.advanced').forEach(input => {
-      input.hidden = !advancedSearchToggle.checked;
+      input.hidden = !showAdvanced;
     });
     // remember choice
-    localStorage.setItem('showAdvanced', advancedSearchToggle.checked ? 'checked' : '');
+    localStorage.setItem('showAdvanced', showAdvanced ? 'yes' : '');
   };
 
   if (
