@@ -201,6 +201,26 @@ async function ready() {
     handleSubmit();
   }
 
+  // set up Advanced Search toggle
+  /** @type {HTMLInputElement} */
+  const advancedSearchToggle = form.querySelector("input[name='advanced']");
+  advancedSearchToggle.onchange = () => {
+    const showAdvanced = advancedSearchToggle.checked;
+    form.querySelectorAll('.advanced').forEach(input => {
+      input.hidden = !showAdvanced;
+    });
+    // remember choice
+    localStorage.setItem('showAdvanced', showAdvanced ? 'yes' : '');
+  };
+
+  if (
+    localStorage.getItem('showAdvanced') ||
+    [...searchParams.keys()].some(k => ['for', 'cite', 'types'].includes(k))
+  ) {
+    advancedSearchToggle.checked = true;
+    advancedSearchToggle.onchange();
+  }
+
   metadata = {
     types: {
       idl: new Set(types.idl),
