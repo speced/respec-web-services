@@ -93,8 +93,9 @@ function getFormData() {
 }
 
 async function handleSubmit() {
-  if (form.querySelector("input[name='term']").value === '') return;
   const data = getFormData();
+  if (data.term === "") return;
+
   const body = { keys: [data], options };
   try {
     const response = await fetch(form.action, {
