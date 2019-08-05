@@ -94,20 +94,28 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
+  if (data.term === "") return;
+
   const body = { keys: [data], options };
-  const response = await fetch(form.action, {
-    method: 'POST',
-    body: JSON.stringify(body),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }).then(res => res.json());
-  const result = response.result[0][1];
-  renderResults(result, data);
+  try {
+    const response = await fetch(form.action, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(res => res.json());
+    const result = response.result[0][1];
+    renderResults(result, data);
+  } catch (err) {
+    output.innerHTML = `<tr><td colspan="4">Network error. Are you online?</td></tr>`;
+    console.error(err);
+  }
 }
 
 function renderResults(entries, query) {
-  caption.innerText = `Searched for "${query.term}".`;
+  const { term } = query;
+  caption.innerText = `Searched for "${term}".`;
   if (!entries.length) {
     output.innerHTML = `<tr><td colspan="4">No results found.</td></tr>`;
     return;
@@ -117,33 +125,45 @@ function renderResults(entries, query) {
   for (const entry of entries) {
     const link = metadata.specs[entry.spec].url + entry.uri;
     const title = metadata.specs[entry.spec].title;
-
-    let howToCite = '';
-    const isIDL = metadata.types.idl.has(entry.type);
-    if (isIDL) {
-      if (entry.for) {
-        howToCite = entry.for.map(f => `{{${f}.${query.term}}}`).join("<br>")
-      } else {
-        howToCite = `{{${query.term}}}`
-      }
-    } else {
-      if (entry.for) {
-        howToCite = entry.for.map(f => `[=${f}/${query.term}=]`).join("<br>")
-      } else {
-        howToCite = `&lt;a data-cite="${entry.shortname}">${query.term}&lt;/a>`;
-      }
-    }
-
+    const cite = metadata.types.idl.has(entry.type) ? howToCiteIDL(term, entry) : howToCiteTerm(term, entry);
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
         <td>${entry.shortname}</td>
         <td>${entry.type}</td>
-        <td>${howToCite}</td>
+        <td>${cite}</td>
       </tr>`;
     html += row;
   }
   output.innerHTML = html;
+}
+
+function howToCiteIDL(term, entry) {
+  const { type, for: forList } = entry;
+  if (forList) {
+    return forList.map(f => `{{${f}/${term ? term : '""'}}}`).join('<br>');
+  }
+  switch (type) {
+    case 'exception':
+      // Except for the following, exceptions take the form {{"SomeException"}}
+      if (!['EvalError', 'RangeError', 'ReferenceError', 'TypeError', 'URIError'].includes(term)) {
+        return `{{"${term}"}}`;
+      }
+    default:
+      return `{{${term}}}`;
+  }
+}
+
+function howToCiteTerm(term, entry) {
+  const { type, for: forList, shortname } = entry;
+  if (forList) {
+    return forList.map(f => `[=${f}/${term}=]`).join('<br>');
+  }
+  switch (type) {
+    case 'element':
+      return `[^${term}^]`;
+  }
+  return `&lt;a data-cite="${shortname}">${term}&lt;/a>`;
 }
 
 async function ready() {
