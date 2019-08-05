@@ -17,10 +17,13 @@ module.exports.route = function route(req, res) {
 
 // TODO: cache this based on `cache.reset()`
 function getData() {
+  const terms = Object.keys(cache.get("by_term"));
+  terms.splice(terms.indexOf(""), 1, '""');
+
   return {
     types,
     specs: cache.get("specmap"),
-    terms: Object.keys(cache.get("by_term")),
+    terms,
   };
 }
 
