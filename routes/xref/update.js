@@ -1,14 +1,14 @@
-const crypto = require("crypto");
-const { exec } = require("child_process");
-const { queue } = require("../../utils/background-task-queue");
-const { cache } = require("respec-xref-route");
+import crypto from "crypto";
+import { exec } from "child_process";
+import { cache } from "respec-xref-route";
+import { queue } from "../../utils/background-task-queue.js";
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
   throw new Error("env variable `BIKESHED_SECRET` is not set.");
 }
 
-module.exports.route = function route(req, res) {
+export function route(req, res) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
     const msg = "Failed to authenticate GitHub hook Signature";

@@ -1,46 +1,55 @@
-const port = parseInt(process.env.PORT, 10) || 8000;
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const compression = require("compression");
-const rawBodyParser = require("./utils/raw-body-parser");
-const morgan = require("morgan");
-const app = express();
-const helmet = require("helmet");
-app.use(compression());
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import compression from "compression";
+import morgan from "morgan";
+import helmet from "helmet";
+import { rawBodyParser } from "./utils/raw-body-parser.js";
 
+import * as caniuseIndex from "./routes/caniuse/index.js";
+import * as caniuseUpdate from "./routes/caniuse/update.js";
+import * as xrefIndex from "./routes/xref/index.js";
+import * as xrefUpdate from "./routes/xref/update.js";
+import * as xrefMeta from "./routes/xref/meta.js";
+
+const port = parseInt(process.env.PORT, 10) || 8000;
+
+const app = express();
+app.use(compression());
 
 // loggin
 app.enable("trust proxy"); // for :remote-addr
 app.use(
   morgan(
-    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms"
-  )
+    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms",
+  ),
 );
 
 app.use(express.static("static"));
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
-app.use(helmet({
-  frameguard: false, // Allow for UI inclusion as iframe in ReSpec pill.
-}));
+app.use(
+  helmet({
+    frameguard: false, // Allow for UI inclusion as iframe in ReSpec pill.
+  }),
+);
 
 // for preflight request
 app.options("/xref", cors({ methods: ["POST", "GET"] }));
-app.post("/xref", bodyParser.json(), cors(), require("./routes/xref/").route);
-app.get("/xref/meta", cors(), require("./routes/xref/meta").route);
+app.post("/xref", bodyParser.json(), cors(), xrefIndex.route);
+app.get("/xref/meta", cors(), xrefMeta.route);
 app.post(
   "/xref/update",
   bodyParser.json({ verify: rawBodyParser }),
-  require("./routes/xref/update").route
+  xrefUpdate.route,
 );
 
 app.options("/caniuse", cors({ methods: ["GET"] }));
-app.get("/caniuse", cors(), require("./routes/caniuse/").route);
+app.get("/caniuse", cors(), caniuseIndex.route);
 app.post(
   "/caniuse/update",
   bodyParser.json({ verify: rawBodyParser }),
-  require("./routes/caniuse/update").route
+  caniuseUpdate.route,
 );
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));

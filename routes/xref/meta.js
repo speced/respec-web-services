@@ -1,6 +1,6 @@
-const { cache, types } = require("respec-xref-route");
+import { cache, types } from "respec-xref-route";
 
-module.exports.route = function route(req, res) {
+export function route(req, res) {
   const data = getData();
   const supportedFields = new Set(Object.keys(data));
   const fields = (req.query.fields || "")

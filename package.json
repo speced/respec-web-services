@@ -2,6 +2,7 @@
   "name": "respec.org",
   "version": "1.0.0",
   "description": "respec.org website and HTTP APIs",
+  "type": "module",
   "main": "app.js",
   "repository": "git@github.com:marcoscaceres/respec.org.git",
   "author": "Marcos Caceres <marcos@marcosc.com>",
@@ -17,7 +18,7 @@
     "respec-xref-route": "^5.4.5"
   },
   "scripts": {
-    "start": "npm run update-data-sources && node app.js",
+    "start": "npm run update-data-sources && node --experimental-modules app.js",
     "start:server": "pm2 start ecosystem.config.js --env production",
     "get-caniuse-data": "fetch-caniuse-data && convert-caniuse-data",
     "get-xref-data": "fetch-bs-data && convert-bs-data",

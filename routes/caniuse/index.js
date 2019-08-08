@@ -1,6 +1,6 @@
-const { createResponseBody } = require("respec-caniuse-route");
+import { createResponseBody } from "respec-caniuse-route";
 
-module.exports.route = async function route(req, res) {
+export async function route(req, res) {
   const options = {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",
@@ -20,6 +20,6 @@ module.exports.route = async function route(req, res) {
   }
 
   // cache for 24hours (86400 seconds)
-  res.set('Cache-Control', 'max-age=86400');
+  res.set("Cache-Control", "max-age=86400");
   res.json(body);
-};
+}
