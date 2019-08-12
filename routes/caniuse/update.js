@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { exec } from "child_process";
 import { cache } from "respec-caniuse-route/index.js";
+import { main as scraper } from "respec-caniuse-route/scraper.js";
 import { queue } from "../../utils/background-task-queue.js";
 
 const caniuseSecret = process.env.CANIUSE_SECRET;
@@ -39,15 +40,11 @@ function isValidGithubSignature(req) {
   return req.get("X-Hub-Signature") === `sha1=${hash}`;
 }
 
-function updateData() {
-  return new Promise((resolve, reject) => {
-    exec("npm run get-caniuse-data", error => {
-      if (error) {
-        console.error(error);
-        reject(new Error("Error while updating data. See server logs."));
-      }
-      cache.clear();
-      resolve("Succesfully updated.");
-    });
-  });
+// TODO: Move this to a Worker maybe
+async function updateData() {
+  const hasUpdated = await scraper();
+  if (hasUpdated) {
+    cache.clear();
+  }
+  return "Succesfully updated.";
 }

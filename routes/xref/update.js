@@ -8,6 +8,9 @@ if (!bikeshedSecret) {
   throw new Error("env variable `BIKESHED_SECRET` is not set.");
 }
 
+const CACHE_INVALIDATION_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
+setInterval(() => cache.invalidateCaches(), CACHE_INVALIDATION_INTERVAL);
+
 export function route(req, res) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
@@ -51,6 +54,7 @@ function hasAnchorUpdate(commits) {
   return commits.some(commit => commit.message.includes("anchors/"));
 }
 
+// TODO: Move this to a Worker maybe
 async function updateData() {
   const hasUpdated = await scraper();
   if (hasUpdated) {
