@@ -1,4 +1,5 @@
-import { cache, types } from "respec-xref-route";
+import { IDL_TYPES, CONCEPT_TYPES } from "respec-xref-route/constants.js";
+import { cache } from "respec-xref-route/search.js";
 
 export function route(req, res) {
   const data = getData();
@@ -13,7 +14,7 @@ export function route(req, res) {
     const filteredData = pickFields(fields, data);
     res.json(filteredData);
   }
-};
+}
 
 // TODO: cache this based on `cache.reset()`
 function getData() {
@@ -21,7 +22,10 @@ function getData() {
   terms.splice(terms.indexOf(""), 1, '""');
 
   return {
-    types,
+    types: {
+      idl: [...IDL_TYPES],
+      concept: [...CONCEPT_TYPES],
+    },
     specs: cache.get("specmap"),
     terms,
   };

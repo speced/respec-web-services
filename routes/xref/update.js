@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { exec } from "child_process";
-import { cache } from "respec-xref-route";
+import { cache } from "respec-xref-route/search.js";
+import { main as scraper } from "respec-xref-route/scraper.js";
 import { queue } from "../../utils/background-task-queue.js";
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
@@ -34,7 +34,7 @@ export function route(req, res) {
   queue.add(updateData, taskId);
   res.status(202); // Accepted
   res.send();
-};
+}
 
 function isValidGithubSignature(req) {
   // see: https://developer.github.com/webhooks/securing/
@@ -51,15 +51,10 @@ function hasAnchorUpdate(commits) {
   return commits.some(commit => commit.message.includes("anchors/"));
 }
 
-function updateData() {
-  return new Promise((resolve, reject) => {
-    exec("npm run get-xref-data", error => {
-      if (error) {
-        console.error(error);
-        reject(new Error("Error while updating data. See server logs."));
-      }
-      cache.reset();
-      resolve("Succesfully updated.");
-    });
-  });
+async function updateData() {
+  const hasUpdated = await scraper();
+  if (hasUpdated) {
+    cache.refresh();
+  }
+  return "Succesfully updated.";
 }

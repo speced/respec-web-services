@@ -14,8 +14,8 @@
     "express": "^4.17.1",
     "helmet": "^3.20.0",
     "morgan": "^1.9.1",
-    "respec-caniuse-route": "^2.0.1",
-    "respec-xref-route": "^5.4.5"
+    "respec-caniuse-route": "github:sidvishnoi/respec-caniuse-route#ts-esm",
+    "respec-xref-route": "^6.0.0-beta.1"
   },
   "scripts": {
     "start": "npm run update-data-sources && node --experimental-modules app.js",

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { exec } from "child_process";
-import { cache } from "respec-caniuse-route";
+import { cache } from "respec-caniuse-route/index.js";
 import { queue } from "../../utils/background-task-queue.js";
 
 const caniuseSecret = process.env.CANIUSE_SECRET;
@@ -27,7 +27,7 @@ export function route(req, res) {
   queue.add(updateData, taskId);
   res.status(202); // Accepted
   res.send();
-};
+}
 
 function isValidGithubSignature(req) {
   // see: https://developer.github.com/webhooks/securing/

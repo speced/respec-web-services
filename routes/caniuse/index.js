@@ -1,4 +1,4 @@
-import { createResponseBody } from "respec-caniuse-route";
+import { createResponseBody } from "respec-caniuse-route/index.js";
 
 export async function route(req, res) {
   const options = {

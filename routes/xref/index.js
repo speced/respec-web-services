@@ -1,7 +1,7 @@
-import { xrefSearch } from "respec-xref-route";
+import { search } from "respec-xref-route/search.js";
 
 export function route(req, res) {
   const { keys, options } = req.body;
-  const body = xrefSearch(keys, options);
+  const body = search(keys, options);
   res.json(body);
 }

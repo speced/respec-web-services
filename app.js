@@ -21,8 +21,8 @@ app.use(compression());
 app.enable("trust proxy"); // for :remote-addr
 app.use(
   morgan(
-    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms",
-  ),
+    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms"
+  )
 );
 
 app.use(express.static("static"));
@@ -31,7 +31,7 @@ app.use(express.static("static"));
 app.use(
   helmet({
     frameguard: false, // Allow for UI inclusion as iframe in ReSpec pill.
-  }),
+  })
 );
 
 // for preflight request
@@ -41,7 +41,7 @@ app.get("/xref/meta", cors(), xrefMeta.route);
 app.post(
   "/xref/update",
   bodyParser.json({ verify: rawBodyParser }),
-  xrefUpdate.route,
+  xrefUpdate.route
 );
 
 app.options("/caniuse", cors({ methods: ["GET"] }));
@@ -49,7 +49,7 @@ app.get("/caniuse", cors(), caniuseIndex.route);
 app.post(
   "/caniuse/update",
   bodyParser.json({ verify: rawBodyParser }),
-  caniuseUpdate.route,
+  caniuseUpdate.route
 );
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
