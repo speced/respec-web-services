@@ -22,6 +22,6 @@
     "start:server": "pm2 start ecosystem.config.js --env production",
     "get-caniuse-data": "fetch-caniuse-data && convert-caniuse-data",
     "get-xref-data": "fetch-bs-data && convert-bs-data",
-    "update-data-sources": "npm run get-xref-data && npm run get-caniuse-data"
+    "update-data-sources": "node --experimental-modules scripts/update-data-sources.js"
   }
 }
