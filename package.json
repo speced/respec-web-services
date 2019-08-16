@@ -14,7 +14,7 @@
     "helmet": "^3.20.0",
     "morgan": "^1.9.1",
     "respec-caniuse-route": "^3.0.2",
-    "respec-xref-route": "file:../respec-xref-route"
+    "respec-xref-route": "github:sidvishnoi/respec-xref-route"
   },
   "scripts": {
     "start": "npm run update-data-sources && node app.js",
