@@ -1,12 +1,16 @@
+// @ts-check
 const crypto = require("crypto");
-const { exec } = require("child_process");
 const { queue } = require("../../utils/background-task-queue");
-const { cache } = require("respec-xref-route");
+const { main: scraper } = require("respec-xref-route/scraper");
+const { cache } = require("respec-xref-route/cache");
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
   throw new Error("env variable `BIKESHED_SECRET` is not set.");
 }
+
+const CACHE_INVALIDATION_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
+setInterval(() => cache.invalidateCaches(), CACHE_INVALIDATION_INTERVAL);
 
 module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {
@@ -51,15 +55,11 @@ function hasAnchorUpdate(commits) {
   return commits.some(commit => commit.message.includes("anchors/"));
 }
 
-function updateData() {
-  return new Promise((resolve, reject) => {
-    exec("npm run get-xref-data", error => {
-      if (error) {
-        console.error(error);
-        reject(new Error("Error while updating data. See server logs."));
-      }
-      cache.reset();
-      resolve("Succesfully updated.");
-    });
-  });
+// TODO: Move this to a Worker maybe
+async function updateData() {
+  const hasUpdated = await scraper();
+  if (hasUpdated) {
+    cache.refresh();
+  }
+  return "Succesfully updated.";
 }

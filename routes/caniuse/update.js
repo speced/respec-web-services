@@ -1,7 +1,8 @@
+// @ts-check
 const crypto = require("crypto");
-const { exec } = require("child_process");
 const { queue } = require("../../utils/background-task-queue");
 const { cache } = require("respec-caniuse-route");
+const { main: scraper } = require("respec-caniuse-route/scraper");
 
 const caniuseSecret = process.env.CANIUSE_SECRET;
 if (!caniuseSecret) {
@@ -19,7 +20,7 @@ module.exports.route = function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     const msg = `Xref Payload was for ${req.body.ref}, ignored it.`;
-    console.error(msg);
+    console.log(msg);
     return res.send(msg);
   }
 
@@ -39,15 +40,11 @@ function isValidGithubSignature(req) {
   return req.get("X-Hub-Signature") === `sha1=${hash}`;
 }
 
-function updateData() {
-  return new Promise((resolve, reject) => {
-    exec("npm run get-caniuse-data", error => {
-      if (error) {
-        console.error(error);
-        reject(new Error("Error while updating data. See server logs."));
-      }
-      cache.clear();
-      resolve("Succesfully updated.");
-    });
-  });
+// TODO: Move this to a Worker maybe
+async function updateData() {
+  const hasUpdated = await scraper();
+  if (hasUpdated) {
+    cache.clear();
+  }
+  return "Succesfully updated.";
 }
