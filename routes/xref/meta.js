@@ -2,9 +2,15 @@
 const { IDL_TYPES, CONCEPT_TYPES } = require("respec-xref-route/constants");
 const { cache } = require("respec-xref-route/cache");
 
+let data = getData();
+
+const supportedFields = new Set(Object.keys(data));
+
 module.exports.route = function route(req, res) {
-  const data = getData();
-  const supportedFields = new Set(Object.keys(data));
+  if (data.version < cache.version) {
+    data = getData();
+  }
+
   const fields = (req.query.fields || "")
     .split(",")
     .filter(field => supportedFields.has(field));
@@ -17,7 +23,6 @@ module.exports.route = function route(req, res) {
   }
 };
 
-// TODO: cache this based on `cache.reset()`
 function getData() {
   const terms = Object.keys(cache.get("by_term"));
   terms.splice(terms.indexOf(""), 1, '""');
@@ -29,6 +34,7 @@ function getData() {
     },
     specs: cache.get("specmap"),
     terms,
+    version: cache.version,
   };
 }
 
