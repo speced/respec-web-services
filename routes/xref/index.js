@@ -6,10 +6,8 @@ module.exports.route = function route(req, res) {
   const body = search(keys, options);
 
   const errors = getErrorCount(body.result);
-  if (errors / keys.length > 0.05) {
-    // add to logs if error rate is more than 5%
-    Object.assign(res.locals, { errors, queries: keys.length });
-  }
+  // add error stats to logs
+  Object.assign(res.locals, { errors, queries: keys.length });
 
   res.json(body);
 };
