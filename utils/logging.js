@@ -15,15 +15,12 @@ const options = {
   skip(req, res) {
     const { method, path, hostname } = req;
     const { statusCode } = res;
-    switch (true) {
+    return (
       // /xref pre-flight request
-      case method === "OPTIONS" && path === "/xref" && statusCode === 204:
+      (method === "OPTIONS" && path === "/xref" && statusCode === 204) ||
       // automated tests
-      case hostname === "localhost:9876":
-        return true;
-      default:
-        return false;
-    }
+      hostname === "localhost:9876"
+    );
   },
 };
 
