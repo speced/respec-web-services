@@ -3,24 +3,16 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const compression = require("compression");
-const rawBodyParser = require("./utils/raw-body-parser");
-const morgan = require("morgan");
-const app = express();
 const helmet = require("helmet");
+const rawBodyParser = require("./utils/raw-body-parser");
+const logging = require("./utils/logging");
+
+const app = express();
 app.use(compression());
 
 // logging
-morgan.token("locals", (req, res) => {
-  if (Object.keys(res.locals).length) {
-    return JSON.stringify(res.locals);
-  }
-});
 app.enable("trust proxy"); // for :remote-addr
-app.use(
-  morgan(
-    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms | :locals",
-  )
-);
+app.use(logging());
 
 app.use(express.static("static"));
 // Security
