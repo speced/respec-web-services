@@ -1,3 +1,4 @@
+// @ts-check
 const { createResponseBody } = require("respec-caniuse-route");
 
 module.exports.route = async function route(req, res) {
@@ -20,6 +21,6 @@ module.exports.route = async function route(req, res) {
   }
 
   // cache for 24hours (86400 seconds)
-  res.set('Cache-Control', 'max-age=86400');
+  res.set("Cache-Control", "max-age=86400");
   res.json(body);
 };

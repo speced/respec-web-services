@@ -1,4 +1,6 @@
-const { cache, types } = require("respec-xref-route");
+// @ts-check
+const { IDL_TYPES, CONCEPT_TYPES } = require("respec-xref-route/constants");
+const { cache } = require("respec-xref-route/cache");
 
 module.exports.route = function route(req, res) {
   const data = getData();
@@ -21,7 +23,10 @@ function getData() {
   terms.splice(terms.indexOf(""), 1, '""');
 
   return {
-    types,
+    types: {
+      idl: [...IDL_TYPES],
+      concept: [...CONCEPT_TYPES],
+    },
     specs: cache.get("specmap"),
     terms,
   };
