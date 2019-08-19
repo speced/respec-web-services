@@ -9,12 +9,16 @@ const app = express();
 const helmet = require("helmet");
 app.use(compression());
 
-
-// loggin
+// logging
+morgan.token("locals", (req, res) => {
+  if (Object.keys(res.locals).length) {
+    return JSON.stringify(res.locals);
+  }
+});
 app.enable("trust proxy"); // for :remote-addr
 app.use(
   morgan(
-    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms"
+    ":date[iso] | :remote-addr | :method :status :url | :referrer | :res[content-length] | :response-time ms | :locals",
   )
 );
 
