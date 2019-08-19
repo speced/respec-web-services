@@ -11,6 +11,24 @@ module.exports.route = function route(req, res) {
     data = getData();
   }
 
+  if (req.params.field) {
+    switch (req.params.field) {
+      case "version":
+        res.set("Cache-Control", "no-cache");
+        res.set("Content-Type", "text/plain");
+        res.send(data.version.toString());
+        break;
+      case "types":
+      case "specs":
+      case "terms":
+        res.send(data[req.params.field]);
+        break;
+      default:
+        res.sendStatus(404);
+    }
+    return;
+  }
+
   const fields = (req.query.fields || "")
     .split(",")
     .filter(field => supportedFields.has(field));
