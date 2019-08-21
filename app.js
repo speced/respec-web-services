@@ -12,7 +12,8 @@ app.use(compression());
 
 // logging
 app.enable("trust proxy"); // for :remote-addr
-app.use(logging());
+app.use(logging.stdout());
+app.use(logging.stderr());
 
 app.use(express.static("static"));
 // Security

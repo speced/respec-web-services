@@ -70,18 +70,31 @@ const formatter = (tokens, req, res) => {
   ].join(" | ");
 };
 
-/** @type {import('morgan').Options} */
-const options = {
-  skip(req, res) {
-    const { method, path, hostname } = req;
-    const { statusCode } = res;
-    return (
-      // /xref pre-flight request
-      (method === "OPTIONS" && path === "/xref" && statusCode === 204) ||
-      // automated tests
-      hostname === "localhost:9876"
-    );
-  },
+/** @type {import('morgan').Options['skip']} */
+const skipCommon = (req, res) => {
+  const { method, path, hostname, query } = req;
+  const { statusCode } = res;
+  return (
+    // /xref pre-flight request
+    (method === "OPTIONS" && path === "/xref" && statusCode === 204) ||
+    // automated tests
+    hostname === "localhost:9876"
+  );
 };
 
-module.exports = () => morgan(formatter, options);
+/** @type {import('morgan').Options} */
+const optionsStdout = {
+  skip: (req, res) => res.statusCode >= 400 || skipCommon(req, res),
+  stream: process.stdout,
+};
+
+/** @type {import('morgan').Options} */
+const optionsStderr = {
+  skip: (req, res) => res.statusCode < 400 || skipCommon(req, res),
+  stream: process.stderr,
+};
+
+module.exports = {
+  stdout: () => morgan(formatter, optionsStdout),
+  stderr: () => morgan(formatter, optionsStderr),
+};
