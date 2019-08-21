@@ -76,7 +76,7 @@ const skipCommon = (req, res) => {
   const { statusCode } = res;
   return (
     // /xref pre-flight request
-    (method === "OPTIONS" && path === "/xref" && statusCode === 204) ||
+    (method === "OPTIONS" && /^\/xref\/?$/.test(path) && statusCode === 204) ||
     // automated tests
     hostname === "localhost:9876" ||
     // successful healthcheck
