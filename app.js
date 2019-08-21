@@ -15,7 +15,8 @@ app.enable("trust proxy"); // for :remote-addr
 app.use(logging.stdout());
 app.use(logging.stderr());
 
-app.use(express.static("static"));
+app.use(express.static(__dirname + "/static"));
+
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
 app.use(helmet({
