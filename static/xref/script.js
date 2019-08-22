@@ -1,4 +1,4 @@
-import { autocomplete } from './autocomplete.js';
+import { autocomplete } from './autocomplete.js?v=5.0.1';
 
 class OptionSelector extends HTMLInputElement {
   constructor() {
