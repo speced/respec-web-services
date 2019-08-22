@@ -278,6 +278,7 @@ export function autocomplete(settings) {
     }
     if (keyCode === 13 /* Enter */ && selected) {
       settings.onSelect(selected, input);
+      ev.preventDefault();
       clear();
     }
   }

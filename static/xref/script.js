@@ -3,57 +3,55 @@ import { autocomplete } from './autocomplete.js';
 class OptionSelector extends HTMLInputElement {
   constructor() {
     super();
-    this._state = {
-      selectedValues: new Set(),
-      options: new Set(),
-      datalist: document.createElement('datalist'),
-    };
   }
 
-  static get sep() {
-    return [',', undefined, 'Enter'];
+  static get observedAttributes() {
+    return ['data-options'];
   }
 
-  /** @returns {Set<string>} */
+  /** @returns {string[]} */
   get values() {
-    return [...this._state.selectedValues];
+    return Array.from(this.selectedValues);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'data-options') {
+      this.options = [...new Set(newValue.split('|'))];
+      this.fuse = new Fuse(this.options, {});
+    }
   }
 
   connectedCallback() {
-    const { datalist, options } = this._state;
+    this.fuse = new Fuse(this.options, {});
+    const limit = parseInt(this.dataset.limit, 10) || 10;
+    autocomplete({
+      input: this,
+      fetch: (text, update) => {
+        text = text.toLowerCase();
+        const matchedIndexes = this.fuse.search(text).slice(0, limit);
+        const values = matchedIndexes.map(i => this.options[i]);
+        update(values);
+      },
+      onSelect: value => {
+        this.select(value.trim());
+      },
+    });
 
     const name = this.getAttribute('name');
-
-    const elSelections = document.querySelector(`.selections[data-for="${this.name}"]`);
-    if (!elSelections) {
-      throw new Error(`[class="selections"][data-for="${name}"] not found`);
+    const sel = `.selections[data-for="${name}"]`;
+    this.elSelections = document.querySelector(sel);
+    if (!this.elSelections) {
+      throw new Error(`${sel} not found`);
     }
-    this._state.elSelections = elSelections;
 
-    this.setAttribute('list', name);
-
-    datalist.setAttribute('id', name);
-    this.dataset.values.split('|').forEach(value => {
-      options.add(value);
-      const option = document.createElement('option');
-      option.value = value;
-      datalist.appendChild(option);
-    });
-    this.parentElement.appendChild(datalist);
-
-    this.addEventListener('keyup', event => {
-      if (OptionSelector.sep.includes(event.key)) {
-        event.preventDefault();
-        this.select(this.value.replace(/,$/, '').trim());
-      }
-    });
-
-    this.addEventListener('blur', () => this.select(this.value.trim()));
+    this.selectedValues = new Set();
+    const options = this.dataset.options || '';
+    this.options = Array.from(new Set(options.split('|')));
   }
 
   select(value) {
-    const { selectedValues, elSelections, options } = this._state;
-    if (value === '' || selectedValues.has(value) || !options.has(value)) {
+    const { selectedValues, elSelections, options } = this;
+    if (value === '' || selectedValues.has(value) || !options.includes(value)) {
       return;
     }
 
@@ -96,7 +94,7 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === "") return;
+  if (data.term === '') return;
 
   const body = { keys: [data], options };
   try {
@@ -127,7 +125,9 @@ function renderResults(entries, query) {
   for (const entry of entries) {
     const link = metadata.specs[entry.spec].url + entry.uri;
     const title = metadata.specs[entry.spec].title;
-    const cite = metadata.types.idl.has(entry.type) ? howToCiteIDL(term, entry) : howToCiteTerm(term, entry);
+    const cite = metadata.types.idl.has(entry.type)
+      ? howToCiteIDL(term, entry)
+      : howToCiteTerm(term, entry);
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
@@ -148,7 +148,15 @@ function howToCiteIDL(term, entry) {
   switch (type) {
     case 'exception':
       // Except for the following, exceptions take the form {{"SomeException"}}
-      if (!['EvalError', 'RangeError', 'ReferenceError', 'TypeError', 'URIError'].includes(term)) {
+      if (
+        ![
+          'EvalError',
+          'RangeError',
+          'ReferenceError',
+          'TypeError',
+          'URIError',
+        ].includes(term)
+      ) {
         return `{{"${term}"}}`;
       }
     default:
@@ -169,25 +177,19 @@ function howToCiteTerm(term, entry) {
 }
 
 async function ready() {
-  const createInput = (name, values) => {
-    const el = document.createElement('input', { is: 'option-selector' });
-    el.setAttribute('type', 'text');
-    el.setAttribute('name', name);
+  const updateInput = (el, values) => {
     el.setAttribute('placeholder', values.slice(0, 5).join(','));
-    el.dataset.values = values.join('|');
-    return el;
+    el.dataset.options = values.join('|');
   };
 
   const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
   const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
 
   const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
-  const newCiteElement = createInput('cite', shortnames.sort());
-  document.querySelector("input[name='cite']").replaceWith(newCiteElement);
+  updateInput(form.cite, shortnames.sort());
 
   const allTypes = [].concat(...Object.values(types)).sort();
-  const newTypesElement = createInput('types', allTypes);
-  document.querySelector("input[name='types']").replaceWith(newTypesElement);
+  updateInput(form.types, allTypes);
 
   const fuse = new Fuse(terms, { caseSensitive: true });
   autocomplete({
