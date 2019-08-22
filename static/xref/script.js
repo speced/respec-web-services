@@ -24,16 +24,17 @@ class OptionSelector extends HTMLInputElement {
   connectedCallback() {
     this.fuse = new Fuse(this.options, {});
     const limit = parseInt(this.dataset.limit, 10) || 10;
+    const self = this;
     autocomplete({
-      input: this,
-      fetch: (text, update) => {
+      input: self,
+      fetch(text, update) {
         text = text.toLowerCase();
-        const matchedIndexes = this.fuse.search(text).slice(0, limit);
-        const values = matchedIndexes.map(i => this.options[i]);
+        const matchedIndexes = self.fuse.search(text).slice(0, limit);
+        const values = matchedIndexes.map(i => self.options[i]);
         update(values);
       },
-      onSelect: value => {
-        this.select(value.trim());
+      onSelect(value) {
+        self.select(value.trim());
       },
     });
 
@@ -79,11 +80,20 @@ const options = {
   all: true,
 };
 
+// Except for the following, exceptions take the form {{"SomeException"}}
+const exceptionExceptions = new Set([
+  'EvalError',
+  'RangeError',
+  'ReferenceError',
+  'TypeError',
+  'URIError',
+]);
+
 function getFormData() {
-  const term = form.term.value;
-  const specs = form.cite.values;
-  const types = form.types.values;
-  const forContext = form.for.value;
+  const { value: term } = form.term;
+  const { values: specs } = form.cite;
+  const { values: types } = form.types;
+  const { value: forContext } = form.for;
   return {
     term,
     ...(specs.length && { specs }),
@@ -147,16 +157,7 @@ function howToCiteIDL(term, entry) {
   }
   switch (type) {
     case 'exception':
-      // Except for the following, exceptions take the form {{"SomeException"}}
-      if (
-        ![
-          'EvalError',
-          'RangeError',
-          'ReferenceError',
-          'TypeError',
-          'URIError',
-        ].includes(term)
-      ) {
+      if (!exceptionExceptions.has(term)) {
         return `{{"${term}"}}`;
       }
     default:
