@@ -80,10 +80,10 @@ const options = {
 };
 
 function getFormData() {
-  const term = form.querySelector("input[name='term']").value;
-  const specs = form.querySelector("input[name='cite']").values;
-  const types = form.querySelector("input[name='types']").values;
-  const forContext = form.querySelector("input[name='for']").value;
+  const term = form.term.value;
+  const specs = form.cite.values;
+  const types = form.types.values;
+  const forContext = form.for.value;
   return {
     term,
     ...(specs.length && { specs }),
@@ -209,7 +209,7 @@ async function ready() {
     event.preventDefault();
     handleSubmit();
   });
-  form.querySelector("input[name='all']").addEventListener('change', ev => {
+  form.all.addEventListener('change', ev => {
     options.all = ev.target.checked;
   });
 
@@ -232,7 +232,7 @@ async function ready() {
 
   // set up Advanced Search toggle
   /** @type {HTMLInputElement} */
-  const advancedSearchToggle = form.querySelector("input[name='advanced']");
+  const advancedSearchToggle = form.advanced;
   advancedSearchToggle.onchange = () => {
     const showAdvanced = advancedSearchToggle.checked;
     form.querySelectorAll('.advanced').forEach(input => {
