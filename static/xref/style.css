@@ -104,3 +104,26 @@ table th {
   padding: 0.5rem;
   text-align: left;
 }
+
+.autocomplete {
+  background: white;
+  z-index: 1000;
+  font: 1em/1.5 '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  overflow: auto;
+  border: 1px solid #005a9c;
+}
+
+.autocomplete > li {
+  padding: 0.2rem;
+  list-style: none;
+}
+
+.autocomplete > li:hover {
+  background-color: #005a9c75;
+  cursor: pointer;
+}
+.autocomplete > li.selected {
+  background: #005a9c;
+  color: #fff;
+}

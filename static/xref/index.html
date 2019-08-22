@@ -9,14 +9,14 @@
       try{customElements.define('built-in',document.createElement('p').constructor,{'extends':'p'})}
       catch(e){document.write('<script src="//unpkg.com/@ungap/custom-elements-builtin"><\x2fscript>')}
     </script>
-    <script src="script.js" defer></script>
+    <script src="fuse.js?v3.4.5"></script>
+    <script type="module" src="script.js" defer></script>
   </head>
   <body>
     <form action="/xref" id="xref-search" name="xref-search" method="post">
       <div class="field">
         <label for="term">Terms, concept, or WebIDL</label>
-        <input name="term" list="term-list" placeholder="EventTarget, event target" required autofocus/>
-        <datalist id="term-list"></datalist>
+        <input name="term" placeholder="event target, EventTarget"  autocomplete="off" aria-autocomplete="list" required autofocus/>
       </div>
       <div class="field advanced" hidden>
         <label for="cite">Specification(s) short name</label>

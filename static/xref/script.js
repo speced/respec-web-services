@@ -1,3 +1,5 @@
+import { autocomplete } from './autocomplete.js';
+
 class OptionSelector extends HTMLInputElement {
   constructor() {
     super();
@@ -187,13 +189,18 @@ async function ready() {
   const newTypesElement = createInput('types', allTypes);
   document.querySelector("input[name='types']").replaceWith(newTypesElement);
 
-  const termsList = document.createDocumentFragment();
-  for (const term of terms) {
-    const option = document.createElement('option');
-    option.value = term;
-    termsList.appendChild(option);
-  }
-  document.querySelector('#term-list').appendChild(termsList);
+  const fuse = new Fuse(terms, { caseSensitive: true });
+  autocomplete({
+    input: form.term,
+    fetch(text, update) {
+      const matchedIndexes = fuse.search(text).slice(0, 15);
+      const suggestions = matchedIndexes.map(i => metadata.terms[i]);
+      update(suggestions);
+    },
+    onSelect(suggestion) {
+      this.input.value = suggestion;
+    },
+  });
 
   form.querySelector("button[type='submit']").removeAttribute('disabled');
   form.addEventListener('submit', event => {
@@ -247,6 +254,7 @@ async function ready() {
       concept: new Set(types.concept),
     },
     specs,
+    terms,
   };
 }
 
