@@ -26,14 +26,14 @@ form label {
   line-height: 1.5;
 }
 
-form input:not([type="checkbox"]) {
+form input:not([type='checkbox']) {
   padding: 0.5rem;
   width: 100%;
   border: 1px solid #005a9c;
   border-radius: 2px;
 }
 
-form input[type="checkbox"] {
+form input[type='checkbox'] {
   vertical-align: middle;
 }
 
@@ -74,7 +74,7 @@ form button:not(:disabled):focus {
   top: -0.25rem;
   background: #f44336;
   border-radius: 50%;
-  content: "x";
+  content: 'x';
   font-size: 60%;
   padding: 0.2rem;
   width: 0.5rem;
@@ -103,4 +103,27 @@ table td,
 table th {
   padding: 0.5rem;
   text-align: left;
+}
+
+.autocomplete {
+  background: white;
+  z-index: 1000;
+  font: 1em/1.5 '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  overflow: auto;
+  border: 1px solid #005a9c;
+}
+
+.autocomplete > li {
+  padding: 0.2rem;
+  list-style: none;
+}
+
+.autocomplete > li:hover {
+  background-color: #005a9c75;
+  cursor: pointer;
+}
+.autocomplete > li.selected {
+  background: #005a9c;
+  color: #fff;
 }

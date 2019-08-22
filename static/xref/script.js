@@ -1,57 +1,58 @@
+import { autocomplete } from './autocomplete.js?v=5.0.1';
+
 class OptionSelector extends HTMLInputElement {
   constructor() {
     super();
-    this._state = {
-      selectedValues: new Set(),
-      options: new Set(),
-      datalist: document.createElement('datalist'),
-    };
   }
 
-  static get sep() {
-    return [',', undefined, 'Enter'];
+  static get observedAttributes() {
+    return ['data-options'];
   }
 
-  /** @returns {Set<string>} */
+  /** @returns {string[]} */
   get values() {
-    return [...this._state.selectedValues];
+    return Array.from(this.selectedValues);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'data-options') {
+      this.options = [...new Set(newValue.split('|'))];
+      this.fuse = new Fuse(this.options, {});
+    }
   }
 
   connectedCallback() {
-    const { datalist, options } = this._state;
+    this.fuse = new Fuse(this.options, {});
+    const limit = parseInt(this.dataset.limit, 10) || 10;
+    const self = this;
+    autocomplete({
+      input: self,
+      fetch(text, update) {
+        text = text.toLowerCase();
+        const matchedIndexes = self.fuse.search(text).slice(0, limit);
+        const values = matchedIndexes.map(i => self.options[i]);
+        update(values);
+      },
+      onSelect(value) {
+        self.select(value.trim());
+      },
+    });
 
     const name = this.getAttribute('name');
-
-    const elSelections = document.querySelector(`.selections[data-for="${this.name}"]`);
-    if (!elSelections) {
-      throw new Error(`[class="selections"][data-for="${name}"] not found`);
+    const sel = `.selections[data-for="${name}"]`;
+    this.elSelections = document.querySelector(sel);
+    if (!this.elSelections) {
+      throw new Error(`${sel} not found`);
     }
-    this._state.elSelections = elSelections;
 
-    this.setAttribute('list', name);
-
-    datalist.setAttribute('id', name);
-    this.dataset.values.split('|').forEach(value => {
-      options.add(value);
-      const option = document.createElement('option');
-      option.value = value;
-      datalist.appendChild(option);
-    });
-    this.parentElement.appendChild(datalist);
-
-    this.addEventListener('keyup', event => {
-      if (OptionSelector.sep.includes(event.key)) {
-        event.preventDefault();
-        this.select(this.value.replace(/,$/, '').trim());
-      }
-    });
-
-    this.addEventListener('blur', () => this.select(this.value.trim()));
+    this.selectedValues = new Set();
+    const options = this.dataset.options || '';
+    this.options = Array.from(new Set(options.split('|')));
   }
 
   select(value) {
-    const { selectedValues, elSelections, options } = this._state;
-    if (value === '' || selectedValues.has(value) || !options.has(value)) {
+    const { selectedValues, elSelections, options } = this;
+    if (value === '' || selectedValues.has(value) || !options.includes(value)) {
       return;
     }
 
@@ -79,11 +80,20 @@ const options = {
   all: true,
 };
 
+// Except for the following, exceptions take the form {{"SomeException"}}
+const exceptionExceptions = new Set([
+  'EvalError',
+  'RangeError',
+  'ReferenceError',
+  'TypeError',
+  'URIError',
+]);
+
 function getFormData() {
-  const term = form.querySelector("input[name='term']").value;
-  const specs = form.querySelector("input[name='cite']").values;
-  const types = form.querySelector("input[name='types']").values;
-  const forContext = form.querySelector("input[name='for']").value;
+  const { value: term } = form.term;
+  const { values: specs } = form.cite;
+  const { values: types } = form.types;
+  const { value: forContext } = form.for;
   return {
     term,
     ...(specs.length && { specs }),
@@ -94,7 +104,7 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === "") return;
+  if (data.term === '') return;
 
   const body = { keys: [data], options };
   try {
@@ -125,7 +135,9 @@ function renderResults(entries, query) {
   for (const entry of entries) {
     const link = metadata.specs[entry.spec].url + entry.uri;
     const title = metadata.specs[entry.spec].title;
-    const cite = metadata.types.idl.has(entry.type) ? howToCiteIDL(term, entry) : howToCiteTerm(term, entry);
+    const cite = metadata.types.idl.has(entry.type)
+      ? howToCiteIDL(term, entry)
+      : howToCiteTerm(term, entry);
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
@@ -145,8 +157,7 @@ function howToCiteIDL(term, entry) {
   }
   switch (type) {
     case 'exception':
-      // Except for the following, exceptions take the form {{"SomeException"}}
-      if (!['EvalError', 'RangeError', 'ReferenceError', 'TypeError', 'URIError'].includes(term)) {
+      if (!exceptionExceptions.has(term)) {
         return `{{"${term}"}}`;
       }
     default:
@@ -167,40 +178,39 @@ function howToCiteTerm(term, entry) {
 }
 
 async function ready() {
-  const createInput = (name, values) => {
-    const el = document.createElement('input', { is: 'option-selector' });
-    el.setAttribute('type', 'text');
-    el.setAttribute('name', name);
+  const updateInput = (el, values) => {
     el.setAttribute('placeholder', values.slice(0, 5).join(','));
-    el.dataset.values = values.join('|');
-    return el;
+    el.dataset.options = values.join('|');
   };
 
   const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
   const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
 
   const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
-  const newCiteElement = createInput('cite', shortnames.sort());
-  document.querySelector("input[name='cite']").replaceWith(newCiteElement);
+  updateInput(form.cite, shortnames.sort());
 
   const allTypes = [].concat(...Object.values(types)).sort();
-  const newTypesElement = createInput('types', allTypes);
-  document.querySelector("input[name='types']").replaceWith(newTypesElement);
+  updateInput(form.types, allTypes);
 
-  const termsList = document.createDocumentFragment();
-  for (const term of terms) {
-    const option = document.createElement('option');
-    option.value = term;
-    termsList.appendChild(option);
-  }
-  document.querySelector('#term-list').appendChild(termsList);
+  const fuse = new Fuse(terms, { caseSensitive: true });
+  autocomplete({
+    input: form.term,
+    fetch(text, update) {
+      const matchedIndexes = fuse.search(text).slice(0, 15);
+      const suggestions = matchedIndexes.map(i => metadata.terms[i]);
+      update(suggestions);
+    },
+    onSelect(suggestion) {
+      this.input.value = suggestion;
+    },
+  });
 
   form.querySelector("button[type='submit']").removeAttribute('disabled');
   form.addEventListener('submit', event => {
     event.preventDefault();
     handleSubmit();
   });
-  form.querySelector("input[name='all']").addEventListener('change', ev => {
+  form.all.addEventListener('change', ev => {
     options.all = ev.target.checked;
   });
 
@@ -223,7 +233,7 @@ async function ready() {
 
   // set up Advanced Search toggle
   /** @type {HTMLInputElement} */
-  const advancedSearchToggle = form.querySelector("input[name='advanced']");
+  const advancedSearchToggle = form.advanced;
   advancedSearchToggle.onchange = () => {
     const showAdvanced = advancedSearchToggle.checked;
     form.querySelectorAll('.advanced').forEach(input => {
@@ -247,6 +257,7 @@ async function ready() {
       concept: new Set(types.concept),
     },
     specs,
+    terms,
   };
 }
 
