@@ -72,13 +72,16 @@ const formatter = (tokens, req, res) => {
 
 /** @type {import('morgan').Options['skip']} */
 const skipCommon = (req, res) => {
-  const { method, path, hostname, query } = req;
+  const { method, path, query } = req;
   const { statusCode } = res;
+  const ref = req.get("referer") || req.get("referrer");
+  const referrer = ref ? new URL(ref) : null;
+
   return (
     // /xref pre-flight request
     (method === "OPTIONS" && /^\/xref\/?$/.test(path) && statusCode === 204) ||
     // automated tests
-    hostname === "localhost:9876" ||
+    (referrer && referrer.host === "localhost:9876") ||
     // successful healthcheck
     (query.healthcheck && statusCode < 400)
   );
