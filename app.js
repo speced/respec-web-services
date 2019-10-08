@@ -38,7 +38,14 @@ app.get("/caniuse", cors(), require("./routes/caniuse/").route);
 app.post(
   "/caniuse/update",
   bodyParser.json({ verify: rawBodyParser }),
-  require("./routes/caniuse/update").route
+  require("./routes/caniuse/update").route,
+);
+
+app.options("/github/:org/:repo/contributors", cors({ methods: ["GET"] }));
+app.get(
+  "/github/:org/:repo/contributors",
+  cors(),
+  require("./routes/github/contributors").route,
 );
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
