@@ -47,5 +47,11 @@ app.get(
   cors(),
   require("./routes/github/contributors").route,
 );
+app.options("/github/:org/:repo/issues", cors({ methods: ["GET"] }));
+app.get(
+  "/github/:org/:repo/issues",
+  cors(),
+  require("./routes/github/issues").route,
+);
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
