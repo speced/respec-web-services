@@ -12,6 +12,10 @@ module.exports.route = async function route(req, res) {
     res.set("Content-Type", "text/plain");
     return res.status(400).send("query parameter 'issues' is required");
   }
+  if (Array.isArray(req.query.issues)) {
+    // ?issues=879,817&issues=912 => ?issues=879,817,912
+    req.query.issues = req.query.issues.join(",")
+  }
   const issues = req.query.issues
     .split(/\,/)
     .map(issue => parseInt(issue.trim(), 10))
