@@ -1,10 +1,7 @@
 const port = parseInt(process.env.PORT, 10) || 8000;
 const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
 const compression = require("compression");
 const helmet = require("helmet");
-const rawBodyParser = require("./utils/raw-body-parser");
 const logging = require("./utils/logging");
 
 const app = express();
