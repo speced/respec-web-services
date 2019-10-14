@@ -1,10 +1,7 @@
 const port = parseInt(process.env.PORT, 10) || 8000;
 const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
 const compression = require("compression");
 const helmet = require("helmet");
-const rawBodyParser = require("./utils/raw-body-parser");
 const logging = require("./utils/logging");
 
 const app = express();
@@ -23,35 +20,8 @@ app.use(helmet({
   frameguard: false, // Allow for UI inclusion as iframe in ReSpec pill.
 }));
 
-// for preflight request
-app.options("/xref", cors({ methods: ["POST", "GET"] }));
-app.post("/xref", bodyParser.json(), cors(), require("./routes/xref/").route);
-app.get("/xref/meta/:field?", cors(), require("./routes/xref/meta").route);
-app.post(
-  "/xref/update",
-  bodyParser.json({ verify: rawBodyParser }),
-  require("./routes/xref/update").route
-);
-
-app.options("/caniuse", cors({ methods: ["GET"] }));
-app.get("/caniuse", cors(), require("./routes/caniuse/").route);
-app.post(
-  "/caniuse/update",
-  bodyParser.json({ verify: rawBodyParser }),
-  require("./routes/caniuse/update").route,
-);
-
-app.options("/github/:org/:repo/contributors", cors({ methods: ["GET"] }));
-app.get(
-  "/github/:org/:repo/contributors",
-  cors(),
-  require("./routes/github/contributors").route,
-);
-app.options("/github/:org/:repo/issues", cors({ methods: ["GET"] }));
-app.get(
-  "/github/:org/:repo/issues",
-  cors(),
-  require("./routes/github/issues").route,
-);
+app.use("/xref", require("./routes/xref/").routes);
+app.use("/caniuse", require("./routes/caniuse/").routes);
+app.use("/github/:org/:repo", require("./routes/github/").routes);
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));
