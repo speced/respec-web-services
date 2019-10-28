@@ -33,14 +33,24 @@ const prettyJSON = (() => {
       .join(" ");
 })();
 
+const $try = (fn, defaultValue = null) => {
+  try {
+    return fn();
+  } catch {
+    return defaultValue;
+  }
+};
+
 /** @type {import('morgan').FormatFn} */
 const formatter = (tokens, req, res) => {
   const date = tokens.date(req, res, "iso");
   const remoteAddr = tokens["remote-addr"](req, res);
   const method = tokens.method(req, res);
   const status = parseInt(tokens.status(req, res), 10);
-  const url = new URL(tokens.url(req, res), "https://respec.org/");
-  const referrer = tokens.referrer(req, res);
+  /** @type {URL|null} */
+  const url = $try(() => new URL(tokens.url(req, res), "https://respec.org/"));
+  /** @type {URL|null} */
+  const referrer = $try(() => new URL(tokens.referrer(req, res)));
   const contentLength = res.get("content-length");
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
@@ -75,11 +85,12 @@ const skipCommon = (req, res) => {
   const { method, path, query } = req;
   const { statusCode } = res;
   const ref = req.get("referer") || req.get("referrer");
-  const referrer = ref ? new URL(ref) : null;
+  /** @type {URL|null} */
+  const referrer = $try(() => new URL(ref));
 
   return (
-    // /xref pre-flight request
-    (method === "OPTIONS" && /^\/xref\/?$/.test(path) && statusCode === 204) ||
+    // successful pre-flight requests
+    (method === "OPTIONS" && statusCode === 204) ||
     // automated tests
     (referrer && referrer.host === "localhost:9876") ||
     // successful healthcheck
