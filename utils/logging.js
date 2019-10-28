@@ -33,14 +33,26 @@ const prettyJSON = (() => {
       .join(" ");
 })();
 
+/**
+ * @param {string} url
+ * @param {string=} base
+ */
+const tryURL = (url, base) => {
+  try {
+    return new URL(url, base);
+  } catch {
+    return null;
+  }
+};
+
 /** @type {import('morgan').FormatFn} */
 const formatter = (tokens, req, res) => {
   const date = tokens.date(req, res, "iso");
   const remoteAddr = tokens["remote-addr"](req, res);
   const method = tokens.method(req, res);
   const status = parseInt(tokens.status(req, res), 10);
-  const url = new URL(tokens.url(req, res), "https://respec.org/");
-  const referrer = tokens.referrer(req, res);
+  const url = tryURL(tokens.url(req, res), "https://respec.org/");
+  const referrer = tryURL(tokens.referrer(req, res));
   const contentLength = res.get("content-length");
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
@@ -52,7 +64,7 @@ const formatter = (tokens, req, res) => {
 
   let formattedReferrer;
   if (referrer) {
-    const { origin, pathname, search } = new URL(referrer);
+    const { origin, pathname, search } = referrer;
     formattedReferrer =
       chalk.magenta(origin + chalk.bold(pathname)) + chalk.italic.gray(search);
   }
@@ -75,11 +87,11 @@ const skipCommon = (req, res) => {
   const { method, path, query } = req;
   const { statusCode } = res;
   const ref = req.get("referer") || req.get("referrer");
-  const referrer = ref ? new URL(ref) : null;
+  const referrer = tryURL(ref);
 
   return (
-    // /xref pre-flight request
-    (method === "OPTIONS" && /^\/xref\/?$/.test(path) && statusCode === 204) ||
+    // successful pre-flight requests
+    (method === "OPTIONS" && statusCode === 204) ||
     // automated tests
     (referrer && referrer.host === "localhost:9876") ||
     // successful healthcheck
