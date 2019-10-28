@@ -64,7 +64,7 @@ const formatter = (tokens, req, res) => {
 
   let formattedReferrer;
   if (referrer) {
-    const { origin, pathname, search } = new URL(referrer);
+    const { origin, pathname, search } = referrer;
     formattedReferrer =
       chalk.magenta(origin + chalk.bold(pathname)) + chalk.italic.gray(search);
   }
