@@ -33,11 +33,15 @@ const prettyJSON = (() => {
       .join(" ");
 })();
 
-const $try = (fn, defaultValue = null) => {
+/**
+ * @param {string} url
+ * @param {string=} base
+ */
+const tryURL = (url, base) => {
   try {
-    return fn();
+    return new URL(url, base);
   } catch {
-    return defaultValue;
+    return null;
   }
 };
 
@@ -47,10 +51,8 @@ const formatter = (tokens, req, res) => {
   const remoteAddr = tokens["remote-addr"](req, res);
   const method = tokens.method(req, res);
   const status = parseInt(tokens.status(req, res), 10);
-  /** @type {URL|null} */
-  const url = $try(() => new URL(tokens.url(req, res), "https://respec.org/"));
-  /** @type {URL|null} */
-  const referrer = $try(() => new URL(tokens.referrer(req, res)));
+  const url = tryURL(tokens.url(req, res), "https://respec.org/");
+  const referrer = tryURL(tokens.referrer(req, res));
   const contentLength = res.get("content-length");
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
@@ -85,8 +87,7 @@ const skipCommon = (req, res) => {
   const { method, path, query } = req;
   const { statusCode } = res;
   const ref = req.get("referer") || req.get("referrer");
-  /** @type {URL|null} */
-  const referrer = $try(() => new URL(ref));
+  const referrer = tryURL(ref);
 
   return (
     // successful pre-flight requests
