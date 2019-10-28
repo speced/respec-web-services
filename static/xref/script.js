@@ -106,6 +106,9 @@ async function handleSubmit() {
   const data = getFormData();
   if (data.term === '') return;
 
+  const params = new URLSearchParams(Object.entries(data));
+  history.replaceState(null, null, `?${params}`);
+
   const body = { keys: [data], options };
   try {
     const response = await fetch(form.action, {
