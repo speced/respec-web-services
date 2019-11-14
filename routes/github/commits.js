@@ -7,10 +7,10 @@ const { getCommits } = require("respec-github-apis/commits");
  */
 module.exports.route = async function route(req, res) {
   const { org, repo } = req.params;
-  const { since } = req.query;
-  if (!since || typeof since !== "string") {
+  const { from, to } = req.query;
+  if (!from || typeof from !== "string") {
     res.set("Content-Type", "text/plain");
-    return res.status(400).send("query parameter 'since' is required");
+    return res.status(400).send("query parameter 'from' is required");
   }
 
   // cache all results for 30 min (1800 seconds)
@@ -18,7 +18,7 @@ module.exports.route = async function route(req, res) {
 
   try {
     const commits = [];
-    for await (const commit of getCommits(org, repo, since)) {
+    for await (const commit of getCommits(org, repo, from, to)) {
       commits.push({
         hash: commit.abbreviatedOid,
         message: commit.messageHeadline,
