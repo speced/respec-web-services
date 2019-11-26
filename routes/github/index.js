@@ -1,3 +1,4 @@
+// @ts-check
 const express = require("express");
 const cors = require("cors");
 
@@ -11,6 +12,9 @@ gh.get("/issues", cors(), require("./issues").route);
 
 gh.options("/commits", cors({ methods: ["GET"] }));
 gh.get("/commits", cors(), require("./commits").route);
+
+gh.options("/files", cors({ methods: ["GET"] }));
+gh.get("/files", cors(), require("./files").route);
 
 module.exports = {
   routes: gh,
