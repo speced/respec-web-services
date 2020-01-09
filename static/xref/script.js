@@ -140,6 +140,8 @@ function renderResults(entries, query) {
     const title = metadata.specs[entry.spec].title;
     const cite = metadata.types.idl.has(entry.type)
       ? howToCiteIDL(term, entry)
+      : metadata.types.markup.has(entry.type)
+      ? howToCiteMarkup(term, entry)
       : howToCiteTerm(term, entry);
     let row = `
       <tr>
@@ -168,14 +170,18 @@ function howToCiteIDL(term, entry) {
   }
 }
 
+function howToCiteMarkup(term, entry) {
+  const { type, for: forList, shortname } = entry;
+  if (forList) {
+    return forList.map(f => `[^${f}/${term}^]`).join('<br>');
+  }
+  return `[^${term}^]`;
+}
+
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
   if (forList) {
     return forList.map(f => `[=${f}/${term}=]`).join('<br>');
-  }
-  switch (type) {
-    case 'element':
-      return `[^${term}^]`;
   }
   return `&lt;a data-cite="${shortname}">${term}&lt;/a>`;
 }
@@ -258,6 +264,7 @@ async function ready() {
     types: {
       idl: new Set(types.idl),
       concept: new Set(types.concept),
+      markup: new Set(types.markup),
     },
     specs,
     terms,
