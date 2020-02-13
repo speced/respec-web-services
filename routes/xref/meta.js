@@ -1,5 +1,9 @@
 // @ts-check
-const { IDL_TYPES, CONCEPT_TYPES } = require("respec-xref-route/constants");
+const {
+  IDL_TYPES,
+  CONCEPT_TYPES,
+  MARKUP_TYPES,
+} = require("respec-xref-route/constants");
 const { cache } = require("respec-xref-route/cache");
 
 let data = getData();
@@ -49,6 +53,7 @@ function getData() {
     types: {
       idl: [...IDL_TYPES],
       concept: [...CONCEPT_TYPES],
+      markup: [...MARKUP_TYPES],
     },
     specs: cache.get("specmap"),
     terms,
