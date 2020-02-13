@@ -91,7 +91,7 @@ const exceptionExceptions = new Set([
 
 function getFormData() {
   const { value: term } = form.term;
-  const { values: specs } = form.cite;
+  const { values: specs } = form.specs;
   const { values: types } = form.types;
   const { value: forContext } = form.for;
   return {
@@ -196,7 +196,7 @@ async function ready() {
   const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
 
   const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
-  updateInput(form.cite, shortnames.sort());
+  updateInput(form.specs, shortnames.sort());
 
   const allTypes = [].concat(...Object.values(types)).sort();
   updateInput(form.types, allTypes);
@@ -230,7 +230,7 @@ async function ready() {
       case 'for':
         form[field].value = value;
         break;
-      case 'cite':
+      case 'specs':
       case 'types':
         value.split(',').forEach(val => form[field].select(val));
         break;
