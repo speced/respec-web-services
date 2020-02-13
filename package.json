@@ -16,7 +16,7 @@
     "morgan": "^1.9.1",
     "respec-caniuse-route": "^3.0.2",
     "respec-github-apis": "^1.4.0",
-    "respec-xref-route": "^6.1.0"
+    "respec-xref-route": "^6.2.1"
   },
   "scripts": {
     "start": "npm run update-data-sources && node app.js",
