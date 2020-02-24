@@ -1,6 +1,6 @@
 // @ts-check
 const morgan = require("morgan");
-const chalk = require("chalk").default;
+const chalk = require("chalk");
 
 /** @param {string} bytes */
 const prettyBytes = bytes => {
