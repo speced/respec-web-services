@@ -25,6 +25,7 @@ async function route(req, res) {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",
     versions: parseInt(req.query.versions, 10),
+    format: req.query.format,
   };
   if (!options.feature) {
     res.sendStatus(400);
@@ -41,5 +42,5 @@ async function route(req, res) {
 
   // cache for 24hours (86400 seconds)
   res.set("Cache-Control", "max-age=86400");
-  res.json(body);
+  res.send(body);
 }
