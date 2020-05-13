@@ -15,8 +15,7 @@ jobs:
         run: |
           set -v
           base_url="http://localhost:8000"
-          echo "$ENDPOINTS"
-          IFS=$'\n' read -r -d '' -a urls <<< "$ENDPOINTS"
+          IFS=$'\n' urls=($ENDPOINTS)
           for url in "${urls[@]}"; do
             echo "${base_url}${url} ... ";
             continue;
