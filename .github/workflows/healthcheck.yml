@@ -4,13 +4,13 @@ on:
 jobs:
   healthcheck:
     runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      ENDPOINTS: |
+        /xref/meta/version/
+        /xref/
     steps:
       - name: healthcheck
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          ENDPOINTS: |
-            /xref/meta/version/
-            /xref/
         shell: bash
         run: |
           set -v
