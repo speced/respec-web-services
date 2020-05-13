@@ -13,7 +13,7 @@ jobs:
       - name: healthcheck
         shell: bash
         run: |
-          base_url="http://localhost:8000"
+          base_url="https://respec.org"
           IFS=$'\n' urls=($ENDPOINTS)
           for url in "${urls[@]}"; do
             echo "${base_url}${url} ... ";
