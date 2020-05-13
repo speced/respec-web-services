@@ -16,7 +16,7 @@ jobs:
           base_url="https://respec.org"
           IFS=$'\n' urls=($ENDPOINTS)
           for url in "${urls[@]}"; do
-            echo "${base_url}${url} ... ";
+            printf "${base_url}${url} ... ";
             full_url="${base_url}${url}?healthcheck=true"
             http_code=$(curl -s -o /dev/null -L -w "%{http_code}" "$full_url")
             echo "$http_code"
