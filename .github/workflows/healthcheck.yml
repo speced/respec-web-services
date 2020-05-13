@@ -6,10 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: healthcheck
-        with:
-          urls: "/xref/meta/version/; /xref/"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          URLS: "/xref/meta/version/; /xref/"
         shell: bash
         run: |
           base_url="https://respec.org"
