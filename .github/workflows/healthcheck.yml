@@ -8,11 +8,13 @@ jobs:
       - name: healthcheck
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          URLS: "/xref/meta/version/; /xref/"
+          ENDPOINTS: |
+            /xref/meta/version/
+            /xref/
         shell: bash
         run: |
           base_url="https://respec.org"
-          IFS='; ' read -r -a urls <<< "$INPUT_URLS"
+          IFS=$'\n' read -r -d '' -a urls <<< "$ENDPOINTS"
           for url in "${urls[@]}"; do
             printf "${base_url}${url} ... ";
             full_url="${base_url}${url}?healthcheck=true"
