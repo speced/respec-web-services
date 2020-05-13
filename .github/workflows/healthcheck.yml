@@ -13,6 +13,7 @@ jobs:
             /xref/
         shell: bash
         run: |
+          set -x
           base_url="https://respec.org"
           IFS=$'\n' read -r -d '' -a urls <<< "$ENDPOINTS"
           for url in "${urls[@]}"; do
