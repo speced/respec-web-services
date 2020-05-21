@@ -25,6 +25,7 @@
   },
   "prettier": {
     "singleQuote": false,
-    "trailingComma": "all"
+    "trailingComma": "all",
+    "arrowParens": "avoid"
   }
 }
