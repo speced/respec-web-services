@@ -32,15 +32,13 @@ class RingBuffer {
   /** Get items in oldest first order. */
   reverseIter() {
     const self = this;
-    return {
-      *[Symbol.iterator]() {
-        let i = self.#length < self.#buffer.length ? self.#ptr - 1 : self.#ptr;
-        for (let k = 0; k < self.#length; k++) {
-          yield self.#buffer[i];
-          i = (i + 1) % self.#buffer.length;
-        }
-      },
-    };
+    return (function* () {
+      let i = self.#length < self.#buffer.length ? self.#ptr - 1 : self.#ptr;
+      for (let k = 0; k < self.#length; k++) {
+        yield self.#buffer[i];
+        i = (i + 1) % self.#buffer.length;
+      }
+    })();
   }
 }
 
