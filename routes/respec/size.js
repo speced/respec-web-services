@@ -20,7 +20,7 @@ if (!respecSecret) {
 const FILE_PATH = path.join(process.env.DATA_DIR, "respec/respec-w3c.json");
 if (!existsSync(FILE_PATH)) {
   mkdirSync(path.dirname(FILE_PATH), { recursive: true });
-  writeFileSync(FILE_PATH, `{ "entries": [] }`);
+  writeFileSync(FILE_PATH, `{ "commits": [] }`);
 }
 
 module.exports = {
@@ -43,22 +43,22 @@ function getHandler(_req, res) {
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  *
- * @typedef {{ commit: string, timestamp: number, size: number, gzipSize: number }} Entry
- * @typedef {{ entries: Entry[] }} Data
+ * @typedef {{ sha: string, time: number, size: number, gzipSize: number }} Entry
+ * @typedef {{ commits: Entry[] }} Data
  */
 async function putHandler(req, res) {
   if (req.get("Authorization") !== respecSecret) {
     return res.sendStatus(401);
   }
 
-  const { commit } = req.body;
+  const { sha } = req.body;
   const size = parseInt(req.body.size, 10);
-  const gzipSize = parseInt(req.body.gzip_size, 10);
-  const timestamp = parseInt(req.body.timestamp, 10);
-  if (!size || !gzipSize || !commit || !timestamp) {
+  const gzipSize = parseInt(req.body.gzipSize, 10);
+  const time = parseInt(req.body.timestamp, 10);
+  if (!size || !gzipSize || !sha || !time) {
     return res.sendStatus(400);
   }
-  const entry = { commit, timestamp, size, gzipSize };
+  const entry = { sha, time, size, gzipSize };
 
   const text = await fs.readFile(FILE_PATH, "utf-8");
   /** @type {Data} */
@@ -68,7 +68,7 @@ async function putHandler(req, res) {
     return res.sendStatus(412);
   }
 
-  json.entries.push(entry);
+  json.commits.push(entry);
   await fs.writeFile(FILE_PATH, JSON.stringify(json));
   res.sendStatus(201);
 }
@@ -79,6 +79,6 @@ async function putHandler(req, res) {
  * @param {Entry} entry
  */
 function putIsValid(data, entry) {
-  const lastFewEntries = data.entries.slice(-3);
-  return lastFewEntries.every(e => e.commit !== entry.commit);
+  const lastFewEntries = data.commits.slice(-3);
+  return lastFewEntries.every((e) => e.sha !== entry.sha);
 }
