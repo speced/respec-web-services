@@ -7,6 +7,7 @@ const {
   promises: fs,
 } = require("fs");
 const path = require("path");
+const RingBuffer = require("../../utils/ring-buffer");
 
 if (!process.env.DATA_DIR) {
   throw new Error("env variable `DATA_DIR` is not set.");
@@ -20,8 +21,8 @@ if (!respecSecret) {
 const FILE_PATH = path.join(process.env.DATA_DIR, "respec/respec-w3c.json");
 if (!existsSync(FILE_PATH)) {
   mkdirSync(path.dirname(FILE_PATH), { recursive: true });
-  writeFileSync(FILE_PATH, `{ "commits": [] }`);
 }
+writeFileSync(FILE_PATH, "");
 
 module.exports = {
   route: {
@@ -35,9 +36,17 @@ module.exports = {
  * @param {import('express').Response} res
  */
 function getHandler(_req, res) {
-  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Content-Type", "text/plain");
   createReadStream(FILE_PATH).pipe(res);
 }
+
+/**
+ * We store last few commits in a buffer and later search it to ensure we don't
+ * add duplicates. This is an optimization over reading and parsing entire file
+ * from disk and checking for duplicates.
+ * @type {RingBuffer<Entry>}
+ */
+const lastFewEntries = new RingBuffer(3);
 
 /**
  * @param {import('express').Request} req
@@ -51,34 +60,23 @@ async function putHandler(req, res) {
     return res.sendStatus(401);
   }
 
-  const { sha } = req.body;
+  /** @type {string} */
+  const sha = req.body.sha;
   const size = parseInt(req.body.size, 10);
   const gzipSize = parseInt(req.body.gzipSize, 10);
   const time = parseInt(req.body.timestamp, 10);
-  if (!size || !gzipSize || !sha || !time) {
+  if (!size || !gzipSize || !time || !/^([a-f0-9]{40})$/.test(sha)) {
     return res.sendStatus(400);
   }
-  const entry = { sha, time, size, gzipSize };
+  const entry = { sha: sha.slice(0, 10), time, size, gzipSize };
 
-  const text = await fs.readFile(FILE_PATH, "utf-8");
-  /** @type {Data} */
-  const json = JSON.parse(text);
-
-  if (!putIsValid(json, entry)) {
+  // Make sure we are not adding duplicates.
+  if ([...lastFewEntries.reverseIter()].some((e) => e.sha === entry.sha)) {
     return res.sendStatus(412);
   }
 
-  json.commits.push(entry);
-  await fs.writeFile(FILE_PATH, JSON.stringify(json));
-  res.sendStatus(201);
-}
+  lastFewEntries.push(entry);
+  await fs.appendFile(FILE_PATH, JSON.stringify(entry));
 
-/**
- * Make sure we are not adding duplicates.
- * @param {Data} data
- * @param {Entry} entry
- */
-function putIsValid(data, entry) {
-  const lastFewEntries = data.commits.slice(-3);
-  return lastFewEntries.every((e) => e.sha !== entry.sha);
+  res.sendStatus(201);
 }
