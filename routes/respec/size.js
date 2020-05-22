@@ -21,8 +21,8 @@ if (!respecSecret) {
 const FILE_PATH = path.join(process.env.DATA_DIR, "respec/respec-w3c.json");
 if (!existsSync(FILE_PATH)) {
   mkdirSync(path.dirname(FILE_PATH), { recursive: true });
+  writeFileSync(FILE_PATH, "");
 }
-writeFileSync(FILE_PATH, "");
 
 module.exports = {
   route: {
