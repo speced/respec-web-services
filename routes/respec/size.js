@@ -7,7 +7,6 @@ const {
   promises: fs,
 } = require("fs");
 const path = require("path");
-const RingBuffer = require("../../utils/ring-buffer");
 
 if (!process.env.DATA_DIR) {
   throw new Error("env variable `DATA_DIR` is not set.");
@@ -44,9 +43,9 @@ function getHandler(_req, res) {
  * We store last few commits in a buffer and later search it to ensure we don't
  * add duplicates. This is an optimization over reading and parsing entire file
  * from disk and checking for duplicates.
- * @type {RingBuffer<Entry>}
+ * @type {Entry[]}
  */
-const lastFewEntries = new RingBuffer(3);
+const lastFewEntries = [];
 
 /**
  * @param {import('express').Request} req
@@ -70,13 +69,23 @@ async function putHandler(req, res) {
   }
   const entry = { sha: sha.slice(0, 10), time, size, gzipSize };
 
-  // Make sure we are not adding duplicates.
-  if ([...lastFewEntries.reverseIter()].some((e) => e.sha === entry.sha)) {
+  if (!ensureUnique(entry)) {
     return res.sendStatus(412);
   }
 
-  lastFewEntries.push(entry);
   await fs.appendFile(FILE_PATH, JSON.stringify(entry));
-
   res.sendStatus(201);
+}
+
+/**
+ * Make sure we don't end up adding duplicates to data file.
+ * @param {Entry} entry
+ */
+function ensureUnique(entry) {
+  if (lastFewEntries.some((e) => e.sha === entry.sha)) {
+    return false;
+  }
+  if (lastFewEntries.length === 3) lastFewEntries.pop();
+  lastFewEntries.unshift(entry);
+  return true;
 }
