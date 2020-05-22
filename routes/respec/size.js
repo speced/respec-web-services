@@ -85,7 +85,9 @@ function ensureUnique(entry) {
   if (lastFewEntries.some((e) => e.sha === entry.sha)) {
     return false;
   }
-  if (lastFewEntries.length === 3) lastFewEntries.pop();
+  if (lastFewEntries.length === 3) {
+    lastFewEntries.pop();
+  }
   lastFewEntries.unshift(entry);
   return true;
 }
