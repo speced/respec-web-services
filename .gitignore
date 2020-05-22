@@ -4,3 +4,4 @@ node_modules
 ecosystem.config.js
 public/
 data
+.env
