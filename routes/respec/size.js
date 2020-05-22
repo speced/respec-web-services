@@ -34,9 +34,11 @@ module.exports = {
  * @param {import('express').Request} _req
  * @param {import('express').Response} res
  */
-function getHandler(_req, res) {
+async function getHandler(_req, res) {
   res.setHeader("Content-Type", "text/plain");
-  createReadStream(FILE_PATH).pipe(res);
+  res.setHeader("Cache-Control", "max-age=1800");
+  const text = await fs.readFile(FILE_PATH);
+  res.send(text);
 }
 
 /**
@@ -82,7 +84,7 @@ async function putHandler(req, res) {
  * @param {Entry} entry
  */
 function ensureUnique(entry) {
-  if (lastFewEntries.some((e) => e.sha === entry.sha)) {
+  if (lastFewEntries.some(e => e.sha === entry.sha)) {
     return false;
   }
   if (lastFewEntries.length === 3) {
