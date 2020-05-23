@@ -45,6 +45,6 @@ form > * + * {
   margin-left: 1ch;
 }
 
-input[type="radio"] {
+input[type="checkbox"] {
   margin: 0 4px;
 }

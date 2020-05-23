@@ -7,7 +7,7 @@ const toCommitURL = sha => `https://github.com/w3c/respec/commit/${sha}`;
 
 async function main() {
   const entries = await fetchData();
-  const dataTable = getDataTable(entries, form.size.value);
+  const dataTable = getDataTable(entries);
   drawChart(dataTable);
   window.addEventListener("resize", () => drawChart(dataTable));
   form.addEventListener("change", () => drawChart(dataTable));
@@ -23,7 +23,7 @@ async function fetchData() {
 
 /** @param {google.visualization.DataTable} data */
 function drawChart(data) {
-  const key = form.size.value;
+  const showGzipSize = form.gzipSize.checked;
   const months = parseInt(form.duration.value, 10);
 
   let viewWindow;
@@ -33,7 +33,7 @@ function drawChart(data) {
     viewWindow = { min: date };
   }
 
-  const title = key === "gzipSize" ? "Size (gzip, bytes)" : "Size (bytes)";
+  const title = showGzipSize ? "Size (gzip, bytes)" : "Size (bytes)";
   /** @type {google.visualization.LineChartOptions} */
   const drawOptions = {
     theme: "maximized",
@@ -62,6 +62,7 @@ function drawChart(data) {
   });
 
   const view = new google.visualization.DataView(data);
+  const key = showGzipSize ? "gzipSize" : "size";
   view.setColumns([columnMap.time, columnMap[key]]);
   chart.draw(view, drawOptions);
 }
@@ -71,7 +72,7 @@ function getDataTable(entries) {
   table.addColumn("datetime", "Time");
   table.addColumn("string", "Commit SHA");
   table.addColumn("number", "Size (bytes)");
-  table.addColumn("number", "Gzip Size (bytes)");
+  table.addColumn("number", "Size (bytes)");
 
   const idxMap = Object.entries(columnMap).sort((a, b) => a[1] - b[1]);
   const toRow = entry => idxMap.map(a => entry[a[0]]);
