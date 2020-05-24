@@ -12,9 +12,9 @@ if (!process.env.DATA_DIR) {
   throw new Error("env variable `DATA_DIR` is not set.");
 }
 
-const respecSecret = process.env.RESPEC_SECRET;
-if (!respecSecret) {
-  throw new Error("env variable `RESPEC_SECRET` is not set.");
+const { RESPEC_GH_ACTION_SECRET } = process.env;
+if (!RESPEC_GH_ACTION_SECRET) {
+  throw new Error("env variable `RESPEC_GH_ACTION_SECRET` is not set.");
 }
 
 const FILE_PATH = path.join(process.env.DATA_DIR, "respec/respec-w3c.json");
@@ -57,7 +57,7 @@ const lastFewEntries = [];
  * @typedef {{ commits: Entry[] }} Data
  */
 async function putHandler(req, res) {
-  if (req.get("Authorization") !== respecSecret) {
+  if (req.get("Authorization") !== RESPEC_GH_ACTION_SECRET) {
     return res.sendStatus(401);
   }
 
