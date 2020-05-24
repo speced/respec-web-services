@@ -1,4 +1,4 @@
-const port = parseInt(process.env.PORT, 10) || 8000;
+require("dotenv").config();
 const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");
@@ -25,4 +25,5 @@ app.use("/caniuse", require("./routes/caniuse/").routes);
 app.use("/github/:org/:repo", require("./routes/github/").routes);
 app.use("/respec", require("./routes/respec/").routes);
 
+const port = parseInt(process.env.PORT, 10) || 8000;
 app.listen(port, () => console.log(`Listening on port ${port}!`));
