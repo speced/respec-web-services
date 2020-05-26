@@ -3,7 +3,6 @@ google.charts.setOnLoadCallback(main);
 
 const form = document.getElementById("size-form");
 const columnMap = { time: 0, sha: 1, size: 2, gzipSize: 3 };
-const toCommitURL = sha => `https://github.com/w3c/respec/commit/${sha}`;
 
 async function main() {
   const entries = await fetchData();
@@ -57,7 +56,7 @@ function drawChart(data) {
     action() {
       const { row } = chart.getSelection().slice(-1)[0];
       const sha = data.getValue(row, 1);
-      window.open(toCommitURL(sha));
+      window.open(`https://github.com/w3c/respec/commit/${sha}`);
     },
   });
 
