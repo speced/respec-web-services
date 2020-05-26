@@ -22,12 +22,14 @@ module.exports = {
 };
 
 function route(req, res) {
-  const { keys = [], options } = req.body;
-  const body = search(keys, options);
+  const { options } = req.body;
+  // req.body.keys for backward compatibility
+  const queries = req.body.queries || req.body.keys || [];
+  const body = search(queries, options);
 
   const errors = getErrorCount(body.result);
   // add error stats to logs
-  Object.assign(res.locals, { errors, queries: keys.length });
+  Object.assign(res.locals, { errors, queries: queries.length });
 
   res.json(body);
 }

@@ -4,14 +4,14 @@ const {
   CONCEPT_TYPES,
   MARKUP_TYPES,
 } = require("respec-xref-route/constants");
-const { cache } = require("respec-xref-route/cache");
+const { store } = require("respec-xref-route/store");
 
 let data = getData();
 
 const supportedFields = new Set(Object.keys(data));
 
 module.exports.route = function route(req, res) {
-  if (data.version < cache.version) {
+  if (data.version < store.version) {
     data = getData();
   }
 
@@ -46,7 +46,7 @@ module.exports.route = function route(req, res) {
 };
 
 function getData() {
-  const terms = Object.keys(cache.get("by_term"));
+  const terms = Object.keys(store.byTerm);
   terms.splice(terms.indexOf(""), 1, '""');
 
   return {
@@ -55,9 +55,9 @@ function getData() {
       concept: [...CONCEPT_TYPES],
       markup: [...MARKUP_TYPES],
     },
-    specs: cache.get("specmap"),
+    specs: store.specmap,
     terms,
-    version: cache.version,
+    version: store.version,
   };
 }
 
