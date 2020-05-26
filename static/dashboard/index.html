@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSpec Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/charts/loader.js" defer></script>
+  <script src="size-chart.js" defer></script>
+</head>
+<body>
+  <h1>ReSpec Dashboard</h1>
+  <section id="size">
+    <header>
+      <h2>Size of respec-w3c profile over time</h2>
+      <form id="size-form">
+        <label><input type="checkbox" name="gzipSize" checked> <span>Show gzip size</span></label>
+        <select name="duration">
+          <option value="0">All time</option>
+          <option value="12">Last year</option>
+          <option value="6">Last 6 months</option>
+          <option value="3">Last 3 months</option>
+          <option value="1">Last month</option>
+        </select>
+      </form>
+    </header>
+    <div class="chart" id="size-chart"></div>
+  </section>
+</body>
+</html>
