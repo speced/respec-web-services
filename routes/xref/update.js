@@ -2,7 +2,8 @@
 const crypto = require("crypto");
 const { queue } = require("../../utils/background-task-queue");
 const { main: scraper } = require("respec-xref-route/scraper");
-const { cache } = require("respec-xref-route/cache");
+const { cache: searchCache } = require("respec-xref-route/search");
+const { store } = require("respec-xref-route/store");
 
 const bikeshedSecret = process.env.BIKESHED_SECRET;
 if (!bikeshedSecret) {
@@ -10,7 +11,7 @@ if (!bikeshedSecret) {
 }
 
 const CACHE_INVALIDATION_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
-setInterval(() => cache.invalidateCaches(), CACHE_INVALIDATION_INTERVAL);
+setInterval(() => searchCache.invalidate(), CACHE_INVALIDATION_INTERVAL);
 
 module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {
@@ -59,7 +60,8 @@ function hasAnchorUpdate(commits) {
 async function updateData() {
   const hasUpdated = await scraper();
   if (hasUpdated) {
-    cache.refresh();
+    searchCache.clear();
+    store.fill();
   }
   return "Succesfully updated.";
 }
