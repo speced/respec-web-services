@@ -7,9 +7,9 @@ const columnMap = { time: 0, sha: 1, size: 2, gzipSize: 3 };
 async function main() {
   const entries = await fetchData();
   const dataTable = getDataTable(entries);
-  drawChart(dataTable);
   window.addEventListener("resize", () => drawChart(dataTable));
   form.addEventListener("change", () => drawChart(dataTable));
+  drawChart(dataTable);
 }
 
 async function fetchData() {
@@ -22,7 +22,7 @@ async function fetchData() {
 
 /** @param {google.visualization.DataTable} data */
 function drawChart(data) {
-  const showGzipSize = form.gzipSize.checked;
+  const { checked: showGzipSize } = form.gzipSize;
   const months = parseInt(form.duration.value, 10);
 
   let viewWindow;
