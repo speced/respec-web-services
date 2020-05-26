@@ -20,6 +20,20 @@ async function fetchData() {
   );
 }
 
+function getDataTable(entries) {
+  const table = new google.visualization.DataTable();
+  table.addColumn("datetime", "Time");
+  table.addColumn("string", "Commit SHA");
+  table.addColumn("number", "Size (bytes)");
+  table.addColumn("number", "Size (bytes)");
+
+  const idxMap = Object.entries(columnMap).sort((a, b) => a[1] - b[1]);
+  const toRow = entry => idxMap.map(a => entry[a[0]]);
+  table.addRows(entries.map(toRow));
+
+  return table;
+}
+
 /** @param {google.visualization.DataTable} data */
 function drawChart(data) {
   const { checked: showGzipSize } = form.gzipSize;
@@ -64,18 +78,4 @@ function drawChart(data) {
   const key = showGzipSize ? "gzipSize" : "size";
   view.setColumns([columnMap.time, columnMap[key]]);
   chart.draw(view, drawOptions);
-}
-
-function getDataTable(entries) {
-  const table = new google.visualization.DataTable();
-  table.addColumn("datetime", "Time");
-  table.addColumn("string", "Commit SHA");
-  table.addColumn("number", "Size (bytes)");
-  table.addColumn("number", "Size (bytes)");
-
-  const idxMap = Object.entries(columnMap).sort((a, b) => a[1] - b[1]);
-  const toRow = entry => idxMap.map(a => entry[a[0]]);
-  table.addRows(entries.map(toRow));
-
-  return table;
 }
