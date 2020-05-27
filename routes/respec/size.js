@@ -75,7 +75,7 @@ async function putHandler(req, res) {
     return res.sendStatus(412);
   }
 
-  await fs.appendFile(FILE_PATH, JSON.stringify(entry));
+  await fs.appendFile(FILE_PATH, `${JSON.stringify(entry)}\n`);
   res.sendStatus(201);
 }
 
