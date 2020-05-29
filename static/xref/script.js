@@ -1,12 +1,9 @@
 import { autocomplete } from './autocomplete.js?v=5.0.1';
+import * as Comlink from 'https://unpkg.com/comlink@4.3.0/dist/esm/comlink.min.js';
 
 class OptionSelector extends HTMLInputElement {
   constructor() {
     super();
-  }
-
-  static get observedAttributes() {
-    return ['data-options'];
   }
 
   /** @returns {string[]} */
@@ -14,31 +11,23 @@ class OptionSelector extends HTMLInputElement {
     return Array.from(this.selectedValues);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'data-options') {
-      this.options = [...new Set(newValue.split('|'))];
-      this.fuse = new Fuse(this.options, {});
-    }
-  }
-
   connectedCallback() {
-    this.fuse = new Fuse(this.options, {});
-    const limit = parseInt(this.dataset.limit, 10) || 10;
+    const name = this.getAttribute('name');
+    this.options = [];
+
     const self = this;
     autocomplete({
       input: self,
-      fetch(text, update) {
-        text = text.toLowerCase();
-        const matchedIndexes = self.fuse.search(text).slice(0, limit);
-        const values = matchedIndexes.map(i => self.options[i]);
-        update(values);
+      async fetch(text, update) {
+        const suggestions = await OptionSelector.search(name, text);
+        self.options = suggestions;
+        update(suggestions);
       },
       onSelect(value) {
         self.select(value.trim());
       },
     });
 
-    const name = this.getAttribute('name');
     const sel = `.selections[data-for="${name}"]`;
     this.elSelections = document.querySelector(sel);
     if (!this.elSelections) {
@@ -46,13 +35,11 @@ class OptionSelector extends HTMLInputElement {
     }
 
     this.selectedValues = new Set();
-    const options = this.dataset.options || '';
-    this.options = Array.from(new Set(options.split('|')));
   }
 
-  select(value) {
-    const { selectedValues, elSelections, options } = this;
-    if (value === '' || selectedValues.has(value) || !options.includes(value)) {
+  select(value, { ignoreOptions = false } = {}) {
+    const { selectedValues, elSelections } = this;
+    if (!this.isSelectable(value, { ignoreOptions })) {
       return;
     }
 
@@ -67,6 +54,15 @@ class OptionSelector extends HTMLInputElement {
       selectedValues.delete(value);
     });
     elSelections.appendChild(button);
+  }
+
+  isSelectable(value, { ignoreOptions }) {
+    const { selectedValues, options } = this;
+    return !(
+      value === '' ||
+      selectedValues.has(value) ||
+      !(ignoreOptions || options.includes(value))
+    );
   }
 }
 
@@ -187,27 +183,14 @@ function howToCiteTerm(term, entry) {
 }
 
 async function ready() {
-  const updateInput = (el, values) => {
-    el.setAttribute('placeholder', values.slice(0, 5).join(','));
-    el.dataset.options = values.join('|');
-  };
+  const searchWorker = Comlink.wrap(new Worker('worker.js'));
+  metadata = await searchWorker.setup();
+  OptionSelector.search = searchWorker.search;
 
-  const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
-  const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
-
-  const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
-  updateInput(form.specs, shortnames.sort());
-
-  const allTypes = [].concat(...Object.values(types)).sort();
-  updateInput(form.types, allTypes);
-
-  const fuse = new Fuse(terms, { caseSensitive: true });
   autocomplete({
     input: form.term,
     fetch(text, update) {
-      const matchedIndexes = fuse.search(text).slice(0, 15);
-      const suggestions = matchedIndexes.map(i => metadata.terms[i]);
-      update(suggestions);
+      searchWorker.search('term', text).then(update);
     },
     onSelect(suggestion) {
       this.input.value = suggestion;
@@ -232,7 +215,8 @@ async function ready() {
         break;
       case 'specs':
       case 'types':
-        value.split(',').forEach(val => form[field].select(val));
+        const ops = { ignoreOptions: true };
+        value.split(',').forEach(val => form[field].select(val, ops));
         break;
     }
   }
@@ -259,16 +243,6 @@ async function ready() {
     advancedSearchToggle.checked = true;
     advancedSearchToggle.onchange();
   }
-
-  metadata = {
-    types: {
-      idl: new Set(types.idl),
-      concept: new Set(types.concept),
-      markup: new Set(types.markup),
-    },
-    specs,
-    terms,
-  };
 }
 
 customElements.define('option-selector', OptionSelector, {
