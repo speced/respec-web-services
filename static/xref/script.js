@@ -180,6 +180,7 @@ function howToCiteMarkup(term, entry) {
 
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
+  term = term.replace('/', '\\/');
   if (forList) {
     return forList.map(f => `[=${f}/${term}=]`).join('<br>');
   }
