@@ -183,7 +183,7 @@ function howToCiteTerm(term, entry) {
   if (forList) {
     return forList.map(f => `[=${f}/${term}=]`).join('<br>');
   }
-  return `&lt;a data-cite="${shortname}">${term}&lt;/a>`;
+  return `[=${term}=]`;
 }
 
 async function ready() {
