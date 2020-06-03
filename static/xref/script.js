@@ -175,6 +175,9 @@ function howToCiteMarkup(term, entry) {
   if (forList) {
     return forList.map(f => `[^${f}/${term}^]`).join('<br>');
   }
+  if (type === 'element-attr') {
+    return `[^/${term}^]`;
+  }
   return `[^${term}^]`;
 }
 
