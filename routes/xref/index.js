@@ -1,9 +1,11 @@
 // @ts-check
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const rawBodyParser = require("../../utils/raw-body-parser");
 const { search } = require("respec-xref-route/search");
+const { DATA_DIR } = require("respec-xref-route/constants");
 
 const xref = express.Router({ mergeParams: true });
 
@@ -15,6 +17,7 @@ xref.post(
   bodyParser.json({ verify: rawBodyParser }),
   require("./update").route,
 );
+xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 
 module.exports = {
   route,

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search cross references</title>
+    <link rel="stylesheet" href="style.css?v=2020-06-03" />
+    <script src="script.js?v=2020-06-03" type="module" defer></script>
+  </head>
+  <body>
+    <h1>Filter ReSpec xref data</h1>
+    <form>
+      <fieldset class="controls">
+        <label><input type="checkbox" name="term"> Term</label>
+        <label><input type="checkbox" name="uri" checked> URI</label>
+        <label><input type="checkbox" name="spec" checked> Spec</label>
+        <label><input type="checkbox" name="shortname"> Shortname</label>
+        <label><input type="checkbox" name="type" checked> Type</label>
+        <label><input type="checkbox" name="for" checked> For</label>
+        <label><input type="checkbox" name="normative"> IsNormative</label>
+        <label><input type="checkbox" name="status"> Status</label>
+      </fieldset>
+      <textarea autofocus spellcheck="false">
+1. Write your query in the left panel.
+2. Press Ctrl+Enter to run query (or change the checkboxes).
+3. Results will appear in the right panel.
+
+
+Query Examples:
+===============
+
+term === "event"
+
+// or use single equal sign
+term = "event"
+
+term === "event" && shortname === "dom"
+
+// expressions in multiple lines are joined by `&&` operator
+term === "event"
+shortname === "dom"
+
+// use JavaScript expressions!
+term === "event"
+shortname === "dom" || spec.startsWith("htm")
+forContext?.includes("HTMLScriptElement")
+
+
+Variables:
+==========
+
+- term
+- uri
+- spec
+- shortname
+- type
+- forContext (as `for` is reserved keyword)
+- normative
+- status
+</textarea>
+      <output>Results will appear here.</output>
+    </form>
+  </body>
+</html>
