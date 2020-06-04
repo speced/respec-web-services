@@ -142,7 +142,7 @@ function renderResults(entries, query) {
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
       ? howToCiteMarkup(term, entry)
-      : entry.type.startsWith('css-')
+      : metadata.types.css.has(entry.type)
       ? howToCiteCSS(term, entry)
       : howToCiteTerm(term, entry);
     let row = `
@@ -290,6 +290,7 @@ async function ready() {
       idl: new Set(types.idl),
       concept: new Set(types.concept),
       markup: new Set(types.markup),
+      css: new Set(types.css),
     },
     specs,
     terms,
