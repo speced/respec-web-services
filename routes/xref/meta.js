@@ -2,6 +2,7 @@
 const {
   IDL_TYPES,
   CONCEPT_TYPES,
+  CSS_TYPES,
   MARKUP_TYPES,
 } = require("respec-xref-route/constants");
 const { store } = require("respec-xref-route/store");
@@ -54,6 +55,7 @@ function getData() {
       idl: [...IDL_TYPES],
       concept: [...CONCEPT_TYPES],
       markup: [...MARKUP_TYPES],
+      css: [...CSS_TYPES],
     },
     specs: store.specmap,
     terms,

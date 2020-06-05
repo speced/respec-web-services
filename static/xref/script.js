@@ -142,6 +142,8 @@ function renderResults(entries, query) {
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
       ? howToCiteMarkup(term, entry)
+      : metadata.types.css.has(entry.type)
+      ? howToCiteCSS(term, entry)
       : howToCiteTerm(term, entry);
     let row = `
       <tr>
@@ -181,6 +183,21 @@ function howToCiteMarkup(term, entry) {
   return `[^${term}^]`;
 }
 
+function howToCiteCSS(term, entry) {
+  const { type, for: forList } = entry;
+  term = escapeHTML(term);
+  if (!forList) {
+    return escapeHTML(`<a data-xref-type="${type}">${term}</a>`);
+  }
+  return forList
+    .map(f =>
+      escapeHTML(
+        `<a data-xref-type="${type}" data-xref-for="${f}">${term}</a>`,
+      ),
+    )
+    .join('<br>');
+}
+
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
   term = term.replace('/', '\\/');
@@ -188,6 +205,10 @@ function howToCiteTerm(term, entry) {
     return forList.map(f => `[=${f}/${term}=]`).join('<br>');
   }
   return `[=${term}=]`;
+}
+
+function escapeHTML(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 async function ready() {
@@ -269,6 +290,7 @@ async function ready() {
       idl: new Set(types.idl),
       concept: new Set(types.concept),
       markup: new Set(types.markup),
+      css: new Set(types.css),
     },
     specs,
     terms,
