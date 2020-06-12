@@ -1,6 +1,7 @@
 // @ts-check
 const { getIssues } = require("respec-github-apis/issues");
 const { TTLCache } = require("respec-github-apis/utils/cache");
+const { seconds } = require("../../utils/misc");
 
 /**
  * @param {import('express').Request} req
@@ -25,8 +26,7 @@ module.exports.route = async function route(req, res) {
     ),
   ];
 
-  // cache all results for 30 min (1800 seconds)
-  res.set("Cache-Control", "max-age=1800");
+  res.set("Cache-Control", `max-age=${seconds("30m")}`);
 
   try {
     const result = await getIssues(org, repo, issues);

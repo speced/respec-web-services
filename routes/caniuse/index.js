@@ -4,6 +4,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const rawBodyParser = require("../../utils/raw-body-parser");
 const { createResponseBody } = require("respec-caniuse-route");
+const { seconds } = require("../../utils/misc");
 
 const caniuse = express.Router({ mergeParams: true });
 
@@ -40,7 +41,6 @@ async function route(req, res) {
     return;
   }
 
-  // cache for 24hours (86400 seconds)
-  res.set("Cache-Control", "max-age=86400");
+  res.set("Cache-Control", `max-age=${seconds("24h")}`);
   res.send(body);
 }

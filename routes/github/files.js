@@ -1,5 +1,6 @@
 // @ts-check
 const { getFiles } = require("respec-github-apis/files");
+const { seconds } = require("../../utils/misc");
 
 /**
  * @param {import('express').Request} req
@@ -13,8 +14,7 @@ module.exports.route = async function route(req, res) {
   try {
     const options = { path, branch, depth };
     const entries = await getFiles(org, repo, options);
-    // cache results for 30 min (1800 seconds)
-    res.set("Cache-Control", "max-age=1800");
+    res.set("Cache-Control", `max-age=${seconds("30m")}`);
     res.json({ entries });
   } catch (error) {
     const errorCode = error.message === "INTERNAL_ERROR" ? 500 : 404;
