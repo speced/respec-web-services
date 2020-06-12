@@ -1,4 +1,5 @@
 import { autocomplete } from './autocomplete.js?v=5.0.1';
+import Fuse from './fuse.js?v=6.0.4';
 
 class OptionSelector extends HTMLInputElement {
   constructor() {
@@ -17,20 +18,20 @@ class OptionSelector extends HTMLInputElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'data-options') {
       this.options = [...new Set(newValue.split('|'))];
-      this.fuse = new Fuse(this.options, {});
+      this.fuse = new Fuse(this.options);
     }
   }
 
   connectedCallback() {
-    this.fuse = new Fuse(this.options, {});
+    this.fuse = new Fuse(this.options);
     const limit = parseInt(this.dataset.limit, 10) || 10;
     const self = this;
     autocomplete({
       input: self,
       fetch(text, update) {
         text = text.toLowerCase();
-        const matchedIndexes = self.fuse.search(text).slice(0, limit);
-        const values = matchedIndexes.map(i => self.options[i]);
+        const searchResults = self.fuse.search(text).slice(0, limit);
+        const values = searchResults.map(r => r.item);
         update(values);
       },
       onSelect(value) {
@@ -226,12 +227,12 @@ async function ready() {
   const allTypes = [].concat(...Object.values(types)).sort();
   updateInput(form.types, allTypes);
 
-  const fuse = new Fuse(terms, {});
+  const fuse = new Fuse(terms);
   autocomplete({
     input: form.term,
     fetch(text, update) {
-      const matchedIndexes = fuse.search(text).slice(0, 15);
-      const suggestions = matchedIndexes.map(i => metadata.terms[i]);
+      const searchResults = fuse.search(text).slice(0, 15);
+      const suggestions = searchResults.map(r => r.item);
       update(suggestions);
     },
     onSelect(suggestion) {
