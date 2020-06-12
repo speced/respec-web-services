@@ -226,7 +226,7 @@ async function ready() {
   const allTypes = [].concat(...Object.values(types)).sort();
   updateInput(form.types, allTypes);
 
-  const fuse = new Fuse(terms, { caseSensitive: true });
+  const fuse = new Fuse(terms, {});
   autocomplete({
     input: form.term,
     fetch(text, update) {
