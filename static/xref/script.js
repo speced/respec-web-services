@@ -1,4 +1,5 @@
 import { autocomplete } from './autocomplete.js?v=5.0.1';
+import Fuse from './fuse.js?v=6.0.4';
 
 class OptionSelector extends HTMLInputElement {
   constructor() {
@@ -29,8 +30,8 @@ class OptionSelector extends HTMLInputElement {
       input: self,
       fetch(text, update) {
         text = text.toLowerCase();
-        const matchedIndexes = self.fuse.search(text).slice(0, limit);
-        const values = matchedIndexes.map(i => self.options[i]);
+        const searchResults = self.fuse.search(text).slice(0, limit);
+        const values = searchResults.map(r => r.item);
         update(values);
       },
       onSelect(value) {
@@ -230,8 +231,8 @@ async function ready() {
   autocomplete({
     input: form.term,
     fetch(text, update) {
-      const matchedIndexes = fuse.search(text).slice(0, 15);
-      const suggestions = matchedIndexes.map(i => metadata.terms[i]);
+      const searchResults = fuse.search(text).slice(0, 15);
+      const suggestions = searchResults.map(r => r.item);
       update(suggestions);
     },
     onSelect(suggestion) {
