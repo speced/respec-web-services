@@ -18,12 +18,12 @@ class OptionSelector extends HTMLInputElement {
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'data-options') {
       this.options = [...new Set(newValue.split('|'))];
-      this.fuse = new Fuse(this.options, {});
+      this.fuse = new Fuse(this.options);
     }
   }
 
   connectedCallback() {
-    this.fuse = new Fuse(this.options, {});
+    this.fuse = new Fuse(this.options);
     const limit = parseInt(this.dataset.limit, 10) || 10;
     const self = this;
     autocomplete({
@@ -227,7 +227,7 @@ async function ready() {
   const allTypes = [].concat(...Object.values(types)).sort();
   updateInput(form.types, allTypes);
 
-  const fuse = new Fuse(terms, {});
+  const fuse = new Fuse(terms);
   autocomplete({
     input: form.term,
     fetch(text, update) {

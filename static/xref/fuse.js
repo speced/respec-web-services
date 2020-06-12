@@ -1,5 +1,6 @@
 /**
  * Fuse.js v6.0.4 - Lightweight fuzzy-search (http://fusejs.io)
+ * (fuse.basic.esm.min.js)
  *
  * Copyright (c) 2020 Kiro Risk (http://kiro.me)
  * All Rights Reserved. Apache Software License 2.0
