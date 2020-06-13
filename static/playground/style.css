@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  font-family: Inconsolata, Fira Mono, Fira Code, monospace;
+}
+
+h1 {
+  text-align: center;
+  border-bottom: 0.5rem double;
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+form {
+  display: grid;
+  grid-template-columns: 60ch 1fr;
+  overflow: hidden;
+}
+
+.input {
+  display: grid;
+  grid-template-rows: 1fr 4fr;
+}
+
+textarea {
+  resize: none;
+  display: block;
+  width: 100%;
+  padding: 1ch;
+}
+
+iframe {
+  border: none;
+  width: 100%;
+  height: 100%;
+}

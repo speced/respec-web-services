@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReSpec Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <h1>ReSpec Playground</h1>
+  <form>
+    <div class="input">
+      <textarea id="respec-config">
+var respecConfig = {
+  shortname: "name",
+  editors: [
+    { name: "Alice Doe" }
+  ],
+}</textarea>
+      <textarea id="body">
+<h1>Some Spec</h1>
+<section id="abstract">
+  <p>I'm the abstract.</p>
+</section>
+<section>
+  <h2>Heading</h2>
+  <p>[[HTML]] defines {{EventHandler}}.</p>
+</section>
+</textarea>
+    </div>
+    <output>
+    </output>
+  </form>
+</body>
+</html>
