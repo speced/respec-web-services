@@ -7,17 +7,12 @@ const {
   promises: fs,
 } = require("fs");
 const path = require("path");
+const { env } = require("../../utils/misc.js");
 
-if (!process.env.DATA_DIR) {
-  throw new Error("env variable `DATA_DIR` is not set.");
-}
+const DATA_DIR = env("DATA_DIR");
+const RESPEC_GH_ACTION_SECRET = env("RESPEC_GH_ACTION_SECRET");
 
-const { RESPEC_GH_ACTION_SECRET } = process.env;
-if (!RESPEC_GH_ACTION_SECRET) {
-  throw new Error("env variable `RESPEC_GH_ACTION_SECRET` is not set.");
-}
-
-const FILE_PATH = path.join(process.env.DATA_DIR, "respec/respec-w3c.json");
+const FILE_PATH = path.join(DATA_DIR, "respec/respec-w3c.json");
 if (!existsSync(FILE_PATH)) {
   mkdirSync(path.dirname(FILE_PATH), { recursive: true });
   writeFileSync(FILE_PATH, "");

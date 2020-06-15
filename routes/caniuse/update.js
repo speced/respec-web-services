@@ -3,11 +3,9 @@ const crypto = require("crypto");
 const { queue } = require("../../utils/background-task-queue");
 const { cache } = require("respec-caniuse-route");
 const { main: scraper } = require("respec-caniuse-route/scraper");
+const { env } = require("../../utils/misc");
 
-const caniuseSecret = process.env.CANIUSE_SECRET;
-if (!caniuseSecret) {
-  throw new Error("env variable `CANIUSE_SECRET` is not set.");
-}
+const caniuseSecret = env("CANIUSE_SECRET");
 
 module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {

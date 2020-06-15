@@ -4,11 +4,9 @@ const { queue } = require("../../utils/background-task-queue");
 const { main: scraper } = require("respec-xref-route/scraper");
 const { cache: searchCache } = require("respec-xref-route/search");
 const { store } = require("respec-xref-route/store");
+const { env } = require("../../utils/misc");
 
-const bikeshedSecret = process.env.BIKESHED_SECRET;
-if (!bikeshedSecret) {
-  throw new Error("env variable `BIKESHED_SECRET` is not set.");
-}
+const bikeshedSecret = env("BIKESHED_SECRET");
 
 const CACHE_INVALIDATION_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
 setInterval(() => searchCache.invalidate(), CACHE_INVALIDATION_INTERVAL);
