@@ -2,11 +2,10 @@
 const fetch = require("node-fetch").default;
 const { MemCache } = require("../../utils/mem-cache.js");
 const { env, ms, seconds } = require("../../utils/misc.js");
-const groupsJSON = require("./groups.json");
+const groups = require("./groups.json");
 
 const API_KEY = env("W3C_API_KEY");
 const cache = new MemCache(ms("2 weeks"));
-const GROUPS = new Map(Object.entries(groupsJSON));
 
 /**
  * @param {import('express').Request} req
@@ -15,7 +14,7 @@ const GROUPS = new Map(Object.entries(groupsJSON));
 module.exports.route = async function route(req, res) {
   const { groupName } = req.params;
   if (!groupName) {
-    return res.json(groupsJSON);
+    return res.json(groups);
   }
 
   try {
@@ -38,8 +37,7 @@ async function getGroupInfo(groupName) {
     return cached;
   }
 
-  const groupId = GROUPS.get(groupName);
-
+  const groupId = groups.hasOwnProperty(groupName) && groups[groupName];
   if (!groupId) {
     throw { statusCode: 404, message: `No group with groupName: ${groupName}` };
   }
