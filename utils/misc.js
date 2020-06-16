@@ -26,18 +26,12 @@ const AS_SECONDS = {
  * ```
  */
 function seconds(duration) {
-  if (typeof duration === "number") {
-    return duration;
-  }
-
-  if (typeof duration === "string") {
-    const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
-    if (matches && matches.length === 3) {
-      const value = parseFloat(matches[1]);
-      const unit = matches[2].toLowerCase();
-      if (value && AS_SECONDS[unit]) {
-        return value * AS_SECONDS[unit];
-      }
+  const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
+  if (matches && matches.length === 3) {
+    const value = parseFloat(matches[1]);
+    const unit = matches[2].toLowerCase();
+    if (value && AS_SECONDS[unit]) {
+      return value * AS_SECONDS[unit];
     }
   }
 
