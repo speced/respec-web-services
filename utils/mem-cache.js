@@ -20,7 +20,7 @@ class MemCache {
    * @param {ValueType} value
    */
   set(key, value) {
-    this._set(key, Date.now(), value);
+    this.#map.set(key, { time: Date.now(), value });
   }
 
   /**
@@ -70,23 +70,6 @@ class MemCache {
 
   clear() {
     this.#map.clear();
-  }
-
-  /**
-   * @param {string} key
-   * @param {number} time
-   * @param {ValueType} value
-   */
-  _set(key, time, value) {
-    this.#map.set(key, { time, value });
-  }
-
-  /**
-   * @param {string} key
-   * @returns {Readonly<{ time: number, value: ValueType }>}
-   */
-  _get(key) {
-    return this.#map.get(key);
   }
 }
 
