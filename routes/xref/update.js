@@ -4,12 +4,11 @@ const { queue } = require("../../utils/background-task-queue");
 const { main: scraper } = require("respec-xref-route/scraper");
 const { cache: searchCache } = require("respec-xref-route/search");
 const { store } = require("respec-xref-route/store");
-const { env } = require("../../utils/misc");
+const { env, ms } = require("../../utils/misc");
 
 const bikeshedSecret = env("BIKESHED_SECRET");
 
-const CACHE_INVALIDATION_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
-setInterval(() => searchCache.invalidate(), CACHE_INVALIDATION_INTERVAL);
+setInterval(() => searchCache.invalidate(), ms("4h"));
 
 module.exports.route = function route(req, res) {
   if (!isValidGithubSignature(req)) {

@@ -2,9 +2,9 @@
 const { getContributors } = require("respec-github-apis/contributors");
 const { getUsersDetails } = require("respec-github-apis/users");
 const { TTLCache } = require("respec-github-apis/utils/cache");
+const { ms, seconds } = require("../../utils/misc");
 
-const CACHE_TTL = 3 * 24 * 60 * 60 * 1000; // 3 days
-const cache = new TTLCache(CACHE_TTL);
+const cache = new TTLCache(ms("3 days"));
 
 /**
  * @param {import('express').Request} req
@@ -14,8 +14,7 @@ module.exports.route = async function route(req, res) {
   const { org, repo } = req.params;
   const cacheKey = `${org}/${repo}`;
 
-  // cache all results for 24hours (86400 seconds)
-  res.set("Cache-Control", "max-age=86400");
+  res.set("Cache-Control", `max-age=${seconds("24h")}`);
 
   const cachedData = cache.get(cacheKey);
   if (typeof cachedData !== "undefined") {

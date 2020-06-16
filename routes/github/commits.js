@@ -1,5 +1,6 @@
 // @ts-check
 const { getCommits } = require("respec-github-apis/commits");
+const { seconds } = require("../../utils/misc");
 
 /**
  * @param {import('express').Request} req
@@ -13,8 +14,7 @@ module.exports.route = async function route(req, res) {
     return res.status(400).send("query parameter 'from' is required");
   }
 
-  // cache all results for 30 min (1800 seconds)
-  res.set("Cache-Control", "max-age=1800");
+  res.set("Cache-Control", `max-age=${seconds("30m")}`);
 
   try {
     const commits = [];
