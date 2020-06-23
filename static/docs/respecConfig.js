@@ -58,6 +58,15 @@ function fixMarkupOnInclude(_, content) {
     .replace(/``` *(\w+)/g, "<pre class='example $1'>")
     .replace(/``` *$/gm, "</pre>");
 
+  result = result
+    .split("\n")
+    .map(line =>
+      line.includes("Warning:")
+        ? `<div class="advisement">${line}</div>`
+        : line,
+    )
+    .join("\n");
+
   return result;
 }
 
