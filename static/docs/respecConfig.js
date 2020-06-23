@@ -113,7 +113,7 @@ function fixLinks() {
 function addWikiLinks() {
   const createWikiLink = includeName => {
     const wikiLink = document.createElement("a");
-    wikiLink.href = `https://github.com/w3c/respec/wiki/${includeName}`;
+    wikiLink.href = `https://github.com/w3c/respec/wiki/${includeName}/_edit`;
     const title = "Edit this section on Wiki";
     wikiLink.title = title;
     wikiLink.setAttribute("aria-label", title);
