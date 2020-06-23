@@ -91,6 +91,10 @@ function fixLinks() {
     // TODO: fix more links!
     if (document.getElementById(href)) {
       a.href = `#${href}`;
+    } else if (document.getElementById(`id-${href}`)) {
+      // Special section IDs like "conformance" trigger ReSpec "include"
+      // behaviour. We manually add `id-` prefix to overcome that.
+      a.href = `#id-${href}`;
     } else {
       a.href = `https://github.com/w3c/respec/wiki/${href}`;
     }
