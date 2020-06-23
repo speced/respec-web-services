@@ -24,6 +24,10 @@ img {
   min-width: auto !important; */
 }
 
+table.def th {
+  width: auto !important;
+}
+
 h2 code,
 h3 code,
 h4 code {

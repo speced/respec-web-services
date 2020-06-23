@@ -17,6 +17,7 @@ var respecConfig = {
     addWikiLinks,
     fixMarkupPostprocess,
     fixupUglyHeadings,
+    postProcessEnhance,
   ],
 };
 
@@ -75,6 +76,12 @@ function fixMarkupPostprocess() {
     if (elem.textContent.startsWith("&lt;")) {
       elem.textContent = elem.textContent.replace(/^&lt;/, "<");
     }
+  }
+}
+
+function postProcessEnhance() {
+  for (const elem of document.querySelectorAll("dl, table")) {
+    elem.classList.add("def");
   }
 }
 
