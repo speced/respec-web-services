@@ -1,0 +1,53 @@
+img {
+  width: 100%;
+  height: auto;
+}
+
+.example {
+  border-width: 0.2em !important;
+  padding: 0 !important;
+
+  border: 1px solid #e1dab4 !important;
+  background: #fcfcfc !important;
+}
+
+.example pre {
+  margin: 0 !important;
+}
+
+.example > .marker {
+  display: none !important;
+  /* position: absolute;
+  right: 0.5em;
+  top: 0.5em;
+  white-space: nowrap;
+  min-width: auto !important; */
+}
+
+h2 code,
+h3 code,
+h4 code {
+  font-weight: bold;
+}
+
+a.wiki-link {
+  font-size: 0.8em;
+  margin-left: 4px !important;
+  display: none;
+}
+
+/* TODO: use :is() when supported */
+h2:focus-within .wiki-link,
+h3:focus-within .wiki-link,
+h4:focus-within .wiki-link,
+h5:focus-within .wiki-link,
+h2:hover .wiki-link,
+h3:hover .wiki-link,
+h4:hover .wiki-link,
+h5:hover .wiki-link {
+  display: initial;
+}
+
+.toc code {
+  color: currentColor;
+}
