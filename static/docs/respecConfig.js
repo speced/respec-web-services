@@ -64,6 +64,8 @@ function fixMarkupOnInclude(_, content) {
     .map(line =>
       line.includes("Warning:")
         ? `<div class="advisement">${line}</div>`
+        : /\bNote:/.test(line)
+        ? `<div class="note">${line}</div>`
         : line,
     )
     .join("\n");
