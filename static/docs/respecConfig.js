@@ -83,7 +83,7 @@ function fixMarkupPostprocess() {
 }
 
 function postProcessEnhance() {
-  for (const elem of document.querySelectorAll("dl, table")) {
+  for (const elem of document.querySelectorAll("section dl, table")) {
     elem.classList.add("def");
   }
 }
