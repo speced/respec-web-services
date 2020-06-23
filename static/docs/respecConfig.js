@@ -59,15 +59,16 @@ function fixMarkupOnInclude(_, content) {
     .replace(/``` *(\w+)/g, "<pre class='example $1'>")
     .replace(/``` *$/gm, "</pre>");
 
+  // Add .note and .advisement classes based on line prefix
   result = result
     .split("\n")
-    .map(line =>
-      line.includes("Warning:")
-        ? `<div class="advisement">${line}</div>`
-        : /\bNote:/.test(line)
-        ? `<div class="note">${line}</div>`
-        : line,
-    )
+    .map(line => {
+      if (/^.{0,5}\s*Warning:/.test(line))
+        return `<div class="advisement">${line}</div>`;
+      if (/^.{0,5}\s*Note:/.test(line))
+        return `<div class="note">${line}</div>`;
+      return line;
+    })
     .join("\n");
 
   return result;
