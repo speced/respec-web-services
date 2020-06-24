@@ -1,6 +1,7 @@
 name: Health Check
 on:
-  pull_request: {}
+  schedule:
+    - cron: "*/5 * * * *" # every 5 minute
 jobs:
   healthcheck:
     runs-on: ubuntu-latest
