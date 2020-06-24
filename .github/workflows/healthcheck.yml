@@ -14,6 +14,6 @@ jobs:
       - name: healthcheck
         shell: bash
         run: |
-          curl -s -O https://raw.githubusercontent.com/marcoscaceres/respec.org/healthcheck-easier/.github/workflows/healthcheck.js
+          curl -s -O https://raw.githubusercontent.com/marcoscaceres/respec.org/gh-pages/.github/workflows/healthcheck.js
           yarn add node-fetch --silent
           node healthcheck.js
