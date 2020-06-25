@@ -16,7 +16,7 @@ async function run() {
       console.log(`${url.href} ... `);
       const res = await fetch(url.href, { method: "HEAD" });
       console.log(`\tOK`);
-      if (res.status !== 200) {
+      if (!res.ok) {
         failures.push({ url: url.pathname, status: res.status });
       }
     } catch (error) {
