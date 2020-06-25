@@ -1,7 +1,7 @@
 name: Health Check
 on:
   schedule:
-    - cron: "*/5 * * * *" # every 5 minute
+    - cron: "*/30 * * * *" # every 30 mins
 jobs:
   healthcheck:
     runs-on: ubuntu-latest
@@ -14,23 +14,6 @@ jobs:
       - name: healthcheck
         shell: bash
         run: |
-          base_url="https://respec.org"
-          IFS=$'\n' urls=($ENDPOINTS)
-          for url in "${urls[@]}"; do
-            printf "${base_url}${url} ... ";
-            full_url="${base_url}${url}?healthcheck=true"
-            set +e
-            http_code=$(curl -s -o /dev/null -L -w "%{http_code}" "$full_url")
-            exit_code=$?
-            set -e
-            echo "$http_code"
-            if [ $exit_code != 0 ]; then
-              echo "curl exited with code: $exit_code"
-            fi
-            if [ $http_code != 200 ]; then
-              echo "Reporting failure on Slack..."
-              curl --fail -H "Content-Type: application/json" \
-                -d "{ \"text\": \"🔴 HEAD $http_code ${url}\" }" \
-                "$SLACK_WEBHOOK_URL"
-            fi
-          done;
+          curl -s -O https://raw.githubusercontent.com/marcoscaceres/respec.org/gh-pages/.github/workflows/healthcheck.js
+          yarn add node-fetch --silent
+          node healthcheck.js
