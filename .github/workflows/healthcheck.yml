@@ -1,7 +1,7 @@
 name: Health Check
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/30 * * * *" # every 30 mins
 jobs:
   healthcheck:
     runs-on: ubuntu-latest
