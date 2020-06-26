@@ -6,7 +6,7 @@ const groups = require("./groups.json");
 
 const API_KEY = env("W3C_API_KEY");
 /**
- * @typedef {{ id: number, group: string, name: string, URI: string, patentURI: string }} Group
+ * @typedef {{ id: number, shortname: string, name: string, URI: string, patentURI: string }} Group
  * @type {MemCache<Group>}
  */
 const cache = new MemCache(ms("2 weeks"));
@@ -19,7 +19,7 @@ module.exports.route = async function route(req, res) {
   const { groupName } = req.params;
   if (!groupName) {
     const data = await getAllGroupInfo();
-    return res.json(data);
+    return res.render("w3c/groups.njk", { groups: data });
   }
 
   try {

@@ -1,0 +1,74 @@
+{%- macro renderGroup(group) %}
+<tr>
+  <td><code>{{ group.shortname }}</code></td>
+  <td>{{ group.id }}</td>
+  <td>
+    {%- if group.URI and group.name -%}
+      <a href="{{ group.URI }}">{{ group.name }}</a>
+    {%- endif -%}
+  </td>
+</tr>
+{%- endmacro -%}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>W3C Working Groups supported by ReSpec</title>
+  <style>
+    h1 {
+      text-align: center;
+    }
+
+    table {
+      margin: auto
+    }
+
+    table tr {
+      background: #eee;
+    }
+
+    table tr:nth-child(2n) {
+      background: #fafafa;
+    }
+
+    table thead tr {
+      background: aliceblue;
+    }
+
+    table td,
+    table th {
+      padding: 0.5rem;
+      text-align: left;
+    }
+
+    caption {
+      text-align: left;
+      padding: 0.5em;
+    }
+    caption, caption a {
+      background: #005a9c;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <h1>W3C Working Groups supported by ReSpec</h1>
+  <table>
+    <caption>List of possible values for <a href="https://github.com/w3c/respec/wiki/group"><code>respecConfig.group</code></a></caption>
+    <thead>
+      <tr>
+        <th><code>group</code></th>
+        <th>Group ID</th>
+        <th>Group Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in groups -%}
+        {{- renderGroup(group) -}}
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>
