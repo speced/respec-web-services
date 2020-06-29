@@ -2,9 +2,8 @@ require("dotenv").config({ path: require("path").join(__dirname, ".env") });
 const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");
-const nunjucks = require("nunjucks");
 const logging = require("./utils/logging");
-const { isDevEnv } = require("./utils/misc");
+const viewEngine = require("./utils/view-engine");
 
 const app = express();
 app.use(compression());
@@ -15,11 +14,7 @@ app.use(logging.stdout());
 app.use(logging.stderr());
 
 app.use(express.static(__dirname + "/static"));
-nunjucks.configure("views", {
-  autoescape: true,
-  express: app,
-  noCache: isDevEnv,
-});
+viewEngine.register(app);
 
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
