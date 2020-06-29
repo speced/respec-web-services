@@ -19,10 +19,10 @@ module.exports.route = async function route(req, res) {
   const { groupName } = req.params;
   if (!groupName) {
     const data = await getAllGroupInfo();
-    if (req.query.format === "json") {
-      return res.json(data);
+    if (req.headers.accept.includes("text/html")) {
+      return res.render("w3c/groups.njk", { groups: data });
     }
-    return res.render("w3c/groups.njk", { groups: data });
+    return res.json(data);
   }
 
   try {
