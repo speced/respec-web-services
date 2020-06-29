@@ -5,6 +5,10 @@ const { env, ms, seconds } = require("../../utils/misc.js");
 const groups = require("./groups.json");
 
 const API_KEY = env("W3C_API_KEY");
+/**
+ * @typedef {{ id: number, group: string, name: string, URI: string, patentURI: string }} Group
+ * @type {MemCache<Group>}
+ */
 const cache = new MemCache(ms("2 weeks"));
 
 /**
@@ -14,7 +18,8 @@ const cache = new MemCache(ms("2 weeks"));
 module.exports.route = async function route(req, res) {
   const { groupName } = req.params;
   if (!groupName) {
-    return res.json(groups);
+    const data = await getAllGroupInfo();
+    return res.json(data);
   }
 
   try {
@@ -51,15 +56,27 @@ async function getGroupInfo(groupName) {
   }
   const json = await res.json();
 
-  const { id, name, description, _links: links } = json;
+  const { id, name, _links: links } = json;
+  /** @type {Group} */
   const result = {
+    shortname: groupName,
     id,
     name,
-    description,
     URI: links.homepage.href,
     patentURI: links["pp-status"].href,
   };
 
   cache.set(groupName, result);
   return result;
+}
+
+async function getAllGroupInfo() {
+  const groupNames = Object.keys(groups);
+
+  // Fill the cache with the groups not fetched recently.
+  await Promise.allSettled(groupNames.map(getGroupInfo));
+
+  return groupNames.map(
+    group => cache.get(group) || { group, id: groups[group] },
+  );
 }
