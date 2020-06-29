@@ -1,3 +1,5 @@
+const isDevEnv = process.env.NODE_ENV !== "production";
+
 /**
  * Get env variable value
  * @param {string} name name of env variable
@@ -53,6 +55,7 @@ function ms(duration) {
 }
 
 module.exports = {
+  isDevEnv,
   env,
   ms,
   seconds,

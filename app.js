@@ -4,6 +4,7 @@ const compression = require("compression");
 const helmet = require("helmet");
 const nunjucks = require("nunjucks");
 const logging = require("./utils/logging");
+const { isDevEnv } = require("./utils/misc");
 
 const app = express();
 app.use(compression());
@@ -17,7 +18,7 @@ app.use(express.static(__dirname + "/static"));
 nunjucks.configure("views", {
   autoescape: true,
   express: app,
-  noCache: process.env.NODE_ENV !== "production",
+  noCache: isDevEnv,
 });
 
 // Security
