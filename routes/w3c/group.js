@@ -59,7 +59,7 @@ async function getGroupInfo(groupName) {
   const { id, name, _links: links } = json;
   /** @type {Group} */
   const result = {
-    group: groupName,
+    shortname: groupName,
     id,
     name,
     URI: links.homepage.href,
