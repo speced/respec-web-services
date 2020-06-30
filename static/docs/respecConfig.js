@@ -70,6 +70,9 @@ function fixMarkupOnInclude(_, content) {
   }
   result = parts.join("");
 
+  // Escape [[[foo]]] and [[foo]] with [[[\foo]]] and [[\foo]]
+  result = result.replace(/\[\[(\w)/g, "[[\\$1");
+
   // Inline code: replace "`<some-tag>`" with "`&lt;some-tag>`"
   result = result.replace(/`</g, "`&lt;");
 
