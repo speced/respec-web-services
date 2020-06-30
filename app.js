@@ -3,6 +3,7 @@ const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");
 const logging = require("./utils/logging");
+const viewEngine = require("./utils/view-engine");
 
 const app = express();
 app.use(compression());
@@ -13,6 +14,7 @@ app.use(logging.stdout());
 app.use(logging.stderr());
 
 app.use(express.static(__dirname + "/static"));
+viewEngine.register(app);
 
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
