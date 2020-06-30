@@ -16,7 +16,6 @@ var respecConfig = {
     fixLinks,
     addWikiLinks,
     fixMarkupPostprocess,
-    fixupUglyHeadings,
     postProcessEnhance,
   ],
 };
@@ -138,13 +137,5 @@ function addWikiLinks() {
     const { includeName } = section.dataset;
     const wikiLink = createWikiLink(includeName);
     section.querySelector("h2, h3, h4, h5, h6").append(wikiLink);
-  }
-}
-
-function fixupUglyHeadings() {
-  for (const elem of document.querySelectorAll(".tocxref")) {
-    if (elem.textContent.trim().match(/Example/)) {
-      elem.closest(".tocline").remove();
-    }
   }
 }
