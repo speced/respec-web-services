@@ -1,4 +1,5 @@
-require("dotenv").config({ path: require("path").join(__dirname, ".env") });
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");
@@ -13,7 +14,9 @@ app.enable("trust proxy"); // for :remote-addr
 app.use(logging.stdout());
 app.use(logging.stderr());
 
-app.use(express.static(__dirname + "/static"));
+app.use(express.static(path.join(__dirname, "/static")));
+
+app.set("views", path.join(__dirname, "views"));
 viewEngine.register(app);
 
 // Security
