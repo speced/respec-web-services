@@ -41,7 +41,9 @@ function fixIncludes() {
     section.dataset.includeName = include;
     section.dataset.oninclude = "fixMarkupOnInclude";
     section.dataset.include = `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`;
-    section.dataset.maxToc = section.querySelector("section") ? "1" : "0";
+    if (!section.hasAttribute("data-max-toc")) {
+      section.dataset.maxToc = section.querySelector("section") ? "1" : "0";
+    }
   }
 }
 
