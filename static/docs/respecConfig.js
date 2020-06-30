@@ -146,10 +146,4 @@ function fixupUglyHeadings() {
       elem.closest(".tocline").remove();
     }
   }
-
-  for (const elem of document.querySelectorAll("h2, h3, h4, h5")) {
-    if (elem.textContent.match(/Example/)) {
-      elem.querySelector("bdi").remove();
-    }
-  }
 }
