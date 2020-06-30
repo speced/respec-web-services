@@ -106,7 +106,7 @@ function fixLinks() {
     "section a:not([href^=http]):not([href^='#'])",
   );
   for (const a of anchors) {
-    const href = a.href.split(urlBase, 2)[1];
+    const href = a.href.split(urlBase, 2)[1].split("#").pop();
     // TODO: fix more links!
     if (document.getElementById(href)) {
       a.href = `#${href}`;
