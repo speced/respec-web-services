@@ -1,5 +1,4 @@
 var respecConfig = {
-  edDraftURI: null,
   editors: [
     {
       name: "ReSpec",
@@ -17,6 +16,22 @@ var respecConfig = {
     addWikiLinks,
     fixMarkupPostprocess,
     postProcessEnhance,
+  ],
+  otherLinks: [
+    {
+      key: "Edit this documentation",
+      data: [
+        {
+          value: "GitHub Wiki",
+          href: "https://github.com/w3c/respec/wiki",
+        },
+        {
+          value: "Single Page",
+          href:
+            "https://github.com/marcoscaceres/respec.org/tree/HEAD/static/docs",
+        },
+      ],
+    },
   ],
 };
 
