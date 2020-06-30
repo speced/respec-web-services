@@ -1,4 +1,5 @@
 var respecConfig = {
+  edDraftURI: null,
   editors: [
     {
       name: "ReSpec",
@@ -17,6 +18,7 @@ var respecConfig = {
     fixMarkupPostprocess,
     postProcessEnhance,
   ],
+  github: "w3c/respec",
   otherLinks: [
     {
       key: "Edit this documentation",
