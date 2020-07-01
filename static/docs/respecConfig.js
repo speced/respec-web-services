@@ -70,8 +70,9 @@ function fixMarkupOnInclude(_, content) {
   }
   result = parts.join("");
 
-  // Escape [[[foo]]] and [[foo]] with [[[\foo]]] and [[\foo]]
-  result = result.replace(/\[\[(\w)/g, "[[\\$1");
+  // Escape [[[foo]]] and [[foo]] by adding zero-width space. Ugly, but  other
+  // way is upsteam changes for an extreme edge case.
+  result = result.replace(/\[\[/g, "[&#8203;[&#8203;");
 
   // Inline code: replace "`<some-tag>`" with "`&lt;some-tag>`"
   result = result.replace(/`</g, "`&lt;");
