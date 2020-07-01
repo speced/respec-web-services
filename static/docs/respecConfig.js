@@ -137,6 +137,9 @@ function fixLinks() {
       // Special section IDs like "conformance" trigger ReSpec "include"
       // behaviour. We manually add `id-` prefix to overcome that.
       a.href = `#id-${href}`;
+    } else if (document.querySelector(`[data-include-name="${href}"]`)) {
+      const { id } = document.querySelector(`[data-include-name="${href}"]`);
+      a.href = `#${id}`;
     } else {
       a.href = `https://github.com/w3c/respec/wiki/${href}`;
     }
