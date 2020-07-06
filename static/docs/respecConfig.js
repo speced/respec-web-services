@@ -148,9 +148,10 @@ function addWikiLinks() {
     return wikiLink;
   };
 
-  const sections = document.querySelectorAll("section[data-include-name]");
-  for (const section of sections) {
-    const { includeName } = section.dataset;
+  for (const section of document.querySelectorAll("section")) {
+    const closest = section.closest("section[data-include-name]");
+    if (!closest) continue;
+    const { includeName } = closest.dataset;
     const wikiLink = createWikiLink(includeName);
     section.querySelector("h2, h3, h4, h5, h6").append(wikiLink);
   }
