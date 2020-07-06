@@ -65,31 +65,12 @@ function fixIncludes() {
 function fixMarkupOnInclude(_, content) {
   let result = content;
 
-  // Replace < in code snippets with &lt;
-  let isInCodeSnippet = false;
-  const parts = result.split(/(```)/);
-  for (let i = 0; i < parts.length; i++) {
-    if (parts[i].startsWith("```")) {
-      isInCodeSnippet = !isInCodeSnippet;
-      if (isInCodeSnippet) {
-        parts[i + 1] = parts[i + 1].replace(/</g, "&lt;");
-        // i++;
-      }
-    }
-  }
-  result = parts.join("");
-
   // Escape [[[foo]]] and [[foo]] by adding zero-width space. Ugly, but  other
   // way is upsteam changes for an extreme edge case.
   result = result.replace(/\[\[/g, "[&#8203;[&#8203;");
 
   // Inline code: replace "`<some-tag>`" with "`&lt;some-tag>`"
   result = result.replace(/`</g, "`&lt;");
-
-  // Treat all markdown code snippets as "example"
-  result = result
-    .replace(/``` *(\w+)/g, "<pre class='example $1'>")
-    .replace(/``` *$/gm, "</pre>");
 
   // Add .note and .advisement classes based on line prefix
   result = result
