@@ -116,7 +116,7 @@ function fixLinks() {
   const urlBase = location.origin + "/docs/";
   /** @type {NodeListOf<HTMLAnchorElement>} */
   const anchors = document.querySelectorAll(
-    "section a:not([href^=http]):not([href^='#'])",
+    "section a:not([href^=http]):not([href^='mailto:']):not([href^='#'])",
   );
   for (const a of anchors) {
     const href = a.href.split(urlBase, 2)[1].split("#").pop();
