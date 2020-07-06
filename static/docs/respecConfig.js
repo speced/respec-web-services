@@ -17,6 +17,7 @@ var respecConfig = {
     addWikiLinks,
     fixMarkupPostprocess,
     postProcessEnhance,
+    cleanup,
   ],
   github: "w3c/respec",
   otherLinks: [
@@ -154,5 +155,18 @@ function addWikiLinks() {
     const { includeName } = closest.dataset;
     const wikiLink = createWikiLink(includeName);
     section.querySelector("h2, h3, h4, h5, h6").append(wikiLink);
+  }
+}
+
+function cleanup() {
+  const attributesToRemove = [
+    "data-max-toc",
+    "data-include-name",
+    "data-oninclude",
+  ];
+  for (const attr of attributesToRemove) {
+    document
+      .querySelectorAll(`[${attr}]`)
+      .forEach(el => el.removeAttribute(attr));
   }
 }
