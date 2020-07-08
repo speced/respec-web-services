@@ -68,12 +68,16 @@ function fixMarkupOnInclude(_, content) {
   let result = content;
 
   // Escape [[[foo]]] and [[foo]] by adding zero-width space. Ugly, but  other
-  // way is upsteam changes for an extreme edge case.
+  // way is upstream changes for an extreme edge case.
   result = result.replace(/\[\[/g, "[&#8203;[&#8203;");
   // Similarly for [= term =], {{ term }}, [^elem^]
   result = result.replace(/\[=/g, "[&#8203;=");
   result = result.replace(/{{/g, "{&#8203;{");
   result = result.replace(/\[\^/g, "[&#8203;^");
+  // Escape | used for inline variables
+  result = result
+    .replace(/\`\|(\w+)/g, "`\\|&#8203;$1")
+    .replace(/(\w+)\|\`/g, "$1&#8203;\\|`");
 
   // Inline code: replace "`<some-tag>`" with "`&lt;some-tag>`"
   result = result.replace(/`</g, "`&lt;");
@@ -97,6 +101,10 @@ function fixMarkupPostprocess() {
   for (const elem of document.querySelectorAll("code")) {
     if (elem.textContent.startsWith("&lt;")) {
       elem.textContent = elem.textContent.replace(/^&lt;/, "<");
+    } else if (elem.textContent.startsWith("\\|​")) {
+      elem.textContent = elem.textContent
+        .replace(/^\\\|​/, "|")
+        .replace(/\\\|$/, "|");
     }
   }
 }
