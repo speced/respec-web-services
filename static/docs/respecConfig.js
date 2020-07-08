@@ -8,6 +8,7 @@ var respecConfig = {
   ],
   lint: {
     "no-http-props": false,
+    "check-punctuation": true,
   },
   format: "markdown",
   preProcess: [addSectionIds, fixIncludes],
