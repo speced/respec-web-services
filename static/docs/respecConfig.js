@@ -76,6 +76,8 @@ function fixMarkupOnInclude(_, content) {
   result = result.replace(/\[\^/g, "[&#8203;^");
   // Escape | used for inline variables
   result = result
+    .replace(/\`\\\|(\w+)/g, "`\\|&#8203;$1")
+    .replace(/(\w+)\\\|\`/g, "$1&#8203;\\|`")
     .replace(/\`\|(\w+)/g, "`\\|&#8203;$1")
     .replace(/(\w+)\|\`/g, "$1&#8203;\\|`");
 
