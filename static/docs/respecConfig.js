@@ -86,9 +86,9 @@ function fixMarkupOnInclude(_, content) {
     .split("\n")
     .map(line => {
       if (/^.{0,5}\s*Warning:/.test(line))
-        return `<div class="advisement">${line}</div>`;
+        return `<div class="advisement">\n\n${line}</div>`;
       if (/^.{0,5}\s*Note:/.test(line))
-        return `<div class="note">${line}</div>`;
+        return `<div class="note">\n\n${line}</div>`;
       return line;
     })
     .join("\n");
