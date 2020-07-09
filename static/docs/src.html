@@ -1,164 +1,193 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset='utf-8'>
-    <title>ReSpec Documentation</title>
-    <script src="https://deploy-preview-3007--respec-pr.netlify.app/respec-w3c.js" class='remove'></script>
-    <script class='remove' src="respecConfig.js"></script>
+    <meta charset="utf-8">
+    <title>
+      ReSpec Documentation
+    </title>
+    <script src=
+    "https://deploy-preview-3007--respec-pr.netlify.app/respec-w3c.js" class=
+    "remove"></script>
+    <script class="remove" src="respecConfig.js"></script>
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-<section id='abstract'>
-ReSpec is a JS library that makes it easier to write technical specifications, or documents that tend to be technical in nature in general. It was originally designed for the purpose of writing W3C specifications, but has since grown to be able to support other outputs as well.
-</section>
-<section data-max-toc="3" data-include-name="ReSpec-Editor's-Guide">
-<h2>Getting Started</h2>
-<section data-include="ReSpec-Editor's-Guide" data-include-replace="true"></section>
-<section data-max-toc="1" data-include-name="WebIDL-Guide">
-<h2>Using WebIDL</h2>
-<section data-include="WebIDL-Guide" data-include-replace="true"></section>
-</section>
-</section>
-<section data-max-toc="2" data-include="static-snapshots"></section>
-<section data-max-toc="2" data-include="Shorthands-Guide"></section>
-<section data-max-toc="1" data-include="markdown"></section>
-<section>
-<h2>Configuration Options</h2>
-<section data-include="a11y"></section>
-<section data-include="addSectionLinks"></section>
-<section data-include="authors"></section>
-<section data-include="caniuse"></section>
-<section data-include="edDraftURI"></section>
-<section data-include="editors"></section>
-<section data-include="format"></section>
-<section data-include="formerEditors"></section>
-<section data-include="github"></section>
-<section data-include="highlightVars"></section>
-<section data-include="isPreview"></section>
-<section data-include="license"></section>
-<section data-include-name="lint" data-max-toc="2">
-<section data-include="lint" data-include-replace="true"></section>
-<section data-include="no-http-props"></section>
-<section data-include="local-refs-exist"></section>
-<section data-include="no-headingless-sections"></section>
-<section data-include="no-unused-vars"></section>
-<section data-include="check-punctuation"></section>
-<section data-include="privsec-section"></section>
-<section data-include="wpt-tests-exist"></section>
-</section>
-<section data-include="localBiblio"></section>
-<section data-include="logos"></section>
-<section data-include="maxTocLevel"></section>
-<section data-include="mdn"></section>
-<section data-include="modificationDate"></section>
-<section data-include="noTOC"></section>
-<section data-include="otherLinks"></section>
-<section data-include="pluralize"></section>
-<section data-include="postProcess"></section>
-<section data-include="preProcess"></section>
-<section data-include="publishDate"></section>
-<section data-include="shortName"></section>
-<section data-include="specStatus"></section>
-<section data-include="subjectPrefix"></section>
-<section data-include="subtitle"></section>
-<section data-include="testSuiteURI"></section>
-<section data-include="tocIntroductory"></section>
-<section data-include="xref"></section>
-</section>
-<section>
-<h2>W3C Specific Configuration Options</h2>
-<section data-include="additionalCopyrightHolders"></section>
-<section data-include="addPatentNote"></section>
-<section data-include="alternateFormats"></section>
-<section data-include="canonicalURI"></section>
-<section data-include="charterDisclosureURI"></section>
-<section data-include="copyrightStart"></section>
-<section data-include="crEnd"></section>
-<section data-include="doJsonLd"></section>
-<section data-include="errata"></section>
-<section data-include="group"></section>
-<section data-include="implementationReportURI"></section>
-<section data-include="lcEnd"></section>
-<section data-include="level"></section>
-<section data-include="noRecTrack"></section>
-<section data-include="prevED"></section>
-<section data-include="previousDiffURI"></section>
-<section data-include="previousMaturity"></section>
-<section data-include="previousPublishDate"></section>
-<section data-include="prevRecShortname"></section>
-<section data-include="prevRecURI"></section>
-<section data-include="processVersion"></section>
-<section data-include="submissionCommentNumber"></section>
-<section data-include="wg"></section>
-<section data-include="wgId"></section>
-<section data-include="wgPatentURI"></section>
-<section data-include="wgPublicList"></section>
-<section data-include="wgURI"></section>
-</section>
-<section id="special-section-ids">
-<h2>Special `&lt;section>` IDs</h2>
-<section id="id-conformance" data-include="conformance"></section>
-<section id="id-gh-contributors" data-include="gh-contributors"></section>
-<section id="id-idl-index" data-include="idl-index"></section>
-<section id="id-index" data-include="index"></section>
-<section id="id-issue-summary" data-include="issue-summary"></section>
-<section id="id-references" data-include="references"></section>
-<section id="id-tof" data-include="tof"></section>
-</section>
-<section>
-<h2>Special element behaviour</h2>
-<section data-include="figure"></section>
-<section data-include="h1-element"></section>
-<section data-include="pre-and-code-elements"></section>
-<section data-include="section"></section>
-<section data-include="title"></section>
-</section>
-<section>
-<h2>CSS classes</h2>
-<section data-include="appendix"></section>
-<section data-include="ednote"></section>
-<section data-include="example"></section>
-<section data-include="informative"></section>
-<section data-include="introductory"></section>
-<section data-include="issue"></section>
-<section data-include="no-link-warnings"></section>
-<section data-include="nohighlight"></section>
-<section data-include="nolink"></section>
-<section data-include="note"></section>
-<section data-include="notoc-class"></section>
-<section data-include="override"></section>
-<section data-include="practice"></section>
-<section data-include="practicedesc"></section>
-<section data-include="practicelab"></section>
-<section data-include="remove"></section>
-<section data-include="removeOnSave"></section>
-</section>
-<section>
-<h2>HTML Attributes</h2>
-<section data-include="data-abbr"></section>
-<section data-include="data-cite"></section>
-<section data-include="data-dfn-for"></section>
-<section data-include="data-dfn-type"></section>
-<section data-include="data-export"></section>
-<section data-include="data-format"></section>
-<section data-include="data-include"></section>
-<section data-include="data-include-format"></section>
-<section data-include="data-include-replace"></section>
-<section data-include="data-link-for"></section>
-<section data-include="data-link-type"></section>
-<section data-include="data-local-lt"></section>
-<section data-include="data-lt"></section>
-<section data-include="data-lt-no-plural"></section>
-<section data-include="data-lt-noDefault"></section>
-<section data-include="data-max-toc"></section>
-<section data-include="data-number"></section>
-<section data-include="data-oninclude"></section>
-<section data-include="data-sort"></section>
-<section data-include="data-tests"></section>
-<section data-include="dir"></section>
-<section data-include="lang"></section>
-</section>
-<section class="appendix" data-include="Ecosystem"></section>
-<section class="appendix" data-include="person"></section>
+    <section id="abstract">
+      <p>
+        ReSpec is a JS library that makes it easier to write technical
+        specifications, or documents that tend to be technical in nature in
+        general. It was originally designed for the purpose of writing W3C
+        specifications, but has since grown to be able to support other outputs
+        as well.
+      </p>
+    </section>
+    <section data-max-toc="3" data-include-name="ReSpec-Editor's-Guide">
+      <h2>
+        Getting Started
+      </h2>
+      <section data-include="ReSpec-Editor's-Guide" data-include-replace=
+      "true"></section>
+      <section data-max-toc="1" data-include-name="WebIDL-Guide">
+        <h2>
+          Using WebIDL
+        </h2>
+        <section data-include="WebIDL-Guide" data-include-replace="true">
+        </section>
+      </section>
+    </section>
+    <section data-max-toc="2" data-include="static-snapshots"></section>
+    <section data-max-toc="2" data-include="Shorthands-Guide"></section>
+    <section data-max-toc="1" data-include="markdown"></section>
+    <section>
+      <h2>
+        Configuration Options
+      </h2>
+      <section data-include="a11y"></section>
+      <section data-include="addSectionLinks"></section>
+      <section data-include="authors"></section>
+      <section data-include="caniuse"></section>
+      <section data-include="edDraftURI"></section>
+      <section data-include="editors"></section>
+      <section data-include="format"></section>
+      <section data-include="formerEditors"></section>
+      <section data-include="github"></section>
+      <section data-include="highlightVars"></section>
+      <section data-include="isPreview"></section>
+      <section data-include="license"></section>
+      <section data-include-name="lint" data-max-toc="2">
+        <section data-include="lint" data-include-replace="true"></section>
+        <section data-include="no-http-props"></section>
+        <section data-include="local-refs-exist"></section>
+        <section data-include="no-headingless-sections"></section>
+        <section data-include="no-unused-vars"></section>
+        <section data-include="check-punctuation"></section>
+        <section data-include="privsec-section"></section>
+        <section data-include="wpt-tests-exist"></section>
+      </section>
+      <section data-include="localBiblio"></section>
+      <section data-include="logos"></section>
+      <section data-include="maxTocLevel"></section>
+      <section data-include="mdn"></section>
+      <section data-include="modificationDate"></section>
+      <section data-include="noTOC"></section>
+      <section data-include="otherLinks"></section>
+      <section data-include="pluralize"></section>
+      <section data-include="postProcess"></section>
+      <section data-include="preProcess"></section>
+      <section data-include="publishDate"></section>
+      <section data-include="shortName"></section>
+      <section data-include="specStatus"></section>
+      <section data-include="subjectPrefix"></section>
+      <section data-include="subtitle"></section>
+      <section data-include="testSuiteURI"></section>
+      <section data-include="tocIntroductory"></section>
+      <section data-include="xref"></section>
+    </section>
+    <section>
+      <h2>
+        W3C Specific Configuration Options
+      </h2>
+      <section data-include="additionalCopyrightHolders"></section>
+      <section data-include="addPatentNote"></section>
+      <section data-include="alternateFormats"></section>
+      <section data-include="canonicalURI"></section>
+      <section data-include="charterDisclosureURI"></section>
+      <section data-include="copyrightStart"></section>
+      <section data-include="crEnd"></section>
+      <section data-include="doJsonLd"></section>
+      <section data-include="errata"></section>
+      <section data-include="group"></section>
+      <section data-include="implementationReportURI"></section>
+      <section data-include="lcEnd"></section>
+      <section data-include="level"></section>
+      <section data-include="noRecTrack"></section>
+      <section data-include="prevED"></section>
+      <section data-include="previousDiffURI"></section>
+      <section data-include="previousMaturity"></section>
+      <section data-include="previousPublishDate"></section>
+      <section data-include="prevRecShortname"></section>
+      <section data-include="prevRecURI"></section>
+      <section data-include="processVersion"></section>
+      <section data-include="submissionCommentNumber"></section>
+      <section data-include="wg"></section>
+      <section data-include="wgId"></section>
+      <section data-include="wgPatentURI"></section>
+      <section data-include="wgPublicList"></section>
+      <section data-include="wgURI"></section>
+    </section>
+    <section id="special-section-ids">
+      <h2>
+        Special `&lt;section&gt;` IDs
+      </h2>
+      <section id="id-conformance" data-include="conformance"></section>
+      <section id="id-gh-contributors" data-include="gh-contributors">
+      </section>
+      <section id="id-idl-index" data-include="idl-index"></section>
+      <section id="id-index" data-include="index"></section>
+      <section id="id-issue-summary" data-include="issue-summary"></section>
+      <section id="id-references" data-include="references"></section>
+      <section id="id-tof" data-include="tof"></section>
+    </section>
+    <section>
+      <h2>
+        Special element behaviour
+      </h2>
+      <section data-include="figure"></section>
+      <section data-include="h1-element"></section>
+      <section data-include="pre-and-code-elements"></section>
+      <section data-include="section"></section>
+      <section data-include="title"></section>
+    </section>
+    <section>
+      <h2>
+        CSS classes
+      </h2>
+      <section data-include="appendix"></section>
+      <section data-include="ednote"></section>
+      <section data-include="example"></section>
+      <section data-include="informative"></section>
+      <section data-include="introductory"></section>
+      <section data-include="issue"></section>
+      <section data-include="no-link-warnings"></section>
+      <section data-include="nohighlight"></section>
+      <section data-include="nolink"></section>
+      <section data-include="note"></section>
+      <section data-include="notoc-class"></section>
+      <section data-include="override"></section>
+      <section data-include="practice"></section>
+      <section data-include="practicedesc"></section>
+      <section data-include="practicelab"></section>
+      <section data-include="remove"></section>
+      <section data-include="removeOnSave"></section>
+    </section>
+    <section>
+      <h2>
+        HTML Attributes
+      </h2>
+      <section data-include="data-abbr"></section>
+      <section data-include="data-cite"></section>
+      <section data-include="data-dfn-for"></section>
+      <section data-include="data-dfn-type"></section>
+      <section data-include="data-export"></section>
+      <section data-include="data-format"></section>
+      <section data-include="data-include"></section>
+      <section data-include="data-include-format"></section>
+      <section data-include="data-include-replace"></section>
+      <section data-include="data-link-for"></section>
+      <section data-include="data-link-type"></section>
+      <section data-include="data-local-lt"></section>
+      <section data-include="data-lt"></section>
+      <section data-include="data-lt-no-plural"></section>
+      <section data-include="data-lt-noDefault"></section>
+      <section data-include="data-max-toc"></section>
+      <section data-include="data-number"></section>
+      <section data-include="data-oninclude"></section>
+      <section data-include="data-sort"></section>
+      <section data-include="data-tests"></section>
+      <section data-include="dir"></section>
+      <section data-include="lang"></section>
+    </section>
+    <section class="appendix" data-include="Ecosystem"></section>
+    <section class="appendix" data-include="person"></section>
   </body>
 </html>
