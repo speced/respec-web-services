@@ -65,24 +65,24 @@ function fixIncludes() {
  * @param {string} content
  */
 function fixMarkupOnInclude(_, content) {
-  let result = content;
-
-  // Escape [[[foo]]] and [[foo]] by adding zero-width space. Ugly, but  other
-  // way is upstream changes for an extreme edge case.
-  result = result.replace(/\[\[/g, "[&#8203;[&#8203;");
-  // Similarly for [= term =], {{ term }}, [^elem^]
-  result = result.replace(/\[=/g, "[&#8203;=");
-  result = result.replace(/{{/g, "{&#8203;{");
-  result = result.replace(/\[\^/g, "[&#8203;^");
-  // Escape | used for inline variables
-  result = result
-    .replace(/\`\\\|(\w+)/g, "`\\|&#8203;$1")
-    .replace(/(\w+)\\\|\`/g, "$1&#8203;\\|`")
-    .replace(/\`\|(\w+)/g, "`\\|&#8203;$1")
-    .replace(/(\w+)\|\`/g, "$1&#8203;\\|`");
+  const ZERO_WIDTH_SPACE = "&#8203;";
+  // Escape [[[foo]]] and [[foo]] by adding zero-width space. We remove these
+  // extraneous characters in postProcess, so users don't end up copy pasting
+  // them.Ugly, but  other way is upstream changes for an extreme edge case.
+  content = content
+    .replaceAll("[[", `[${ZERO_WIDTH_SPACE}[${ZERO_WIDTH_SPACE}`)
+    // Similarly for [= term =], {{ term }}, [^elem^]
+    .replaceAll("[=", `[${ZERO_WIDTH_SPACE}=`)
+    .replaceAll("{{", `{${ZERO_WIDTH_SPACE}{`)
+    .replaceAll("[^", `[${ZERO_WIDTH_SPACE}^`)
+    // and also escape | used for inline variables
+    .replace(/\`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+    .replace(/(\w+)\\\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
+    .replace(/\`\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+    .replace(/(\w+)\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``);
 
   // Add .note and .advisement classes based on line prefix
-  result = result
+  content = content
     .split("\n")
     .map(line => {
       if (/^.{0,5}\s*Warning:/.test(line))
@@ -93,16 +93,17 @@ function fixMarkupOnInclude(_, content) {
     })
     .join("\n");
 
-  return result;
+  return content;
 }
 
 function fixMarkupPostprocess() {
+  const ESCAPED_ZERO_WIDTH_SPACE = "&amp;#8203;";
   for (const elem of document.querySelectorAll("code")) {
-    if (elem.innerHTML.includes("&amp;#8203;")) {
-      elem.innerHTML = elem.innerHTML.replace(/&amp;#8203;/g, "");
+    if (elem.innerHTML.includes(ESCAPED_ZERO_WIDTH_SPACE)) {
+      elem.innerHTML = elem.innerHTML.replaceAll(ESCAPED_ZERO_WIDTH_SPACE, "");
     }
     if (elem.innerHTML.includes("\\|")) {
-      elem.innerHTML = elem.innerHTML.replace(/\\\|/g, "|");
+      elem.innerHTML = elem.innerHTML.replaceAll("\\|", "|");
     }
   }
 }
