@@ -2,7 +2,7 @@ google.charts.load("current", { packages: ["line", "corechart"] });
 google.charts.setOnLoadCallback(main);
 
 const form = document.getElementById("size-form");
-const columnMap = { time: 0, sha: 1, size: 2, gzipSize: 3 };
+const columnMap = { time: 0, sha: 1, size: 2, xferSize: 3 };
 
 async function main() {
   const entries = await fetchData();
@@ -36,7 +36,7 @@ function getDataTable(entries) {
 
 /** @param {google.visualization.DataTable} data */
 function drawChart(data) {
-  const { checked: showGzipSize } = form.gzipSize;
+  const { checked: showTransferredSize } = form.xferSize;
   const months = parseInt(form.duration.value, 10);
 
   let viewWindow;
@@ -46,7 +46,7 @@ function drawChart(data) {
     viewWindow = { min: date };
   }
 
-  const title = showGzipSize ? "Size (gzip, bytes)" : "Size (bytes)";
+  const title = showTransferredSize ? "Size (br/gzip, bytes)" : "Size (bytes)";
   /** @type {google.visualization.LineChartOptions} */
   const drawOptions = {
     theme: "maximized",
@@ -75,7 +75,7 @@ function drawChart(data) {
   });
 
   const view = new google.visualization.DataView(data);
-  const key = showGzipSize ? "gzipSize" : "size";
+  const key = showTransferredSize ? "xferSize" : "size";
   view.setColumns([columnMap.time, columnMap[key]]);
   chart.draw(view, drawOptions);
 }
