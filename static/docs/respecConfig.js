@@ -10,7 +10,6 @@ var respecConfig = {
     "no-http-props": false,
     "check-punctuation": true,
   },
-  format: "markdown",
   preProcess: [addSectionIds, fixIncludes],
   postProcess: [
     removeCopyright,
@@ -52,6 +51,7 @@ function fixIncludes() {
   for (const section of document.querySelectorAll("section[data-include]")) {
     const { include } = section.dataset;
     section.dataset.includeName = include;
+    section.dataset.includeFormat = "markdown";
     section.dataset.oninclude = "fixMarkupOnInclude";
     section.dataset.include = `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`;
     if (!section.hasAttribute("data-max-toc")) {
@@ -107,6 +107,8 @@ function fixMarkupPostprocess() {
       elem.textContent = elem.textContent
         .replace(/^\\\|​/, "|")
         .replace(/\\\|$/, "|");
+    } else if (elem.innerHTML.includes("&amp;#8203;")) {
+      elem.innerHTML = elem.innerHTML.replace(/&amp;#8203;/g, "");
     }
   }
 }
