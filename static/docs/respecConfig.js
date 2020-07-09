@@ -101,6 +101,9 @@ function fixMarkupPostprocess() {
     if (elem.innerHTML.includes("&amp;#8203;")) {
       elem.innerHTML = elem.innerHTML.replace(/&amp;#8203;/g, "");
     }
+    if (elem.innerHTML.includes("\\|")) {
+      elem.innerHTML = elem.innerHTML.replace(/\\\|/g, "|");
+    }
   }
 }
 
