@@ -35,15 +35,6 @@ var respecConfig = {
       ],
     },
   ],
-  logos: [
-    {
-      src: "respec-logo.png",
-      width: 100,
-      height: 100,
-      alt: "ReSpec logo",
-      url: "https://respec.org/",
-    },
-  ],
 };
 
 function addSectionIds() {
