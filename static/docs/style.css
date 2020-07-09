@@ -3,11 +3,14 @@ img {
   height: auto;
 }
 
-
 pre {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   padding: 0;
+}
+
+:not(.example) > pre {
+  background: #fbfbfb;
 }
 
 table.def th {
@@ -39,7 +42,7 @@ h5:hover .wiki-link {
 }
 
 .toc code {
-  color: #005A9C;
+  color: #005a9c;
 }
 
 kbd {
