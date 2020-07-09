@@ -18,6 +18,7 @@ var respecConfig = {
     postProcessEnhance,
     cleanup,
   ],
+  canonicalURI: "https://respec.org/docs/",
   github: "w3c/respec",
   otherLinks: [
     {
