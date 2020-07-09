@@ -46,6 +46,13 @@ var respecConfig = {
   ],
 };
 
+function addSectionIds() {
+  const sections = document.querySelectorAll("section[data-include]:not([id])");
+  for (const section of sections) {
+    section.id = section.dataset.include;
+  }
+}
+
 function fixIncludes() {
   for (const section of document.querySelectorAll("section[data-include]")) {
     const { include } = section.dataset;
@@ -115,13 +122,6 @@ function postProcessEnhance() {
   }
 }
 
-function addSectionIds() {
-  const sections = document.querySelectorAll("section[data-include]:not([id])");
-  for (const section of sections) {
-    section.id = section.dataset.include;
-  }
-}
-
 function fixLinks() {
   const urlBase = location.origin + "/docs/";
   /** @type {NodeListOf<HTMLAnchorElement>} */
@@ -133,7 +133,7 @@ function fixLinks() {
     if (document.getElementById(href)) {
       a.href = `#${href}`;
     } else if (document.getElementById(`id-${href}`)) {
-      // Special section IDs like "conformance" trigger ReSpec "include"
+      // Special section IDs like "conformance" trigger ReSpec's "include"
       // behaviour. We manually add `id-` prefix to overcome that.
       a.href = `#id-${href}`;
     } else if (document.querySelector(`[data-include-name="${href}"]`)) {
@@ -171,9 +171,12 @@ function cleanup() {
     "data-max-toc",
     "data-include-name",
     "data-oninclude",
+    "aria-busy",
   ];
   const selector = attributesToRemove.map(attr => `[${attr}]`).join(", ");
   document.querySelectorAll(selector).forEach(el => {
     attributesToRemove.forEach(attr => el.removeAttribute(attr));
   });
+
+  document.getElementById("respec-dfn-panel").remove();
 }
