@@ -56,10 +56,12 @@ function addSectionIds() {
 function fixIncludes() {
   for (const section of document.querySelectorAll("section[data-include]")) {
     const { include } = section.dataset;
-    section.dataset.includeName = include;
-    section.dataset.includeFormat = "markdown";
-    section.dataset.oninclude = "fixMarkupOnInclude";
-    section.dataset.include = `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`;
+    Object.assign(section.dataset, {
+      includeName: include,
+      includeFormat: "markdown",
+      oninclude: "fixMarkupOnInclude",
+      include: `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`,
+    });
     if (!section.hasAttribute("data-max-toc")) {
       section.dataset.maxToc = section.querySelector("section") ? "2" : "1";
     }
