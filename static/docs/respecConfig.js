@@ -12,7 +12,6 @@ var respecConfig = {
   },
   preProcess: [addSectionIds, fixIncludes],
   postProcess: [
-    removeCopyright,
     fixLinks,
     addWikiLinks,
     fixMarkupPostprocess,
@@ -109,6 +108,8 @@ function fixMarkupPostprocess() {
 }
 
 function postProcessEnhance() {
+  document.querySelector("p.copyright").remove();
+
   for (const elem of document.querySelectorAll("section dl, table")) {
     elem.classList.add("def");
   }
@@ -121,10 +122,6 @@ function addSectionIds() {
   }
 }
 
-function removeCopyright() {
-  document.querySelector("p.copyright").remove();
-}
-
 function fixLinks() {
   const urlBase = location.origin + "/docs/";
   /** @type {NodeListOf<HTMLAnchorElement>} */
@@ -133,7 +130,6 @@ function fixLinks() {
   );
   for (const a of anchors) {
     const href = a.href.split(urlBase, 2)[1].split("#").pop();
-    // TODO: fix more links!
     if (document.getElementById(href)) {
       a.href = `#${href}`;
     } else if (document.getElementById(`id-${href}`)) {
@@ -176,9 +172,8 @@ function cleanup() {
     "data-include-name",
     "data-oninclude",
   ];
-  for (const attr of attributesToRemove) {
-    document
-      .querySelectorAll(`[${attr}]`)
-      .forEach(el => el.removeAttribute(attr));
-  }
+  const selector = attributesToRemove.map(attr => `[${attr}]`).join(", ");
+  document.querySelectorAll(selector).forEach(el => {
+    attributesToRemove.forEach(attr => el.removeAttribute(attr));
+  });
 }
