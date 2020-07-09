@@ -81,9 +81,6 @@ function fixMarkupOnInclude(_, content) {
     .replace(/\`\|(\w+)/g, "`\\|&#8203;$1")
     .replace(/(\w+)\|\`/g, "$1&#8203;\\|`");
 
-  // Inline code: replace "`<some-tag>`" with "`&lt;some-tag>`"
-  result = result.replace(/`</g, "`&lt;");
-
   // Add .note and .advisement classes based on line prefix
   result = result
     .split("\n")
@@ -101,13 +98,7 @@ function fixMarkupOnInclude(_, content) {
 
 function fixMarkupPostprocess() {
   for (const elem of document.querySelectorAll("code")) {
-    if (elem.textContent.startsWith("&lt;")) {
-      elem.textContent = elem.textContent.replace(/^&lt;/, "<");
-    } else if (elem.textContent.startsWith("\\|​")) {
-      elem.textContent = elem.textContent
-        .replace(/^\\\|​/, "|")
-        .replace(/\\\|$/, "|");
-    } else if (elem.innerHTML.includes("&amp;#8203;")) {
+    if (elem.innerHTML.includes("&amp;#8203;")) {
       elem.innerHTML = elem.innerHTML.replace(/&amp;#8203;/g, "");
     }
   }
