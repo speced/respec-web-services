@@ -165,7 +165,6 @@ function cleanup() {
     "data-max-toc",
     "data-include-name",
     "data-oninclude",
-    "aria-busy",
   ];
   const selector = attributesToRemove.map(attr => `[${attr}]`).join(", ");
   document.querySelectorAll(selector).forEach(el => {
