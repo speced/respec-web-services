@@ -48,7 +48,7 @@ const lastFewEntries = [];
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  *
- * @typedef {{ sha: string, time: number, size: number, gzipSize: number }} Entry
+ * @typedef {{ sha: string, time: number, size: number, xferSize: number }} Entry
  * @typedef {{ commits: Entry[] }} Data
  */
 async function putHandler(req, res) {
@@ -59,12 +59,12 @@ async function putHandler(req, res) {
   /** @type {string} */
   const sha = req.body.sha;
   const size = parseInt(req.body.size, 10);
-  const gzipSize = parseInt(req.body.gzipSize, 10);
+  const xferSize = parseInt(req.body.xferSize, 10);
   const time = parseInt(req.body.timestamp, 10);
-  if (!size || !gzipSize || !time || !/^([a-f0-9]{40})$/.test(sha)) {
+  if (!size || !xferSize || !time || !/^([a-f0-9]{40})$/.test(sha)) {
     return res.sendStatus(400);
   }
-  const entry = { sha: sha.slice(0, 10), time, size, gzipSize };
+  const entry = { sha: sha.slice(0, 10), time, size, xferSize };
 
   if (!ensureUnique(entry)) {
     return res.sendStatus(412);
