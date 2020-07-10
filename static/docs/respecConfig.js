@@ -68,7 +68,7 @@ function fixMarkupOnInclude(_, content) {
   const ZERO_WIDTH_SPACE = "&#8203;";
   // Escape [[[foo]]] and [[foo]] by adding zero-width space. We remove these
   // extraneous characters in postProcess, so users don't end up copy pasting
-  // them.Ugly, but  other way is upstream changes for an extreme edge case.
+  // them. Ugly, but  other way is upstream changes for an extreme edge case.
   content = content
     .replaceAll("[[", `[${ZERO_WIDTH_SPACE}[${ZERO_WIDTH_SPACE}`)
     // Similarly for [= term =], {{ term }}, [^elem^]
