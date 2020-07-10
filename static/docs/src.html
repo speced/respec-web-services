@@ -80,11 +80,11 @@
         // extraneous characters in postProcess, so users don't end up copy pasting
         // them. Ugly, but  other way is upstream changes for an extreme edge case.
         content = content
-          .replaceAll("[[", `[${ZERO_WIDTH_SPACE}[${ZERO_WIDTH_SPACE}`)
+          .replace(/\[\[/g, `[${ZERO_WIDTH_SPACE}[${ZERO_WIDTH_SPACE}`)
           // Similarly for [= term =], {{ term }}, [^elem^]
-          .replaceAll("[=", `[${ZERO_WIDTH_SPACE}=`)
-          .replaceAll("{{", `{${ZERO_WIDTH_SPACE}{`)
-          .replaceAll("[^", `[${ZERO_WIDTH_SPACE}^`)
+          .replace(/\[=/g, `[${ZERO_WIDTH_SPACE}=`)
+          .replace(/{{/g, `{${ZERO_WIDTH_SPACE}{`)
+          .replace(/\[\^/g, `[${ZERO_WIDTH_SPACE}^`)
           // and also escape | used for inline variables
           .replace(/\`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
           .replace(/(\w+)\\\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
@@ -107,13 +107,12 @@
       }
 
       function fixMarkupPostprocess() {
-        const ESCAPED_ZERO_WIDTH_SPACE = "&amp;#8203;";
         for (const elem of document.querySelectorAll("code")) {
-          if (elem.innerHTML.includes(ESCAPED_ZERO_WIDTH_SPACE)) {
-            elem.innerHTML = elem.innerHTML.replaceAll(ESCAPED_ZERO_WIDTH_SPACE, "");
+          if (elem.innerHTML.includes("&amp;#8203;")) {
+            elem.innerHTML = elem.innerHTML.replace(/&amp;#8203;/g, "");
           }
           if (elem.innerHTML.includes("\\|")) {
-            elem.innerHTML = elem.innerHTML.replaceAll("\\|", "|");
+            elem.innerHTML = elem.innerHTML.replace(/\\\|/g, "|");
           }
         }
       }
