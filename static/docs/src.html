@@ -130,7 +130,7 @@
           "section a:not([href^=http]):not([href^='mailto:']):not([href^='#'])",
         );
         for (const a of anchors) {
-          const href = a.hash ? a.hash.slice(1) : a.pathname.split("/docs/")[1];
+          const href = a.hash ? a.hash.slice(1) : a.pathname.split("/").pop();
           if (document.getElementById(href)) {
             a.href = `#${href}`;
           } else if (document.getElementById(`id-${href}`)) {
