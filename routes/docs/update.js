@@ -11,7 +11,7 @@ const SECRET = env("RESPEC_SECRET");
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-module.exports.route = async function route(req, res) {
+async function route(req, res) {
   if (!isValidGithubSignature(req)) {
     res.status(401); // Unauthorized
     const msg = "Failed to authenticate GitHub hook Signature";
@@ -31,7 +31,7 @@ module.exports.route = async function route(req, res) {
     res.status(status);
     res.send(message);
   }
-};
+}
 
 function isValidGithubSignature(req) {
   // see: https://developer.github.com/webhooks/securing/
@@ -62,3 +62,5 @@ async function regenerateDocs() {
   const staticHtmlFile = path.join(__dirname, "../../static/docs/index.html");
   await writeFile(staticHtmlFile, html);
 }
+
+module.exports = { route, regenerateDocs };
