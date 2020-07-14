@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>
+      ReSpec Documentation
+    </title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"
+    defer></script>
+    <script class="remove">
+      var respecConfig = {
+        edDraftURI: null,
+        editors: [
+          {
+            name: "ReSpec",
+            url: "https://github.com/w3c/respec",
+          },
+        ],
+        license: "cc0",
+        lint: {
+          "no-http-props": false,
+          "check-punctuation": true,
+        },
+        preProcess: [addSectionIds, fixIncludes],
+        postProcess: [
+          fixLinks,
+          addWikiLinks,
+          fixMarkupPostprocess,
+          postProcessEnhance,
+          cleanup,
+        ],
+        canonicalURI: "https://respec.org/docs/",
+        github: "w3c/respec",
+        otherLinks: [
+          {
+            key: "Edit this documentation",
+            data: [
+              {
+                value: "GitHub Wiki",
+                href: "https://github.com/w3c/respec/wiki",
+              },
+              {
+                value: "Single Page",
+                href:
+                  "https://github.com/marcoscaceres/respec.org/tree/HEAD/static/docs",
+              },
+            ],
+          },
+        ],
+      };
+
+      function addSectionIds() {
+        const sections = document.querySelectorAll("section[data-include]:not([id])");
+        for (const section of sections) {
+          section.id = section.dataset.include;
+        }
+      }
+
+      function fixIncludes() {
+        for (const section of document.querySelectorAll("section[data-include]")) {
+          const { include } = section.dataset;
+          Object.assign(section.dataset, {
+            includeName: include,
+            includeFormat: "markdown",
+            oninclude: "fixMarkupOnInclude",
+            include: `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`,
+          });
+          if (!section.hasAttribute("data-max-toc")) {
+            section.dataset.maxToc = section.querySelector("section") ? "2" : "1";
+          }
+        }
+      }
+
+      /**
+       * @param {*} _
+       * @param {string} content
+       */
+      function fixMarkupOnInclude(_, content) {
+        const ZERO_WIDTH_SPACE = "&#8203;";
+        // Escape [[[foo]]] and [[foo]] by adding zero-width space. We remove these
+        // extraneous characters in postProcess, so users don't end up copy pasting
+        // them. Ugly, but  other way is upstream changes for an extreme edge case.
+        content = content
+          .replace(/\[\[/g, `[${ZERO_WIDTH_SPACE}[${ZERO_WIDTH_SPACE}`)
+          // Similarly for [= term =], {{ term }}, [^elem^]
+          .replace(/\[=/g, `[${ZERO_WIDTH_SPACE}=`)
+          .replace(/{{/g, `{${ZERO_WIDTH_SPACE}{`)
+          .replace(/\[\^/g, `[${ZERO_WIDTH_SPACE}^`)
+          // and also escape | used for inline variables
+          .replace(/\`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+          .replace(/(\w+)\\\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
+          .replace(/\`\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+          .replace(/(\w+)\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``);
+
+        // Add .note and .advisement classes based on line prefix
+        content = content
+          .split("\n")
+          .map(line => {
+            if (/^.{0,5}\s*Warning:/.test(line))
+              return `<div class="advisement">\n\n${line}</div>`;
+            if (/^.{0,5}\s*Note:/.test(line))
+              return `<div class="note">\n\n${line}</div>`;
+            return line;
+          })
+          .join("\n");
+
+        return content;
+      }
+
+      function fixMarkupPostprocess() {
+        for (const elem of document.querySelectorAll("code")) {
+          if (elem.innerHTML.includes("&amp;#8203;")) {
+            elem.innerHTML = elem.innerHTML.replace(/&amp;#8203;/g, "");
+          }
+          if (elem.innerHTML.includes("\\|")) {
+            elem.innerHTML = elem.innerHTML.replace(/\\\|/g, "|");
+          }
+        }
+      }
+
+      function postProcessEnhance() {
+        for (const elem of document.querySelectorAll("section dl, table")) {
+          elem.classList.add("def");
+        }
+      }
+
+      function fixLinks() {
+        /** @type {NodeListOf<HTMLAnchorElement>} */
+        const anchors = document.querySelectorAll(
+          "section a:not([href^=http]):not([href^='mailto:']):not([href^='#'])",
+        );
+        for (const a of anchors) {
+          const href = a.hash ? a.hash.slice(1) : a.pathname.split("/").pop();
+          if (document.getElementById(href)) {
+            a.href = `#${href}`;
+          } else if (document.getElementById(`id-${href}`)) {
+            // Special section IDs like "conformance" trigger ReSpec's "include"
+            // behaviour. We manually add `id-` prefix to overcome that.
+            a.href = `#id-${href}`;
+          } else if (document.querySelector(`[data-include-name="${href}"]`)) {
+            const { id } = document.querySelector(`[data-include-name="${href}"]`);
+            a.href = `#${id}`;
+          } else {
+            a.href = `https://github.com/w3c/respec/wiki/${href}`;
+          }
+        }
+      }
+
+      function addWikiLinks() {
+        const createWikiLink = includeName => {
+          const wikiLink = document.createElement("a");
+          wikiLink.href = `https://github.com/w3c/respec/wiki/${includeName}/_edit`;
+          const title = "Edit this section on Wiki";
+          wikiLink.title = title;
+          wikiLink.setAttribute("aria-label", title);
+          wikiLink.textContent = "📝 Edit";
+          wikiLink.classList.add("wiki-link");
+          return wikiLink;
+        };
+
+        for (const section of document.querySelectorAll("section")) {
+          const closest = section.closest("section[data-include-name]");
+          if (!closest) continue;
+          const { includeName } = closest.dataset;
+          const wikiLink = createWikiLink(includeName);
+          section.querySelector("h2, h3, h4, h5, h6").append(wikiLink);
+        }
+      }
+
+      function cleanup() {
+        const attributesToRemove = [
+          "data-max-toc",
+          "data-include-name",
+          "data-oninclude",
+        ];
+        const selector = attributesToRemove.map(attr => `[${attr}]`).join(", ");
+        document.querySelectorAll(selector).forEach(el => {
+          attributesToRemove.forEach(attr => el.removeAttribute(attr));
+        });
+
+        document.getElementById("respec-dfn-panel").remove();
+      }
+    </script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <section id="abstract">
+      <p>
+        ReSpec is a JS library that makes it easier to write technical
+        specifications, or documents that tend to be technical in nature in
+        general. It was originally designed for the purpose of writing W3C
+        specifications, but has since grown to be able to support other outputs
+        as well.
+      </p>
+    </section>
+    <section data-max-toc="3" data-include-name="ReSpec-Editor's-Guide">
+      <h2>
+        Getting Started
+      </h2>
+      <section data-include="ReSpec-Editor's-Guide" data-include-replace=
+      "true"></section>
+      <section data-max-toc="1" data-include="WebIDL-Guide"></section>
+    </section>
+    <section data-max-toc="2" data-include="static-snapshots"></section>
+    <section data-max-toc="2" data-include="Shorthands-Guide"></section>
+    <section data-max-toc="1" data-include="markdown"></section>
+    <section>
+      <h2>
+        Configuration Options
+      </h2>
+      <section data-include="a11y"></section>
+      <section data-include="addSectionLinks"></section>
+      <section data-include="authors"></section>
+      <section data-include="caniuse"></section>
+      <section data-include="edDraftURI"></section>
+      <section data-include="editors"></section>
+      <section data-include="format"></section>
+      <section data-include="formerEditors"></section>
+      <section data-include="github"></section>
+      <section data-include="highlightVars"></section>
+      <section data-include="isPreview"></section>
+      <section data-include="license"></section>
+      <section data-include-name="lint" data-max-toc="2">
+        <section data-include="lint" data-include-replace="true"></section>
+        <section data-include="no-http-props"></section>
+        <section data-include="local-refs-exist"></section>
+        <section data-include="no-headingless-sections"></section>
+        <section data-include="no-unused-vars"></section>
+        <section data-include="check-punctuation"></section>
+        <section data-include="privsec-section"></section>
+        <section data-include="wpt-tests-exist"></section>
+      </section>
+      <section data-include="localBiblio"></section>
+      <section data-include="logos"></section>
+      <section data-include="maxTocLevel"></section>
+      <section data-include="mdn"></section>
+      <section data-include="modificationDate"></section>
+      <section data-include="noTOC"></section>
+      <section data-include="otherLinks"></section>
+      <section data-include="pluralize"></section>
+      <section data-include="postProcess"></section>
+      <section data-include="preProcess"></section>
+      <section data-include="publishDate"></section>
+      <section data-include="shortName"></section>
+      <section data-include="specStatus"></section>
+      <section data-include="subjectPrefix"></section>
+      <section data-include="subtitle"></section>
+      <section data-include="testSuiteURI"></section>
+      <section data-include="tocIntroductory"></section>
+      <section data-include="xref"></section>
+    </section>
+    <section>
+      <h2>
+        W3C Specific Configuration Options
+      </h2>
+      <section data-include="additionalCopyrightHolders"></section>
+      <section data-include="addPatentNote"></section>
+      <section data-include="alternateFormats"></section>
+      <section data-include="canonicalURI"></section>
+      <section data-include="charterDisclosureURI"></section>
+      <section data-include="copyrightStart"></section>
+      <section data-include="crEnd"></section>
+      <section data-include="doJsonLd"></section>
+      <section data-include="errata"></section>
+      <section data-include="group"></section>
+      <section data-include="implementationReportURI"></section>
+      <section data-include="lcEnd"></section>
+      <section data-include="level"></section>
+      <section data-include="noRecTrack"></section>
+      <section data-include="prevED"></section>
+      <section data-include="previousDiffURI"></section>
+      <section data-include="previousMaturity"></section>
+      <section data-include="previousPublishDate"></section>
+      <section data-include="prevRecShortname"></section>
+      <section data-include="prevRecURI"></section>
+      <section data-include="processVersion"></section>
+      <section data-include="submissionCommentNumber"></section>
+      <section data-include="wg"></section>
+      <section data-include="wgId"></section>
+      <section data-include="wgPatentURI"></section>
+      <section data-include="wgPublicList"></section>
+      <section data-include="wgURI"></section>
+    </section>
+    <section id="special-section-ids">
+      <h2>
+        Special `&lt;section&gt;` IDs
+      </h2>
+      <section id="id-conformance" data-include="conformance"></section>
+      <section id="id-gh-contributors" data-include="gh-contributors">
+      </section>
+      <section id="id-idl-index" data-include="idl-index"></section>
+      <section id="id-index" data-include="index"></section>
+      <section id="id-issue-summary" data-include="issue-summary"></section>
+      <section id="id-references" data-include="references"></section>
+      <section id="id-tof" data-include="tof"></section>
+    </section>
+    <section>
+      <h2>
+        Special element behaviour
+      </h2>
+      <section data-include="figure"></section>
+      <section data-include="h1-element"></section>
+      <section data-include="pre-and-code-elements"></section>
+      <section data-include="section"></section>
+      <section data-include="title"></section>
+    </section>
+    <section>
+      <h2>
+        CSS classes
+      </h2>
+      <section data-include="appendix"></section>
+      <section data-include="ednote"></section>
+      <section data-include="example"></section>
+      <section data-include="informative"></section>
+      <section data-include="introductory"></section>
+      <section data-include="issue"></section>
+      <section data-include="no-link-warnings"></section>
+      <section data-include="nohighlight"></section>
+      <section data-include="nolink"></section>
+      <section data-include="note"></section>
+      <section data-include="notoc-class"></section>
+      <section data-include="override"></section>
+      <section data-include="practice"></section>
+      <section data-include="practicedesc"></section>
+      <section data-include="practicelab"></section>
+      <section data-include="remove"></section>
+      <section data-include="removeOnSave"></section>
+    </section>
+    <section>
+      <h2>
+        HTML Attributes
+      </h2>
+      <section data-include="data-abbr"></section>
+      <section data-include="data-cite"></section>
+      <section data-include="data-dfn-for"></section>
+      <section data-include="data-dfn-type"></section>
+      <section data-include="data-export"></section>
+      <section data-include="data-format"></section>
+      <section data-include="data-include"></section>
+      <section data-include="data-include-format"></section>
+      <section data-include="data-include-replace"></section>
+      <section data-include="data-link-for"></section>
+      <section data-include="data-link-type"></section>
+      <section data-include="data-local-lt"></section>
+      <section data-include="data-lt"></section>
+      <section data-include="data-lt-no-plural"></section>
+      <section data-include="data-lt-noDefault"></section>
+      <section data-include="data-max-toc"></section>
+      <section data-include="data-number"></section>
+      <section data-include="data-oninclude"></section>
+      <section data-include="data-sort"></section>
+      <section data-include="data-tests"></section>
+      <section data-include="dir"></section>
+      <section data-include="lang"></section>
+    </section>
+    <section class="appendix" data-include="Ecosystem"></section>
+    <section class="appendix" data-include="person"></section>
+  </body>
+</html>

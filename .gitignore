@@ -1,7 +1,8 @@
 .DS_Store
-.vscode
-node_modules
-ecosystem.config.js
-public/
-data
 .env
+.vscode
+data
+ecosystem.config.js
+node_modules
+public/
+static/docs/index.html
