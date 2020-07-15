@@ -3,9 +3,11 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const rawBodyParser = require("../../utils/raw-body-parser");
 const { search } = require("respec-xref-route/search");
 const { DATA_DIR } = require("respec-xref-route/constants");
+const rawBodyParser = require("../../utils/raw-body-parser");
+const authGithubWebhook = require("../../utils/auth-github-webhook");
+const { env } = require("../../utils/misc");
 
 const xref = express.Router({ mergeParams: true });
 
@@ -15,6 +17,7 @@ xref.get("/meta/:field?", cors(), require("./meta").route);
 xref.post(
   "/update",
   bodyParser.json({ verify: rawBodyParser }),
+  authGithubWebhook(env("BIKESHED_SECRET")),
   require("./update").route,
 );
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));

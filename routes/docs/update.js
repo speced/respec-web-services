@@ -1,24 +1,13 @@
 // @ts-check
-const crypto = require("crypto");
 const fetch = require("node-fetch").default;
 const path = require("path");
 const { writeFile } = require("fs").promises;
-const { env } = require("../../utils/misc");
-
-const SECRET = env("RESPEC_SECRET");
 
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
 async function route(req, res) {
-  if (!isValidGithubSignature(req)) {
-    res.status(401); // Unauthorized
-    const msg = "Failed to authenticate GitHub hook Signature";
-    console.error(msg);
-    return res.send(msg);
-  }
-
   try {
     const start = Date.now();
     console.log("Regenerating docs...");
@@ -31,16 +20,6 @@ async function route(req, res) {
     res.status(status);
     res.send(message);
   }
-}
-
-function isValidGithubSignature(req) {
-  // see: https://developer.github.com/webhooks/securing/
-  const hash = crypto
-    .createHmac("sha1", SECRET)
-    .update(req.rawBody)
-    .digest("hex");
-
-  return req.get("X-Hub-Signature") === `sha1=${hash}`;
 }
 
 async function regenerateDocs() {

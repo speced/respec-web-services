@@ -2,9 +2,10 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const rawBodyParser = require("../../utils/raw-body-parser");
 const { createResponseBody } = require("respec-caniuse-route");
-const { seconds } = require("../../utils/misc");
+const rawBodyParser = require("../../utils/raw-body-parser");
+const authGithubWebhook = require("../../utils/auth-github-webhook");
+const { env, seconds } = require("../../utils/misc");
 
 const caniuse = express.Router({ mergeParams: true });
 
@@ -13,6 +14,7 @@ caniuse.get("/", cors(), route);
 caniuse.post(
   "/update",
   bodyParser.json({ verify: rawBodyParser }),
+  authGithubWebhook(env("CANIUSE_SECRET")),
   require("./update").route,
 );
 
