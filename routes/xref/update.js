@@ -1,23 +1,13 @@
 // @ts-check
-const crypto = require("crypto");
 const { queue } = require("../../utils/background-task-queue");
 const { main: scraper } = require("respec-xref-route/scraper");
 const { cache: searchCache } = require("respec-xref-route/search");
 const { store } = require("respec-xref-route/store");
-const { env, ms } = require("../../utils/misc");
-
-const bikeshedSecret = env("BIKESHED_SECRET");
+const { ms } = require("../../utils/misc");
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
 module.exports.route = function route(req, res) {
-  if (!isValidGithubSignature(req)) {
-    res.status(401); // Unauthorized
-    const msg = "Failed to authenticate GitHub hook Signature";
-    console.error(msg);
-    return res.send(msg);
-  }
-
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     const msg = `Caniuse payload was for ${req.body.ref}, ignored it.`;
@@ -37,16 +27,6 @@ module.exports.route = function route(req, res) {
   res.status(202); // Accepted
   res.send();
 };
-
-function isValidGithubSignature(req) {
-  // see: https://developer.github.com/webhooks/securing/
-  const hash = crypto
-    .createHmac("sha1", bikeshedSecret)
-    .update(req.rawBody)
-    .digest("hex");
-
-  return req.get("X-Hub-Signature") === `sha1=${hash}`;
-}
 
 function hasAnchorUpdate(commits) {
   if (!Array.isArray(commits)) return false;
