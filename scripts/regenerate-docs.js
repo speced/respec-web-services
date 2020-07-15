@@ -1,4 +1,3 @@
-require("dotenv").config(__dirname, "../.env");
 const { regenerateDocs } = require("../routes/docs/update");
 
 (async () => {
