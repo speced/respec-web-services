@@ -2,6 +2,7 @@
 const fetch = require("node-fetch").default;
 const path = require("path");
 const { writeFile } = require("fs").promises;
+const { HTTPError } = require("../../utils/misc");
 
 /**
  * @param {import('express').Request} req
@@ -15,9 +16,9 @@ async function route(req, res) {
     console.log(`Successfully regenerated docs in ${Date.now() - start}ms.`);
     res.sendStatus(200); // ok
   } catch (error) {
-    const { message = "", status = 500 } = error;
+    const { message = "", statusCode = 500 } = error;
     console.error(`Failed to regenerate docs: ${message.slice(0, 400)}...`);
-    res.status(status);
+    res.status(statusCode);
     res.send(message);
   }
 }
@@ -34,7 +35,7 @@ async function regenerateDocs() {
     // https://stackoverflow.com/a/29497680
     const ansiColors = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
     const message = error.replace(ansiColors, "");
-    throw { message, status: res.status };
+    throw new HTTPError(res.status, message);
   }
 
   const html = await res.text();
