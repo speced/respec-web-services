@@ -1,12 +1,17 @@
 const { css, html } = require("ucontent");
 
 const style = css`
-  h1 {
+  h1,
+  p {
     text-align: center;
   }
 
-  table {
-    margin: auto;
+  .tables {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80ch, 1fr));
+    gap: 0.5em;
+    align-items: start;
+    overflow: auto;
   }
 
   table tr {
@@ -27,12 +32,15 @@ const style = css`
     text-align: left;
   }
 
+  table th {
+    white-space: nowrap;
+  }
+
   caption {
     text-align: left;
     padding: 0.5em;
   }
-  caption,
-  caption a {
+  caption {
     background: #005a9c;
     color: #fff;
   }
@@ -50,28 +58,44 @@ module.exports = ({ groups }) => html`
       </style>
     </head>
     <body>
-      <h1>W3C Working Groups supported by ReSpec</h1>
-      <table>
-        <caption>
-          List of possible values for
-          <a href="https://github.com/w3c/respec/wiki/group">
-            <code>respecConfig.group</code>
-          </a>
-        </caption>
-        <thead>
-          <tr>
-            <th><code>group</code></th>
-            <th>Group ID</th>
-            <th>Group Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${groups.map(renderGroup)}
-        </tbody>
-      </table>
+      <h1>W3C Working Groups and Community Groups supported by ReSpec</h1>
+      <p>
+        List of possible values for
+        <a href="/docs/#group"><code>respecConfig.group</code></a>
+      </p>
+      <div class="tables">
+        ${renderTable(
+          groups.filter(({ type }) => type === "wg"),
+          "Working Groups",
+        )}
+        ${renderTable(
+          groups.filter(({ type }) => type === "cg"),
+          "Community Groups",
+        )}
+      </div>
     </body>
   </html>
 `;
+
+function renderTable(groups, caption) {
+  return html`
+    <table>
+      <caption>
+        ${caption}
+      </caption>
+      <thead>
+        <tr>
+          <th><code>group</code></th>
+          <th>Group ID</th>
+          <th>Group Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${groups.map(renderGroup)}
+      </tbody>
+    </table>
+  `;
+}
 
 function renderGroup({ shortname, id, URI, name }) {
   return html`
