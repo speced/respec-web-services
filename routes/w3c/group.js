@@ -1,7 +1,7 @@
 // @ts-check
 const fetch = require("node-fetch").default;
 const { MemCache } = require("../../utils/mem-cache.js");
-const { env, ms, seconds } = require("../../utils/misc.js");
+const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
 const groups = require("./groups.json");
 
 const API_KEY = env("W3C_API_KEY");
@@ -50,7 +50,7 @@ async function getGroupInfo(groupName) {
 
   const groupId = groups.hasOwnProperty(groupName) && groups[groupName];
   if (!groupId) {
-    throw { statusCode: 404, message: `No group with groupName: ${groupName}` };
+    throw new HTTPError(404, `No group with groupName: ${groupName}`);
   }
 
   await getAllGroupInfo();
@@ -75,7 +75,7 @@ async function getAllGroupInfo() {
 
   const res = await fetch(url);
   if (!res.ok) {
-    throw { statusCode: res.status, message: res.statusText };
+    throw new HTTPError(res.status, res.statusText);
   }
   const json = await res.json();
 

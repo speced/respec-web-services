@@ -54,9 +54,18 @@ function ms(duration) {
   return seconds(duration) * 1000;
 }
 
+class HTTPError extends Error {
+  constructor(statusCode, message, url) {
+    super(message);
+    this.statusCode = statusCode;
+    this.url = url;
+  }
+}
+
 module.exports = {
   isDevEnv,
   env,
   ms,
   seconds,
+  HTTPError,
 };
