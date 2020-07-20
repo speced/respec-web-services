@@ -46,6 +46,9 @@ const style = css`
   }
 `;
 
+const PR_URL =
+  "https://github.com/marcoscaceres/respec.org/blob/gh-pages/routes/w3c/groups.json";
+
 module.exports = ({ groups }) => html`
   <!DOCTYPE html>
   <html lang="en">
@@ -61,7 +64,8 @@ module.exports = ({ groups }) => html`
       <h1>W3C Working Groups and Community Groups supported by ReSpec</h1>
       <p>
         List of possible values for
-        <a href="/docs/#group"><code>respecConfig.group</code></a>
+        <a href="/docs/#group"><code>respecConfig.group</code></a>.
+        Send a Pull Request to <a href=${PR_URL}>add missing groups.</a>
       </p>
       <div class="tables">
         ${renderTable(
