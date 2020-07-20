@@ -59,7 +59,7 @@ async function getGroupInfo(groupName) {
   if (groupInfo) {
     return groupInfo;
   }
-  throw { statusCode: 500, message: `Failed to fetch group details.` };
+  throw new HTTPError(500, "Failed to fetch group details.");
 }
 
 async function getAllGroupInfo() {
