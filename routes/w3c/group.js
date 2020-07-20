@@ -7,7 +7,7 @@ const groups = require("./groups.json");
 const API_KEY = env("W3C_API_KEY");
 
 /**
- * @typedef {{ id: number, shortname: string, name: string, URI: string, patentURI: string }} Group
+ * @typedef {{ id: number, shortname: string, type: string, name: string, URI: string, patentURI: string }} Group
  * @type {MemCache<Group>}
  */
 const store = new MemCache(ms("2 weeks"));
@@ -48,7 +48,9 @@ async function getGroupInfo(groupName) {
     return groupInfo;
   }
 
-  const groupId = groups.hasOwnProperty(groupName) && groups[groupName];
+  const groupId =
+    (groups.wg.hasOwnProperty(groupName) && groups.wg[groupName]) ||
+    (groups.cg.hasOwnProperty(groupName) && groups.cg[groupName]);
   if (!groupId) {
     throw new HTTPError(404, `No group with groupName: ${groupName}`);
   }
@@ -92,10 +94,12 @@ async function getAllGroupInfo() {
   }
 
   const result = [];
-  for (const [shortname, id] of Object.entries(groups)) {
-    const group = { shortname, id, ...data.get(id) };
-    store.set(shortname, group);
-    result.push(group);
+  for (const [type, shortnameToID] of Object.entries(groups)) {
+    for (const [shortname, id] of Object.entries(shortnameToID)) {
+      const group = { shortname, id, type, ...data.get(id) };
+      store.set(shortname, group);
+      result.push(group);
+    }
   }
   cache.set("DATA", result);
   return result;
