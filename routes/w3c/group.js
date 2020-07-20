@@ -5,10 +5,13 @@ const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
 const groups = require("./groups.json");
 
 const API_KEY = env("W3C_API_KEY");
+
 /**
  * @typedef {{ id: number, shortname: string, name: string, URI: string, patentURI: string }} Group
  * @type {MemCache<Group>}
  */
+const store = new MemCache(ms("2 weeks"));
+/** @type {MemCache<Group[]>} */
 const cache = new MemCache(ms("2 weeks"));
 
 /**
@@ -40,9 +43,9 @@ module.exports.route = async function route(req, res) {
  * @param {string} groupName
  */
 async function getGroupInfo(groupName) {
-  const cached = cache.get(groupName);
-  if (cached) {
-    return cached;
+  let groupInfo = store.get(groupName);
+  if (groupInfo) {
+    return groupInfo;
   }
 
   const groupId = groups.hasOwnProperty(groupName) && groups[groupName];
@@ -50,7 +53,24 @@ async function getGroupInfo(groupName) {
     throw new HTTPError(404, `No group with groupName: ${groupName}`);
   }
 
-  const url = new URL(groupId.toString(), "https://api.w3.org/groups/");
+  await getAllGroupInfo();
+
+  groupInfo = store.get(groupName);
+  if (groupInfo) {
+    return groupInfo;
+  }
+  throw new HTTPError(500, "Failed to fetch group details.");
+}
+
+async function getAllGroupInfo() {
+  const cached = cache.get("DATA");
+  if (cached) {
+    return cached;
+  }
+
+  const url = new URL("https://api.w3.org/groups/");
+  url.searchParams.set("items", "400");
+  url.searchParams.set("embed", "true");
   url.searchParams.set("apikey", API_KEY);
 
   const res = await fetch(url);
@@ -59,27 +79,24 @@ async function getGroupInfo(groupName) {
   }
   const json = await res.json();
 
-  const { id, name, _links: links } = json;
-  /** @type {Group} */
-  const result = {
-    shortname: groupName,
-    id,
-    name,
-    URI: links.homepage.href,
-    patentURI: links["pp-status"].href,
-  };
+  /** @type {Map<number, { name: string, URI: string, patentURI: string }>} */
+  const data = new Map();
+  for (const group of json._embedded.groups) {
+    const { id, name, _links: links } = group;
+    const details = {
+      name,
+      URI: links.homepage?.href,
+      patentURI: links["pp-status"]?.href,
+    };
+    data.set(id, details);
+  }
 
-  cache.set(groupName, result);
+  const result = [];
+  for (const [shortname, id] of Object.entries(groups)) {
+    const group = { shortname, id, ...data.get(id) };
+    store.set(shortname, group);
+    result.push(group);
+  }
+  cache.set("DATA", result);
   return result;
-}
-
-async function getAllGroupInfo() {
-  const groupNames = Object.keys(groups);
-
-  // Fill the cache with the groups not fetched recently.
-  await Promise.allSettled(groupNames.map(getGroupInfo));
-
-  return groupNames.map(
-    group => cache.get(group) || { group, id: groups[group] },
-  );
 }
