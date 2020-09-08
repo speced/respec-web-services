@@ -7,11 +7,15 @@ const groups = require("./groups.json");
 const API_KEY = env("W3C_API_KEY");
 
 /**
- * @typedef {{ id: number, shortname: string, type: string, name: string, URI: string, patentURI: string }} Group
- * @type {MemCache<Group>}
+ * @typedef {object} Group
+ * @property {number} Group.id
+ * @property {string} Group.shortname
+ * @property {"wg" | "cg"} Group.type
+ * @property {string} Group.name
+ * @property {string} [Group.URI]
+ * @property {string} [Group.patentURI]
  */
-const store = new MemCache(ms("2 weeks"));
-/** @type {MemCache<Group[]>} */
+/** @type {MemCache<Group>} */
 const cache = new MemCache(ms("2 weeks"));
 
 /**
@@ -43,36 +47,35 @@ module.exports.route = async function route(req, res) {
  * @param {string} groupName
  */
 async function getGroupInfo(groupName) {
-  let groupInfo = store.get(groupName);
+  let groupInfo = cache.get(groupName);
   if (groupInfo) {
     return groupInfo;
   }
 
-  const groupId =
-    (groups.wg.hasOwnProperty(groupName) && groups.wg[groupName]) ||
-    (groups.cg.hasOwnProperty(groupName) && groups.cg[groupName]);
+  const { id: groupId, type: groupType } = getGroupMeta(groupName);
   if (!groupId) {
     throw new HTTPError(404, `No group with groupName: ${groupName}`);
   }
 
-  await getAllGroupInfo();
-
-  groupInfo = store.get(groupName);
-  if (groupInfo) {
-    return groupInfo;
-  }
-  throw new HTTPError(500, "Failed to fetch group details.");
+  groupInfo = await fetchGroupInfo(groupId, groupName, groupType);
+  cache.set(groupName, groupInfo);
+  return groupInfo;
 }
 
 async function getAllGroupInfo() {
-  const cached = cache.get("DATA");
-  if (cached) {
-    return cached;
-  }
+  const allGroupNames = Object.values(groups).flatMap(g => Object.keys(g));
+  await Promise.allSettled(allGroupNames.map(getGroupInfo)); // fill cache
+  return allGroupNames.map(name => cache.get(name) || getGroupMeta(name));
+}
 
-  const url = new URL("https://api.w3.org/groups/");
-  url.searchParams.set("items", "400");
-  url.searchParams.set("embed", "true");
+/**
+ * @param {number} id
+ * @param {string} shortname
+ * @param {Group["type"]} type
+ * @returns {Promise<Group>}
+ */
+async function fetchGroupInfo(id, shortname, type) {
+  const url = new URL(id.toString(), "https://api.w3.org/groups/");
   url.searchParams.set("apikey", API_KEY);
 
   const res = await fetch(url);
@@ -81,26 +84,29 @@ async function getAllGroupInfo() {
   }
   const json = await res.json();
 
-  /** @type {Map<number, { name: string, URI: string, patentURI: string }>} */
-  const data = new Map();
-  for (const group of json._embedded.groups) {
-    const { id, name, _links: links } = group;
-    const details = {
-      name,
-      URI: links.homepage?.href,
-      patentURI: links["pp-status"]?.href,
-    };
-    data.set(id, details);
+  const { name, _links: links } = json;
+  return {
+    shortname,
+    type,
+    id,
+    name,
+    URI: links.homepage?.href,
+    patentURI: links["pp-status"]?.href,
+  };
+}
+
+/** @param {string} shortname */
+function getGroupMeta(shortname) {
+  /** @type {number} */
+  let id;
+  /** @type {Group["type"]} */
+  let type;
+
+  if (groups.wg.hasOwnProperty(shortname)) {
+    [type, id] = ["wg", groups.wg[shortname]];
+  } else if (groups.cg.hasOwnProperty(shortname)) {
+    [type, id] = ["cg", groups.cg[shortname]];
   }
 
-  const result = [];
-  for (const [type, shortnameToID] of Object.entries(groups)) {
-    for (const [shortname, id] of Object.entries(shortnameToID)) {
-      const group = { shortname, id, type, ...data.get(id) };
-      store.set(shortname, group);
-      result.push(group);
-    }
-  }
-  cache.set("DATA", result);
-  return result;
+  return { shortname, type, id };
 }
