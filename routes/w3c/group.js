@@ -14,7 +14,7 @@ const API_KEY = env("W3C_API_KEY");
  * @property {string} Group.name
  * @property {string} [Group.URI]
  * @property {string} [Group.patentURI]
- * @property {string} [Group.patentPolicy]
+ * @property {"PP2017" | "PP2020" | null} [Group.patentPolicy]
  */
 /** @type {MemCache<Group>} */
 const cache = new MemCache(ms("2 weeks"));
@@ -87,7 +87,7 @@ async function fetchGroupInfo(id, shortname, type) {
 
   const { name, _links: links } = json;
 
-  const patentPolicy = links["active-charter"]
+  const patentPolicy = links["active-charter"]?.href
     ? await getPatentPolicy(links["active-charter"].href)
     : undefined;
 
@@ -111,7 +111,7 @@ async function getPatentPolicy(activeCharterApiUrl) {
   const { ["patent-policy"]: patentPolicyURL } = await res.json();
 
   if (!patentPolicyURL || typeof patentPolicyURL !== "string") {
-    return;
+    return null;
   } else if (patentPolicyURL.includes("Patent-Policy-2017")) {
     return "PP2017";
   } else {
