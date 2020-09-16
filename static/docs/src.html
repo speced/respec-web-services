@@ -1,12 +1,17 @@
 <!DOCTYPE html>
+<!--
+  The source for this document is at:
+  https://github.com/marcoscaceres/respec.org/edit/gh-pages/static/docs/src.html
+-->
 <html>
   <head>
-    <meta charset="utf-8">
-    <title>
-      ReSpec Documentation
-    </title>
-    <script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove"
-    defer></script>
+    <meta charset="utf-8" />
+    <title>ReSpec Documentation</title>
+    <script
+      src="https://www.w3.org/Tools/respec/respec-w3c"
+      class="remove"
+      defer
+    ></script>
     <script class="remove">
       var respecConfig = {
         edDraftURI: null,
@@ -29,15 +34,18 @@
           postProcessEnhance,
           cleanup,
         ],
-        logos: [{
-          src: "/respec-logo.png",
-          alt: "ReSpec logo",
-          width: 204,
-          height: 120,
-          url: "https://respec.org/",
-        }],
+        logos: [
+          {
+            src: "/respec-logo.png",
+            alt: "ReSpec logo",
+            width: 204,
+            height: 120,
+            url: "https://respec.org/",
+          },
+        ],
         canonicalURI: "https://respec.org/docs/",
         github: "w3c/respec",
+        format: "markdown",
         otherLinks: [
           {
             key: "Edit this documentation",
@@ -57,14 +65,18 @@
       };
 
       function addSectionIds() {
-        const sections = document.querySelectorAll("section[data-include]:not([id])");
+        const sections = document.querySelectorAll(
+          "section[data-include]:not([id])",
+        );
         for (const section of sections) {
           section.id = section.dataset.include;
         }
       }
 
       function fixIncludes() {
-        for (const section of document.querySelectorAll("section[data-include]")) {
+        for (const section of document.querySelectorAll(
+          "section[data-include]",
+        )) {
           const { include } = section.dataset;
           Object.assign(section.dataset, {
             includeName: include,
@@ -73,7 +85,9 @@
             include: `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`,
           });
           if (!section.hasAttribute("data-max-toc")) {
-            section.dataset.maxToc = section.querySelector("section") ? "2" : "1";
+            section.dataset.maxToc = section.querySelector("section")
+              ? "2"
+              : "1";
           }
         }
       }
@@ -145,7 +159,9 @@
             // behaviour. We manually add `id-` prefix to overcome that.
             a.href = `#id-${href}`;
           } else if (document.querySelector(`[data-include-name="${href}"]`)) {
-            const { id } = document.querySelector(`[data-include-name="${href}"]`);
+            const { id } = document.querySelector(
+              `[data-include-name="${href}"]`,
+            );
             a.href = `#${id}`;
           } else {
             a.href = `https://github.com/w3c/respec/wiki/${href}`;
@@ -188,7 +204,7 @@
         document.getElementById("respec-dfn-panel").remove();
       }
     </script>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <section id="abstract">
@@ -201,20 +217,18 @@
       </p>
     </section>
     <section data-max-toc="3" data-include-name="ReSpec-Editor's-Guide">
-      <h2>
-        Getting Started
-      </h2>
-      <section data-include="ReSpec-Editor's-Guide" data-include-replace=
-      "true"></section>
+      <h2>Getting Started</h2>
+      <section
+        data-include="ReSpec-Editor's-Guide"
+        data-include-replace="true"
+      ></section>
       <section data-max-toc="1" data-include="WebIDL-Guide"></section>
     </section>
     <section data-max-toc="2" data-include="static-snapshots"></section>
     <section data-max-toc="2" data-include="Shorthands-Guide"></section>
     <section data-max-toc="1" data-include="markdown"></section>
     <section>
-      <h2>
-        Configuration Options
-      </h2>
+      <h2>Configuration Options</h2>
       <section data-include="a11y"></section>
       <section data-include="addSectionLinks"></section>
       <section data-include="authors"></section>
@@ -257,9 +271,7 @@
       <section data-include="xref"></section>
     </section>
     <section>
-      <h2>
-        W3C Specific Configuration Options
-      </h2>
+      <h2>W3C Specific Configuration Options</h2>
       <section data-include="additionalCopyrightHolders"></section>
       <section data-include="addPatentNote"></section>
       <section data-include="alternateFormats"></section>
@@ -281,15 +293,13 @@
       <section data-include="prevRecShortname"></section>
       <section data-include="prevRecURI"></section>
       <section data-include="submissionCommentNumber"></section>
+      <section data-include="wgPatentPolicy"></section>
       <section data-include="wgPublicList"></section>
     </section>
     <section id="special-section-ids">
-      <h2>
-        Special `&lt;section&gt;` IDs
-      </h2>
+      <h2>Special `&lt;section&gt;` IDs</h2>
       <section id="id-conformance" data-include="conformance"></section>
-      <section id="id-gh-contributors" data-include="gh-contributors">
-      </section>
+      <section id="id-gh-contributors" data-include="gh-contributors"></section>
       <section id="id-idl-index" data-include="idl-index"></section>
       <section id="id-index" data-include="index"></section>
       <section id="id-issue-summary" data-include="issue-summary"></section>
@@ -297,9 +307,7 @@
       <section id="id-tof" data-include="tof"></section>
     </section>
     <section>
-      <h2>
-        Special element behaviour
-      </h2>
+      <h2>Special element behaviour</h2>
       <section data-include="figure"></section>
       <section data-include="h1-element"></section>
       <section data-include="pre-and-code-elements"></section>
@@ -307,9 +315,7 @@
       <section data-include="title"></section>
     </section>
     <section>
-      <h2>
-        CSS classes
-      </h2>
+      <h2>CSS classes</h2>
       <section data-include="appendix"></section>
       <section data-include="ednote"></section>
       <section data-include="example"></section>
@@ -329,9 +335,7 @@
       <section data-include="removeOnSave"></section>
     </section>
     <section>
-      <h2>
-        HTML Attributes
-      </h2>
+      <h2>HTML Attributes</h2>
       <section data-include="data-abbr"></section>
       <section data-include="data-cite"></section>
       <section data-include="data-dfn-for"></section>
@@ -369,9 +373,37 @@
     </section>
     <section class="appendix" data-include="Ecosystem"></section>
     <section class="appendix" data-include="person"></section>
-    <section class="appendix" data-max-toc="1" data-include-name="Errors-FAQ" >
+    <section class="appendix" data-max-toc="1" data-include-name="Errors-FAQ">
       <h2>Common Errors</h2>
       <section data-include="Errors-FAQ" data-include-replace="true"></section>
+    </section>
+    <section>
+      <h2>Editing this document</h2>
+      <p>
+        This document is generated directly from the content of the
+        <a href="https://github.com/w3c/respec/wiki">ReSpec project wiki</a> on
+        GitHub. Thus, it can be edited in two ways:
+      </p>
+      <ol>
+        <li>
+          The
+          <a
+            href="https://github.com/marcoscaceres/respec.org/edit/gh-pages/static/docs/src.html"
+            >src.html</a
+          >
+          for this document provides the structure. The `src.html` is available
+          in the
+          <a href="https://github.com/marcoscaceres/respec.org"
+            >respec.org repository</a
+          >.
+        </li>
+        <li>
+          The
+          <a href="https://github.com/w3c/respec/wiki">ReSpec project wiki</a>.
+          In addition, hovering over a section heading provides a link to
+          directly edit the relevant page in the wiki.
+        </li>
+      </ol>
     </section>
   </body>
 </html>
