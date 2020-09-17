@@ -19,6 +19,12 @@ const API_KEY = env("W3C_API_KEY");
 /** @type {MemCache<Group>} */
 const cache = new MemCache(ms("2 weeks"));
 
+// Support non W3C shortnames for backward compatibility.
+const LEGACY_SHORTNAMES = new Map([
+  ["wai-apa", "apa"],
+  ["i18n", "i18n-core"], // more than 10 instances
+]);
+
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -31,6 +37,10 @@ module.exports.route = async function route(req, res) {
       return res.render("w3c/groups.js", { groups: data });
     }
     return res.json(data);
+  }
+
+  if (LEGACY_SHORTNAMES.has(shortname)) {
+    return res.redirect(`/w3c/groups/${LEGACY_SHORTNAMES.get(shortname)}`, 301);
   }
 
   if (type && !groups.hasOwnProperty(type)) {
