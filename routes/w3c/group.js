@@ -10,7 +10,7 @@ const API_KEY = env("W3C_API_KEY");
  * @typedef {object} Group
  * @property {number} Group.id
  * @property {string} Group.shortname
- * @property {"wg" | "cg"} Group.type
+ * @property {keyof typeof groups} Group.type
  * @property {string} Group.name
  * @property {string} [Group.URI]
  * @property {string} [Group.patentURI]
@@ -24,8 +24,8 @@ const cache = new MemCache(ms("2 weeks"));
  * @param {import('express').Response} res
  */
 module.exports.route = async function route(req, res) {
-  const { groupName } = req.params;
-  if (!groupName) {
+  const { shortname, type } = req.params;
+  if (!shortname) {
     const data = await getAllGroupInfo();
     if (req.headers.accept.includes("text/html")) {
       return res.render("w3c/groups.js", { groups: data });
@@ -33,8 +33,13 @@ module.exports.route = async function route(req, res) {
     return res.json(data);
   }
 
+  if (type && !groups.hasOwnProperty(type)) {
+    return res.status(404).send(`Invalid group type: "${type}"`);
+  }
+
   try {
-    const groupInfo = await getGroupInfo(groupName);
+    const requestedType = /** @type {Group["type"]} */ (type);
+    const groupInfo = await getGroupInfo(shortname, requestedType);
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
   } catch (error) {
@@ -45,28 +50,39 @@ module.exports.route = async function route(req, res) {
 };
 
 /**
- * @param {string} groupName
+ * @param {string} shortname
+ * @param {Group["type"]} [requestedType]
  */
-async function getGroupInfo(groupName) {
-  let groupInfo = cache.get(groupName);
-  if (groupInfo) {
-    return groupInfo;
+async function getGroupInfo(shortname, requestedType) {
+  const cacheKey = `${shortname}/${requestedType || ""}`;
+  if (cache.expires(cacheKey) > 1000) {
+    return cache.get(cacheKey);
   }
 
-  const { id: groupId, type: groupType } = getGroupMeta(groupName);
-  if (!groupId) {
-    throw new HTTPError(404, `No group with groupName: ${groupName}`);
-  }
+  const { id, type } = getGroupMeta(shortname, requestedType);
+  const groupInfo = await fetchGroupInfo(id, shortname, type);
 
-  groupInfo = await fetchGroupInfo(groupId, groupName, groupType);
-  cache.set(groupName, groupInfo);
+  cache.set(cacheKey, groupInfo);
+  if (requestedType !== type) {
+    cache.set(`${shortname}/${type}`, groupInfo);
+  }
   return groupInfo;
 }
 
 async function getAllGroupInfo() {
-  const allGroupNames = Object.values(groups).flatMap(g => Object.keys(g));
-  await Promise.allSettled(allGroupNames.map(getGroupInfo)); // fill cache
-  return allGroupNames.map(name => cache.get(name) || getGroupMeta(name));
+  /** @type {[string, Group["type"]][]} */
+  const allGroups = Object.keys(groups).flatMap(type =>
+    Object.keys(groups[type]).map(name => [name, type]),
+  );
+
+  // fill cache
+  await Promise.allSettled(
+    allGroups.map(([name, type]) => getGroupInfo(name, type)),
+  );
+
+  return allGroups.map(
+    ([name, type]) => cache.get(`${name}/${type}`) || getGroupMeta(name, type),
+  );
 }
 
 /**
@@ -119,18 +135,37 @@ async function getPatentPolicy(activeCharterApiUrl) {
   }
 }
 
-/** @param {string} shortname */
-function getGroupMeta(shortname) {
-  /** @type {number} */
-  let id;
-  /** @type {Group["type"]} */
-  let type;
+/**
+ * @param {string} shortname
+ * @param {Group["type"]} [requestedType]
+ * */
+function getGroupMeta(shortname, requestedType) {
+  /** @type {Group["type"][]} */
+  const types = requestedType ? [requestedType] : ["wg", "cg"];
+  const data = types
+    .map(type => {
+      if (groups[type].hasOwnProperty(shortname)) {
+        /** @type {number} */
+        const id = groups[type][shortname];
+        return { shortname, type, id };
+      }
+    })
+    .filter(g => g);
 
-  if (groups.wg.hasOwnProperty(shortname)) {
-    [type, id] = ["wg", groups.wg[shortname]];
-  } else if (groups.cg.hasOwnProperty(shortname)) {
-    [type, id] = ["cg", groups.cg[shortname]];
+  switch (data.length) {
+    case 1:
+      return data[0];
+    case 0: {
+      const msg = `No group with shortname: "${shortname}"${
+        requestedType ? ` and type: "${requestedType}"` : ""
+      }`;
+      throw new HTTPError(404, msg);
+    }
+    default: {
+      const suggestions = data.map(g => `"${shortname}/${g.type}"`).join(", ");
+      const hint = `Please specify one of following: ${suggestions}`;
+      const msg = `Multiple groups with shortname: "${shortname}".`;
+      throw new HTTPError(409, `${msg} ${hint}`);
+    }
   }
-
-  return { shortname, type, id };
 }
