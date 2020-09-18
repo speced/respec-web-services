@@ -55,7 +55,7 @@
     "privacycg": 120428,
     "sensorweb": 52409,
     "svgcg": 112986,
-    "timed-text-cg": 50119,
+    "timed-text": 50119,
     "touchevents": 67497,
     "voice-assistant": 108997,
     "w3process": 50503,
@@ -69,6 +69,6 @@
     "webperfs": 58490,
     "webtiming": 76245,
     "wicg": 80485,
-    "wot-cg": 63991
+    "wot": 63991
   }
 }
