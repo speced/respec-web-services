@@ -1,12 +1,15 @@
 /**
- * Run this script occasionally to update {@link routes/w3c/groups.json} with
- * new group shortnames.
+ * Run this script occasionally to update {@link {DATA_DIR}/w3c/groups.json}
+ * with new group shortnames.
  */
 
 const path = require("path");
-const { writeFile } = require("fs").promises;
+const { writeFile, mkdir } = require("fs").promises;
 const fetch = require("node-fetch").default;
 const { env } = require("../utils/misc.js");
+
+const DATA_DIR = env("DATA_DIR");
+const OUTPUT_FILE = path.join(DATA_DIR, "w3c/groups.json");
 
 const mapGroupType = new Map([
   ["community group", "cg"],
@@ -42,10 +45,10 @@ async function update() {
     );
   }
 
-  const filePath = path.resolve(__dirname, "../routes/w3c/groups.json");
   const count = Object.values(data).flatMap(_ => Object.keys(_)).length;
-  console.log(`Writing ${count} entries to ${filePath}..`);
-  writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+  console.log(`Writing ${count} entries to ${OUTPUT_FILE}..`);
+  await mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
+  await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
 update().catch(error => {

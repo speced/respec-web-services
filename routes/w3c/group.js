@@ -1,8 +1,15 @@
 // @ts-check
+const path = require("path");
+const { readFileSync } = require("fs");
 const fetch = require("node-fetch").default;
 const { MemCache } = require("../../utils/mem-cache.js");
 const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
-const groups = require("./groups.json");
+
+const DATA_DIR = env("DATA_DIR");
+const dataSource = path.join(DATA_DIR, "w3c/groups.json");
+
+/** @type {{ [type in "wg" | "cg"]: Record<string, number> }} */
+const groups = JSON.parse(readFileSync(dataSource, "utf-8"));
 
 const API_KEY = env("W3C_API_KEY");
 
