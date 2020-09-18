@@ -1,8 +1,14 @@
 // @ts-check
+const path = require("path");
+const { readFileSync } = require("fs");
 const fetch = require("node-fetch").default;
 const { MemCache } = require("../../utils/mem-cache.js");
 const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
-const groups = require("./groups.json");
+
+const DATA_DIR = env("DATA_DIR");
+const dataSource = path.join(DATA_DIR, "w3c/groups.json");
+/** @type {{ [type in "wg" | "cg"]: Record<string, number> }} */
+const groups = JSON.parse(readFileSync(dataSource, "utf-8"));
 
 const API_KEY = env("W3C_API_KEY");
 
@@ -19,6 +25,12 @@ const API_KEY = env("W3C_API_KEY");
 /** @type {MemCache<Group>} */
 const cache = new MemCache(ms("2 weeks"));
 
+// Support non W3C shortnames for backward compatibility.
+const LEGACY_SHORTNAMES = new Map([
+  ["wai-apa", "apa"],
+  ["i18n", "i18n-core"], // more than 10 instances
+]);
+
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -31,6 +43,10 @@ module.exports.route = async function route(req, res) {
       return res.render("w3c/groups.js", { groups: data });
     }
     return res.json(data);
+  }
+
+  if (LEGACY_SHORTNAMES.has(shortname)) {
+    return res.redirect(`/w3c/groups/${LEGACY_SHORTNAMES.get(shortname)}`, 301);
   }
 
   if (type && !groups.hasOwnProperty(type)) {
