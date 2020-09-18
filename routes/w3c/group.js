@@ -7,7 +7,6 @@ const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
-
 /** @type {{ [type in "wg" | "cg"]: Record<string, number> }} */
 const groups = JSON.parse(readFileSync(dataSource, "utf-8"));
 

@@ -1,6 +1,6 @@
 /**
  * Run this script occasionally to update {@link {DATA_DIR}/w3c/groups.json}
- * with new group shortnames.
+ * with new group shortnames and IDs.
  */
 
 const path = require("path");
