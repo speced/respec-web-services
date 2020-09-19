@@ -64,7 +64,7 @@ module.exports = ({ groups }) => html`
       <h1>W3C Working Groups and Community Groups supported by ReSpec</h1>
       <p>
         List of possible values for
-        <a href="/docs/#group"><code>respecConfig.group</code></a>
+        <a href="/docs/#group"><code>respecConfig.group</code></a>.
       </p>
       <div class="tables">
         ${renderTable(groups.wg, "Working Groups")}
