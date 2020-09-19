@@ -29,13 +29,14 @@ async function update() {
     if (!type) continue;
 
     const { shortname, id, name } = group;
+    const url = group._links.homepage?.href;
 
     if (!shortname) {
       console.error(`No shortname for ${name} (${id}).`);
       continue;
     }
 
-    data[type][shortname] = id;
+    data[type][shortname] = { id, name, URI: url };
   }
 
   // Sort results for presentation.

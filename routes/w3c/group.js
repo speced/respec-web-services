@@ -38,11 +38,10 @@ const LEGACY_SHORTNAMES = new Map([
 module.exports.route = async function route(req, res) {
   const { shortname, type } = req.params;
   if (!shortname) {
-    const data = await getAllGroupInfo();
     if (req.headers.accept.includes("text/html")) {
-      return res.render("w3c/groups.js", { groups: data });
+      return res.render("w3c/groups.js", { groups });
     }
-    return res.json(data);
+    return res.json(groups);
   }
 
   if (LEGACY_SHORTNAMES.has(shortname)) {
@@ -83,22 +82,6 @@ async function getGroupInfo(shortname, requestedType) {
     cache.set(`${shortname}/${type}`, groupInfo);
   }
   return groupInfo;
-}
-
-async function getAllGroupInfo() {
-  /** @type {[string, Group["type"]][]} */
-  const allGroups = Object.keys(groups).flatMap(type =>
-    Object.keys(groups[type]).map(name => [name, type]),
-  );
-
-  // fill cache
-  await Promise.allSettled(
-    allGroups.map(([name, type]) => getGroupInfo(name, type)),
-  );
-
-  return allGroups.map(
-    ([name, type]) => cache.get(`${name}/${type}`) || getGroupMeta(name, type),
-  );
 }
 
 /**
@@ -162,7 +145,7 @@ function getGroupMeta(shortname, requestedType) {
     .map(type => {
       if (groups[type].hasOwnProperty(shortname)) {
         /** @type {number} */
-        const id = groups[type][shortname];
+        const id = groups[type][shortname].id;
         return { shortname, type, id };
       }
     })

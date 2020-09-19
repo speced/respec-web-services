@@ -65,17 +65,10 @@ module.exports = ({ groups }) => html`
       <p>
         List of possible values for
         <a href="/docs/#group"><code>respecConfig.group</code></a>.
-        Send a Pull Request to <a href=${PR_URL}>add missing groups.</a>
       </p>
       <div class="tables">
-        ${renderTable(
-          groups.filter(({ type }) => type === "wg"),
-          "Working Groups",
-        )}
-        ${renderTable(
-          groups.filter(({ type }) => type === "cg"),
-          "Community Groups",
-        )}
+        ${renderTable(groups.wg, "Working Groups")}
+        ${renderTable(groups.cg, "Community Groups")}
       </div>
     </body>
   </html>
@@ -95,13 +88,13 @@ function renderTable(groups, caption) {
         </tr>
       </thead>
       <tbody>
-        ${groups.map(renderGroup)}
+        ${Object.entries(groups).map(renderGroup)}
       </tbody>
     </table>
   `;
 }
 
-function renderGroup({ shortname, id, URI, name }) {
+function renderGroup([shortname, { id, URI, name }]) {
   return html`
     <tr>
       <td><code>${shortname}</code></td>
