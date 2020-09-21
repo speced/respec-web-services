@@ -49,7 +49,7 @@ module.exports.route = async function route(req, res) {
   }
 
   if (type && !groups.hasOwnProperty(type)) {
-    return res.status(404).send(`Invalid group type: "${type}"`);
+    return res.status(404).send(`Invalid group type: "${type}".`);
   }
 
   try {
@@ -157,14 +157,14 @@ function getGroupMeta(shortname, requestedType) {
     case 0: {
       const msg = `No group with shortname: "${shortname}"${
         requestedType ? ` and type: "${requestedType}"` : ""
-      }`;
+      }.`;
       throw new HTTPError(404, msg);
     }
     default: {
-      const suggestions = data.map(g => `"${shortname}/${g.type}"`).join(", ");
-      const hint = `Please specify one of following: ${suggestions}`;
       const msg = `Multiple groups with shortname: "${shortname}".`;
-      throw new HTTPError(409, `${msg} ${hint}`);
+      const suggestions = data.map(g => `"${g.type}"`).join(", ");
+      const hint = `Specify one of following group types: ${suggestions}.`;
+      throw new HTTPError(409, `${msg}\n${hint}`);
     }
   }
 }
