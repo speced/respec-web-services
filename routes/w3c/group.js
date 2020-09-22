@@ -7,7 +7,7 @@ const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
-/** @type {{ [type in "wg" | "cg"]: Record<string, number> }} */
+/** @type {{ [type in "wg" | "cg" | "ig" | "bg"]: Record<string, number> }} */
 const groups = JSON.parse(readFileSync(dataSource, "utf-8"));
 
 const API_KEY = env("W3C_API_KEY");
@@ -140,7 +140,7 @@ async function getPatentPolicy(activeCharterApiUrl) {
  * */
 function getGroupMeta(shortname, requestedType) {
   /** @type {Group["type"][]} */
-  const types = requestedType ? [requestedType] : ["wg", "cg"];
+  const types = requestedType ? [requestedType] : Object.keys(groups);
   const data = types
     .map(type => {
       if (groups[type].hasOwnProperty(shortname)) {

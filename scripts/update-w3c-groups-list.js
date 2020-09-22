@@ -12,7 +12,9 @@ const DATA_DIR = env("DATA_DIR");
 const OUTPUT_FILE = path.join(DATA_DIR, "w3c/groups.json");
 
 const mapGroupType = new Map([
+  ["business group", "bg"],
   ["community group", "cg"],
+  ["interest group", "ig"],
   ["working group", "wg"],
 ]);
 
@@ -23,7 +25,9 @@ async function update() {
   apiUrl.searchParams.set("items", "500");
   const json = await fetch(apiUrl).then(r => r.json());
 
-  const data = { wg: {}, cg: {} };
+  const data = Object.fromEntries(
+    [...mapGroupType.values()].map(type => [type, {}]),
+  );
   for (const group of json._embedded.groups) {
     const type = mapGroupType.get(group.type);
     if (!type) continue;
