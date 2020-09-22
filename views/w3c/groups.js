@@ -9,6 +9,7 @@ const style = css`
   .tables {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(80ch, 1fr));
+    grid-template-rows: masonry;
     gap: 0.5em;
     align-items: start;
     overflow: auto;
@@ -46,9 +47,6 @@ const style = css`
   }
 `;
 
-const PR_URL =
-  "https://github.com/marcoscaceres/respec.org/blob/gh-pages/routes/w3c/groups.json";
-
 module.exports = ({ groups }) => html`
   <!DOCTYPE html>
   <html lang="en">
@@ -69,6 +67,8 @@ module.exports = ({ groups }) => html`
       <div class="tables">
         ${renderTable(groups.wg, "Working Groups")}
         ${renderTable(groups.cg, "Community Groups")}
+        ${renderTable(groups.ig, "Interest Groups")}
+        ${renderTable(groups.bg, "Business Groups")}
       </div>
     </body>
   </html>
