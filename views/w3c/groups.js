@@ -65,6 +65,7 @@ module.exports = ({ groups }) => html`
         ${renderTable(groups.wg, "Working Groups")}
         ${renderTable(groups.bg, "Business Groups")}
         ${renderTable(groups.ig, "Interest Groups")}
+        ${renderTable(groups.misc, "Miscellaneous Groups")}
         ${renderTable(groups.cg, "Community Groups")}
       </div>
     </body>
