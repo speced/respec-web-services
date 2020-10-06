@@ -7,9 +7,11 @@ const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
-/** @type {{ [type in "wg" | "cg" | "ig" | "bg"]: Record<string, number> }} */
+/**
+ * @typedef {{ id: number, name: string, URI: string }} GroupMeta
+ * @type {{ [type in "wg" | "cg" | "ig" | "bg" | "misc"]: Record<string, GroupMeta> }}
+ */
 const groups = JSON.parse(readFileSync(dataSource, "utf-8"));
-
 const API_KEY = env("W3C_API_KEY");
 
 /**
