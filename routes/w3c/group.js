@@ -23,7 +23,7 @@ const API_KEY = env("W3C_API_KEY");
  * @property {"PP2017" | "PP2020" | null} [Group.patentPolicy]
  */
 /** @type {MemCache<Group>} */
-const cache = new MemCache(ms("2 weeks"));
+const cache = new MemCache(ms("3 days"));
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
