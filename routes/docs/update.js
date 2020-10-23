@@ -38,6 +38,11 @@ async function regenerateDocs() {
     throw new HTTPError(res.status, message);
   }
 
+  const errorCount = parseInt(res.headers.get("x-errors-count")) || 0;
+  if (errorCount > 0) {
+    throw new Error(`There were ${errorCount} errors in processing.`);
+  }
+
   const html = await res.text();
   const staticHtmlFile = path.join(__dirname, "../../static/docs/index.html");
   await writeFile(staticHtmlFile, html);
