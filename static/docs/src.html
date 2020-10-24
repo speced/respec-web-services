@@ -31,6 +31,7 @@
           fixLinks,
           addWikiLinks,
           fixMarkupPostprocess,
+          fixTableAlign,
           postProcessEnhance,
           cleanup,
         ],
@@ -136,6 +137,14 @@
           if (elem.innerHTML.includes("\\|")) {
             elem.innerHTML = elem.innerHTML.replace(/\\\|/g, "|");
           }
+        }
+      }
+
+      function fixTableAlign() {
+        for(const elem of document.querySelectorAll("[align]")) {
+          const className = `align-${elem.getAttribute("align")}`;
+          elem.classList.add(className);
+          elem.removeAttribute("align");
         }
       }
 

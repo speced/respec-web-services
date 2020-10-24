@@ -17,6 +17,18 @@ table.def th {
   width: auto !important;
 }
 
+.align-left {
+    text-align: left;
+}
+
+.align-right {
+    text-align: right;
+}
+
+.align-center {
+    text-align: center;
+}
+
 h2 code,
 h3 code,
 h4 code {
