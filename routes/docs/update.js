@@ -32,10 +32,7 @@ async function regenerateDocs() {
 
   if (!res.ok) {
     const { error = "" } = await res.json();
-    // https://stackoverflow.com/a/29497680
-    const ansiColors = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-    const message = error.replace(ansiColors, "");
-    throw new HTTPError(res.status, message);
+    throw new HTTPError(res.status, error);
   }
 
   const errorCount = parseInt(res.headers.get("x-errors-count")) || 0;
