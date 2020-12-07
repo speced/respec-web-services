@@ -40,7 +40,7 @@ const LEGACY_SHORTNAMES = new Map([
 module.exports.route = async function route(req, res) {
   const { shortname, type } = req.params;
   if (!shortname) {
-    if (req.headers.accept.includes("text/html")) {
+    if (req.headers.accept?.includes("text/html")) {
       return res.render("w3c/groups.js", { groups });
     }
     return res.json(groups);
