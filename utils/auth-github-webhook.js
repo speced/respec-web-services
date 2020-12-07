@@ -8,6 +8,9 @@ const crypto = require("crypto");
 module.exports = function githubWebhookAuthenticator(secret) {
   return (req, res, next) => {
     if (isValidGithubSignature(req, secret)) {
+      if (req.body.zen /** is ping event */) {
+        return res.send("pong");
+      }
       return next();
     }
     const msg = "Failed to authenticate GitHub hook Signature";
