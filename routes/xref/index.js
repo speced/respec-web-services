@@ -17,7 +17,7 @@ xref.get("/meta/:field?", cors(), require("./meta").route);
 xref.post(
   "/update",
   bodyParser.json({ verify: rawBodyParser }),
-  authGithubWebhook(env("BIKESHED_SECRET")),
+  authGithubWebhook(env("W3C_WEBREF_SECRET")),
   require("./update").route,
 );
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
