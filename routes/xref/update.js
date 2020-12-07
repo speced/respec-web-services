@@ -10,14 +10,14 @@ setInterval(() => searchCache.invalidate(), ms("4h"));
 module.exports.route = function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
-    const msg = `Caniuse payload was for ${req.body.ref}, ignored it.`;
+    const msg = `Webref payload was for ${req.body.ref}, ignored webhook.`;
     console.error(msg);
     return res.send(msg);
   }
 
-  if (!hasAnchorUpdate(req.body.commits)) {
+  if (!hasRelevantUpdate(req.body.commits)) {
     res.status(400); // Bad request
-    const msg = "Anchors were not modified, ignored it.";
+    const msg = "No relevant Webref changes, ignored webhook.";
     console.error(msg);
     return res.send(msg);
   }
@@ -28,9 +28,16 @@ module.exports.route = function route(req, res) {
   res.send();
 };
 
-function hasAnchorUpdate(commits) {
+/**
+ * @typedef {{ message: string, added: string[], removed: string[], modified: string[] }} Commit
+ * @param {Commit[]} commits
+ */
+function hasRelevantUpdate(commits) {
   if (!Array.isArray(commits)) return false;
-  return commits.some(commit => commit.message.includes("anchors/"));
+  const changedFiles = commits
+    .map(commit => [commit.added, commit.removed, commit.modified])
+    .flat(2);
+  return changedFiles.some(file => file?.startsWith("ed/dfns/"));
 }
 
 // TODO: Move this to a Worker maybe
