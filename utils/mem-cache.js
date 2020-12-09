@@ -3,7 +3,7 @@
  * An in-memory cache.
  * @template ValueType
  */
-class MemCache {
+export class MemCache {
   #ttl = Infinity;
   /** @type {Map<string, { time: number, value: ValueType }>} */
   #map = new Map();
@@ -72,5 +72,3 @@ class MemCache {
     this.#map.clear();
   }
 }
-
-module.exports = { MemCache };

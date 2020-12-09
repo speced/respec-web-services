@@ -1,33 +1,38 @@
 // @ts-check
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
-const bodyParser = require("body-parser");
+import path from "path";
+import { createRequire } from "module";
+
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+
+import rawBodyParser from "../../utils/raw-body-parser.js";
+import authGithubWebhook from "../../utils/auth-github-webhook.js";
+import { env } from "../../utils/misc.js";
+
+import metaRoute from "./meta.js";
+import updateRoute from "./update.js";
+
+const require = createRequire(import.meta.url);
 const { search } = require("respec-xref-route/search");
 const { DATA_DIR } = require("respec-xref-route/constants");
-const rawBodyParser = require("../../utils/raw-body-parser");
-const authGithubWebhook = require("../../utils/auth-github-webhook");
-const { env } = require("../../utils/misc");
 
 const xref = express.Router({ mergeParams: true });
 
 xref.options("/", cors({ methods: ["POST", "GET"] }));
 xref.post("/", bodyParser.json(), cors(), route);
-xref.get("/meta/:field?", cors(), require("./meta").route);
+xref.get("/meta/:field?", cors(), metaRoute);
 xref.post(
   "/update",
   bodyParser.json({ verify: rawBodyParser }),
   authGithubWebhook(env("W3C_WEBREF_SECRET")),
-  require("./update").route,
+  updateRoute,
 );
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 
-module.exports = {
-  route,
-  routes: xref,
-};
+export default xref;
 
-function route(req, res) {
+export function route(req, res) {
   const { options } = req.body;
   // req.body.keys for backward compatibility
   const queries = req.body.queries || req.body.keys || [];

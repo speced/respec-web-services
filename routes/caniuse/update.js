@@ -1,9 +1,13 @@
 // @ts-check
-const { queue } = require("../../utils/background-task-queue");
+import { createRequire } from "module";
+
+import { queue } from "../../utils/background-task-queue.js";
+
+const require = createRequire(import.meta.url);
 const { cache } = require("respec-caniuse-route");
 const { main: scraper } = require("respec-caniuse-route/scraper");
 
-module.exports.route = function route(req, res) {
+export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     const msg = `Xref Payload was for ${req.body.ref}, ignored it.`;
@@ -15,7 +19,7 @@ module.exports.route = function route(req, res) {
   queue.add(updateData, taskId);
   res.status(202); // Accepted
   res.send();
-};
+}
 
 // TODO: Move this to a Worker maybe
 async function updateData() {

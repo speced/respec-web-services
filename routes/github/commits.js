@@ -1,12 +1,16 @@
 // @ts-check
+import { createRequire } from "module";
+
+import { seconds } from "../../utils/misc.js";
+
+const require = createRequire(import.meta.url);
 const { getCommits } = require("respec-github-apis/commits");
-const { seconds } = require("../../utils/misc");
 
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-module.exports.route = async function route(req, res) {
+export default async function route(req, res) {
   const { org, repo } = req.params;
   const { from, to } = req.query;
   if (!from || typeof from !== "string") {
@@ -28,4 +32,4 @@ module.exports.route = async function route(req, res) {
   } catch (error) {
     res.status(404).send(error.message);
   }
-};
+}

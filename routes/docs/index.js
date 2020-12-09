@@ -1,19 +1,20 @@
 // @ts-check
-const express = require("express");
-const bodyParser = require("body-parser");
-const rawBodyParser = require("../../utils/raw-body-parser");
-const authGithubWebhook = require("../../utils/auth-github-webhook");
-const { env } = require("../../utils/misc");
+import { Router } from "express";
+import bodyParser from "body-parser";
 
-const routes = express.Router({ mergeParams: true });
+import rawBodyParser from "../../utils/raw-body-parser.js";
+import authGithubWebhook from "../../utils/auth-github-webhook.js";
+import { env } from "../../utils/misc.js";
+
+import updateRoute from "./update.js";
+
+const routes = Router({ mergeParams: true });
 
 routes.post(
   "/update",
   bodyParser.json({ verify: rawBodyParser }),
   authGithubWebhook(env("RESPEC_SECRET")),
-  require("./update").route,
+  updateRoute,
 );
 
-module.exports = {
-  routes,
-};
+export default routes;

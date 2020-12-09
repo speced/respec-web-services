@@ -1,11 +1,14 @@
-const isDevEnv = process.env.NODE_ENV !== "production";
+import path from "path";
+import { fileURLToPath } from "url";
+
+export const isDevEnv = process.env.NODE_ENV !== "production";
 
 /**
  * Get env variable value
  * @param {string} name name of env variable
  * @throws if env variable is not set
  */
-function env(name) {
+export function env(name) {
   const value = process.env[name];
   if (value) return value;
   throw `env variable \`${name}\` is not set.`;
@@ -27,7 +30,7 @@ const AS_SECONDS = {
  * seconds("1.5m") // 90
  * ```
  */
-function seconds(duration) {
+export function seconds(duration) {
   const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
   if (matches && matches.length === 3) {
     const value = parseFloat(matches[1]);
@@ -50,11 +53,11 @@ function seconds(duration) {
  * ms("10.5s") // 10_500
  * ```
  */
-function ms(duration) {
+export function ms(duration) {
   return seconds(duration) * 1000;
 }
 
-class HTTPError extends Error {
+export class HTTPError extends Error {
   constructor(statusCode, message, url) {
     super(message);
     this.statusCode = statusCode;
@@ -62,10 +65,6 @@ class HTTPError extends Error {
   }
 }
 
-module.exports = {
-  isDevEnv,
-  env,
-  ms,
-  seconds,
-  HTTPError,
-};
+export function legacyDirname(meta) {
+  return path.dirname(fileURLToPath(meta.url));
+}

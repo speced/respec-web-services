@@ -1,13 +1,17 @@
 // @ts-check
+import { createRequire } from "module";
+
+import { seconds } from "../../utils/misc.js";
+
+const require = createRequire(import.meta.url);
 const { getIssues } = require("respec-github-apis/issues");
 const { TTLCache } = require("respec-github-apis/utils/cache");
-const { seconds } = require("../../utils/misc");
 
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-module.exports.route = async function route(req, res) {
+export default async function route(req, res) {
   const { org, repo } = req.params;
   if (!req.query.issues) {
     res.set("Content-Type", "text/plain");
@@ -35,4 +39,4 @@ module.exports.route = async function route(req, res) {
   } catch (error) {
     res.sendStatus(500);
   }
-};
+}

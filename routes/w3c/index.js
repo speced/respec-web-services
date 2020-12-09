@@ -1,11 +1,12 @@
-const express = require("express");
-const cors = require("cors");
+// @ts-check
+import { Router } from "express";
+import cors from "cors";
 
-const w3c = express.Router();
+import groupsRoute from "./group.js";
+
+const w3c = Router();
 
 w3c.options("/groups/:shortname?/:type?", cors({ methods: ["GET"] }));
-w3c.get("/groups/:shortname?/:type?", cors(), require("./group").route);
+w3c.get("/groups/:shortname?/:type?", cors(), groupsRoute);
 
-module.exports = {
-  routes: w3c,
-};
+export default w3c;

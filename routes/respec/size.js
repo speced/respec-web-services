@@ -1,30 +1,19 @@
 // @ts-check
-const {
-  createReadStream,
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-  promises: fs,
-} = require("fs");
-const path = require("path");
-const { env } = require("../../utils/misc.js");
+import { existsSync, mkdirSync, writeFileSync, promises as fs } from "fs";
+import { join, dirname } from "path";
+import { env } from "../../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const RESPEC_GH_ACTION_SECRET = env("RESPEC_GH_ACTION_SECRET");
 
-const FILE_PATH = path.join(DATA_DIR, "respec/respec-w3c.json");
+const FILE_PATH = join(DATA_DIR, "respec/respec-w3c.json");
 if (!existsSync(FILE_PATH)) {
-  mkdirSync(path.dirname(FILE_PATH), { recursive: true });
+  mkdirSync(dirname(FILE_PATH), { recursive: true });
   writeFileSync(FILE_PATH, "");
 }
 
-module.exports = {
-  route: {
-    get: getHandler,
-    put: putHandler,
-  },
-};
-
+export { getHandler as get };
+export { putHandler as put };
 /**
  * @param {import('express').Request} _req
  * @param {import('express').Response} res

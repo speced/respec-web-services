@@ -1,4 +1,4 @@
-const { regenerateDocs } = require("../routes/docs/update");
+import { regenerateDocs } from "../routes/docs/update.js";
 
 (async () => {
   const start = Date.now();

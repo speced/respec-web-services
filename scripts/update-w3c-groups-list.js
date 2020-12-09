@@ -3,10 +3,12 @@
  * with new group shortnames and IDs.
  */
 
-const path = require("path");
-const { writeFile, mkdir } = require("fs").promises;
-const fetch = require("node-fetch").default;
-const { env } = require("../utils/misc.js");
+import path from "path";
+import { writeFile, mkdir } from "fs/promises";
+
+import fetch from "node-fetch";
+
+import { env } from "../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const OUTPUT_FILE = path.join(DATA_DIR, "w3c/groups.json");

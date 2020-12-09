@@ -1,6 +1,6 @@
 // @ts-check
-const morgan = require("morgan");
-const chalk = require("chalk");
+import morgan from "morgan";
+import chalk from "chalk";
 
 /** @param {string} bytes */
 const prettyBytes = bytes => {
@@ -111,7 +111,5 @@ const optionsStderr = {
   stream: process.stderr,
 };
 
-module.exports = {
-  stdout: () => morgan(formatter, optionsStdout),
-  stderr: () => morgan(formatter, optionsStderr),
-};
+export const stdout = () => morgan(formatter, optionsStdout);
+export const stderr = () => morgan(formatter, optionsStderr);

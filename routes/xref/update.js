@@ -1,13 +1,17 @@
 // @ts-check
-const { queue } = require("../../utils/background-task-queue");
+import { createRequire } from "module";
+
+import { queue } from "../../utils/background-task-queue.js";
+import { ms } from "../../utils/misc.js";
+
+const require = createRequire(import.meta.url);
 const { main: scraper } = require("respec-xref-route/scraper");
 const { cache: searchCache } = require("respec-xref-route/search");
 const { store } = require("respec-xref-route/store");
-const { ms } = require("../../utils/misc");
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
-module.exports.route = function route(req, res) {
+export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     const msg = `Webref payload was for ${req.body.ref}, ignored webhook.`;
@@ -26,7 +30,7 @@ module.exports.route = function route(req, res) {
   queue.add(updateData, taskId);
   res.status(202); // Accepted
   res.send();
-};
+}
 
 /**
  * @typedef {{ message: string, added: string[], removed: string[], modified: string[] }} Commit

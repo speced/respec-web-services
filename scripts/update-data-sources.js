@@ -1,3 +1,6 @@
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
 const { main: caniuse } = require("respec-caniuse-route/scraper");
 const { main: xref } = require("respec-xref-route/scraper");
 

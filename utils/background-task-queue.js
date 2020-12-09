@@ -1,4 +1,4 @@
-class BackgroundTaskQueue extends Set {
+export class BackgroundTaskQueue extends Set {
   constructor(...args) {
     super(...args);
     this.isActive = false;
@@ -37,6 +37,4 @@ class BackgroundTaskQueue extends Set {
   }
 }
 
-const queue = new BackgroundTaskQueue();
-
-module.exports = { BackgroundTaskQueue, queue };
+export const queue = new BackgroundTaskQueue();

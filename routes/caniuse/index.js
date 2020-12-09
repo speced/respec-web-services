@@ -1,13 +1,20 @@
 // @ts-check
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { createResponseBody } = require("respec-caniuse-route");
-const rawBodyParser = require("../../utils/raw-body-parser");
-const authGithubWebhook = require("../../utils/auth-github-webhook");
-const { env, seconds } = require("../../utils/misc");
+import { createRequire } from "module";
 
-const caniuse = express.Router({ mergeParams: true });
+import { Router } from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+
+import authGithubWebhook from "../../utils/auth-github-webhook.js";
+import { env, seconds } from "../../utils/misc.js";
+import rawBodyParser from "../../utils/raw-body-parser.js";
+
+import updateRoute from "./update.js";
+
+const require = createRequire(import.meta.url);
+const { createResponseBody } = require("respec-caniuse-route");
+
+const caniuse = Router({ mergeParams: true });
 
 caniuse.options("/", cors({ methods: ["GET"] }));
 caniuse.get("/", cors(), route);
@@ -15,15 +22,12 @@ caniuse.post(
   "/update",
   bodyParser.json({ verify: rawBodyParser }),
   authGithubWebhook(env("CANIUSE_SECRET")),
-  require("./update").route,
+  updateRoute,
 );
 
-module.exports = {
-  route,
-  routes: caniuse,
-};
+export default caniuse;
 
-async function route(req, res) {
+export async function route(req, res) {
   const options = {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",

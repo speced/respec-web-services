@@ -1,16 +1,16 @@
 // @ts-check
-const express = require("express");
-const bodyParser = require("body-parser");
+import { Router } from "express";
+import bodyParser from "body-parser";
 
-const router = express.Router({ mergeParams: true });
+import * as sizeRoute from "./size.js";
 
-router.get("/size", require("./size").route.get);
+const router = Router({ mergeParams: true });
+
+router.get("/size", sizeRoute.get);
 router.put(
   "/size",
   bodyParser.urlencoded({ extended: false, parameterLimit: 4, limit: "128b" }),
-  require("./size").route.put,
+  sizeRoute.put,
 );
 
-module.exports = {
-  routes: router,
-};
+export default router;

@@ -1,4 +1,7 @@
 // @ts-check
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 const {
   IDL_TYPES,
   CONCEPT_TYPES,
@@ -11,7 +14,7 @@ let data = getData();
 
 const supportedFields = new Set(Object.keys(data));
 
-module.exports.route = function route(req, res) {
+export default function route(req, res) {
   if (data.version < store.version) {
     data = getData();
   }

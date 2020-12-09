@@ -1,14 +1,15 @@
 // @ts-check
-const fetch = require("node-fetch").default;
-const path = require("path");
-const { writeFile } = require("fs").promises;
-const { HTTPError } = require("../../utils/misc");
+import { join } from "path";
+import { writeFile } from "fs/promises";
 
+import fetch from "node-fetch";
+
+import { HTTPError } from "../../utils/misc.js";
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-async function route(req, res) {
+export default async function route(req, res) {
   try {
     const start = Date.now();
     console.log("Regenerating docs...");
@@ -23,7 +24,7 @@ async function route(req, res) {
   }
 }
 
-async function regenerateDocs() {
+export async function regenerateDocs() {
   const url = new URL("https://labs.w3.org/spec-generator/");
   url.searchParams.set("type", "respec");
   url.searchParams.set("url", "https://respec.org/docs/src.html");
@@ -41,8 +42,6 @@ async function regenerateDocs() {
   }
 
   const html = await res.text();
-  const staticHtmlFile = path.join(__dirname, "../../static/docs/index.html");
+  const staticHtmlFile = join(__dirname, "../../static/docs/index.html");
   await writeFile(staticHtmlFile, html);
 }
-
-module.exports = { route, regenerateDocs };

@@ -1,8 +1,12 @@
 // @ts-check
+import { createRequire } from "module";
+
+import { ms, seconds } from "../../utils/misc.js";
+
+const require = createRequire(import.meta.url);
 const { getContributors } = require("respec-github-apis/contributors");
 const { getUsersDetails } = require("respec-github-apis/users");
 const { TTLCache } = require("respec-github-apis/utils/cache");
-const { ms, seconds } = require("../../utils/misc");
 
 const cache = new TTLCache(ms("3 days"));
 
@@ -10,7 +14,7 @@ const cache = new TTLCache(ms("3 days"));
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-module.exports.route = async function route(req, res) {
+export default async function route(req, res) {
   const { org, repo } = req.params;
   const cacheKey = `${org}/${repo}`;
 
@@ -64,4 +68,4 @@ module.exports.route = async function route(req, res) {
 
   cache.set(cacheKey, result);
   return res.json(result);
-};
+}
