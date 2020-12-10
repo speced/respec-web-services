@@ -1,8 +1,5 @@
-import { createRequire } from "module";
 import { main as xref } from "respec-xref-route/scraper.js";
-
-const require = createRequire(import.meta.url);
-const { main: caniuse } = require("respec-caniuse-route/scraper");
+import { main as caniuse } from "respec-caniuse-route/scraper.js";
 
 async function update() {
   console.group("caniuse");

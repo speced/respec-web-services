@@ -1,6 +1,4 @@
 // @ts-check
-import { createRequire } from "module";
-
 import { Router } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -9,10 +7,8 @@ import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, seconds } from "../../utils/misc.js";
 import rawBodyParser from "../../utils/raw-body-parser.js";
 
+import { createResponseBody } from "respec-caniuse-route";
 import updateRoute from "./update.js";
-
-const require = createRequire(import.meta.url);
-const { createResponseBody } = require("respec-caniuse-route");
 
 const caniuse = Router({ mergeParams: true });
 

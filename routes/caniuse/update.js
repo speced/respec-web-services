@@ -1,11 +1,8 @@
 // @ts-check
-import { createRequire } from "module";
-
 import { queue } from "../../utils/background-task-queue.js";
 
-const require = createRequire(import.meta.url);
-const { cache } = require("respec-caniuse-route");
-const { main: scraper } = require("respec-caniuse-route/scraper");
+import { cache } from "respec-caniuse-route";
+import { main as scraper } from "respec-caniuse-route/scraper.js";
 
 export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
