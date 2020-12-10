@@ -1,5 +1,5 @@
 // @ts-check
-import { join } from "path";
+import path from "path";
 import { writeFile } from "fs/promises";
 
 import fetch from "node-fetch";
@@ -42,6 +42,6 @@ export async function regenerateDocs() {
   }
 
   const html = await res.text();
-  const staticHtmlFile = join(__dirname, "../../static/docs/index.html");
+  const staticHtmlFile = path.join(__dirname, "../../static/docs/index.html");
   await writeFile(staticHtmlFile, html);
 }

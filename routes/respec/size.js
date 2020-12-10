@@ -1,14 +1,15 @@
 // @ts-check
 import { existsSync, mkdirSync, writeFileSync, promises as fs } from "fs";
-import { join, dirname } from "path";
+import path from "path";
+
 import { env } from "../../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const RESPEC_GH_ACTION_SECRET = env("RESPEC_GH_ACTION_SECRET");
 
-const FILE_PATH = join(DATA_DIR, "respec/respec-w3c.json");
+const FILE_PATH = path.join(DATA_DIR, "respec/respec-w3c.json");
 if (!existsSync(FILE_PATH)) {
-  mkdirSync(dirname(FILE_PATH), { recursive: true });
+  mkdirSync(path.dirname(FILE_PATH), { recursive: true });
   writeFileSync(FILE_PATH, "");
 }
 
