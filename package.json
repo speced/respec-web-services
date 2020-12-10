@@ -19,7 +19,7 @@
     "node-fetch": "^2.6.1",
     "respec-caniuse-route": "^3.1.0",
     "respec-github-apis": "^1.4.0",
-    "respec-xref-route": "^8.0.0",
+    "respec-xref-route": "^9.0.3",
     "ucontent": "^2.0.0"
   },
   "scripts": {

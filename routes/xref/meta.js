@@ -1,14 +1,11 @@
 // @ts-check
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-
-const {
+import {
   IDL_TYPES,
   CONCEPT_TYPES,
   CSS_TYPES,
   MARKUP_TYPES,
-} = require("respec-xref-route/constants");
-const { store } = require("respec-xref-route/store");
+} from "respec-xref-route/constants.js";
+import { store } from "respec-xref-route/store.js";
 
 let data = getData();
 
@@ -47,7 +44,7 @@ export default function route(req, res) {
     const filteredData = pickFields(fields, data);
     res.json(filteredData);
   }
-};
+}
 
 function getData() {
   const terms = Object.keys(store.byTerm);

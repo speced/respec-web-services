@@ -1,6 +1,5 @@
 // @ts-check
 import path from "path";
-import { createRequire } from "module";
 
 import express from "express";
 import cors from "cors";
@@ -12,10 +11,8 @@ import { env } from "../../utils/misc.js";
 
 import metaRoute from "./meta.js";
 import updateRoute from "./update.js";
-
-const require = createRequire(import.meta.url);
-const { search } = require("respec-xref-route/search");
-const { DATA_DIR } = require("respec-xref-route/constants");
+import { search } from "respec-xref-route/search.js";
+import { DATA_DIR } from "respec-xref-route/constants.js";
 
 const xref = express.Router({ mergeParams: true });
 

@@ -1,13 +1,10 @@
 // @ts-check
-import { createRequire } from "module";
-
 import { queue } from "../../utils/background-task-queue.js";
 import { ms } from "../../utils/misc.js";
 
-const require = createRequire(import.meta.url);
-const { main: scraper } = require("respec-xref-route/scraper");
-const { cache: searchCache } = require("respec-xref-route/search");
-const { store } = require("respec-xref-route/store");
+import { main as scraper } from "respec-xref-route/scraper.js";
+import { cache as searchCache } from "respec-xref-route/search.js";
+import { store } from "respec-xref-route/store.js";
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
