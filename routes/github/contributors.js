@@ -1,12 +1,9 @@
 // @ts-check
-import { createRequire } from "module";
-
 import { ms, seconds } from "../../utils/misc.js";
 
-const require = createRequire(import.meta.url);
-const { getContributors } = require("respec-github-apis/contributors");
-const { getUsersDetails } = require("respec-github-apis/users");
-const { TTLCache } = require("respec-github-apis/utils/cache");
+import { getContributors } from "respec-github-apis/contributors.js";
+import { getUsersDetails } from "respec-github-apis/users.js";
+import { TTLCache } from "respec-github-apis/utils/cache.js";
 
 const cache = new TTLCache(ms("3 days"));
 

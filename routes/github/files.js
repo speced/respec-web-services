@@ -1,10 +1,7 @@
 // @ts-check
-import { createRequire } from "module";
-
 import { seconds } from "../../utils/misc.js";
 
-const require = createRequire(import.meta.url);
-const { getFiles } = require("respec-github-apis/files");
+import { getFiles } from "respec-github-apis/files.js";
 
 /**
  * @param {import('express').Request} req

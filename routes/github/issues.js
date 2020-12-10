@@ -1,11 +1,7 @@
 // @ts-check
-import { createRequire } from "module";
-
 import { seconds } from "../../utils/misc.js";
 
-const require = createRequire(import.meta.url);
-const { getIssues } = require("respec-github-apis/issues");
-const { TTLCache } = require("respec-github-apis/utils/cache");
+import { getIssues } from "respec-github-apis/issues.js";
 
 /**
  * @param {import('express').Request} req
