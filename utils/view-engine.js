@@ -1,8 +1,5 @@
 async function engine(filePath, options, callback) {
   try {
-    // if (!options.cache) {
-    //   delete require.cache[require.resolve(filePath)];
-    // }
     const { default: template } = await import(filePath);
     const html = template(options).toString();
     callback(null, html);
