@@ -49,7 +49,7 @@ export default async function route(req, res) {
   }
 
   if (LEGACY_SHORTNAMES.has(shortname)) {
-    return res.redirect(`/w3c/groups/${LEGACY_SHORTNAMES.get(shortname)}`, 301);
+    return res.redirect(301, `/w3c/groups/${LEGACY_SHORTNAMES.get(shortname)}`);
   }
 
   if (type && !groups.hasOwnProperty(type)) {
