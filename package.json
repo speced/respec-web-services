@@ -5,6 +5,7 @@
   "main": "app.js",
   "repository": "git@github.com:marcoscaceres/respec.org.git",
   "author": "Marcos Caceres <marcos@marcosc.com>",
+  "type": "module",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.19.0",
@@ -16,9 +17,9 @@
     "helmet": "^4.1.0",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.1",
-    "respec-caniuse-route": "^3.1.0",
-    "respec-github-apis": "^1.4.0",
-    "respec-xref-route": "^8.0.0",
+    "respec-caniuse-route": "^3.1.1",
+    "respec-github-apis": "^2.0.0",
+    "respec-xref-route": "^9.0.4",
     "ucontent": "^2.0.0"
   },
   "scripts": {

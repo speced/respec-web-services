@@ -3,7 +3,7 @@
     "target": "es2020",
     "moduleResolution": "node",
     "noImplicitThis": true,
-    "module": "CommonJS",
+    "module": "esnext",
     "resolveJsonModule": true
   }
 }

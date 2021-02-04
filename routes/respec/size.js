@@ -1,13 +1,8 @@
 // @ts-check
-const {
-  createReadStream,
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-  promises: fs,
-} = require("fs");
-const path = require("path");
-const { env } = require("../../utils/misc.js");
+import { existsSync, mkdirSync, writeFileSync, promises as fs } from "fs";
+import path from "path";
+
+import { env } from "../../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const RESPEC_GH_ACTION_SECRET = env("RESPEC_GH_ACTION_SECRET");
@@ -18,13 +13,8 @@ if (!existsSync(FILE_PATH)) {
   writeFileSync(FILE_PATH, "");
 }
 
-module.exports = {
-  route: {
-    get: getHandler,
-    put: putHandler,
-  },
-};
-
+export { getHandler as get };
+export { putHandler as put };
 /**
  * @param {import('express').Request} _req
  * @param {import('express').Response} res

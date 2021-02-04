@@ -1,9 +1,11 @@
 // @ts-check
-const path = require("path");
-const { readFileSync } = require("fs");
-const fetch = require("node-fetch").default;
-const { MemCache } = require("../../utils/mem-cache.js");
-const { env, ms, seconds, HTTPError } = require("../../utils/misc.js");
+import path from "path";
+import { readFileSync } from "fs";
+
+import fetch from "node-fetch";
+
+import { MemCache } from "../../utils/mem-cache.js";
+import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
@@ -37,7 +39,7 @@ const LEGACY_SHORTNAMES = new Map([
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-module.exports.route = async function route(req, res) {
+export default async function route(req, res) {
   const { shortname, type } = req.params;
   if (!shortname) {
     if (req.headers.accept?.includes("text/html")) {
@@ -64,7 +66,7 @@ module.exports.route = async function route(req, res) {
     res.set("Content-Type", "text/plain");
     res.status(statusCode).send(message);
   }
-};
+}
 
 /**
  * @param {string} shortname

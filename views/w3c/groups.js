@@ -1,4 +1,4 @@
-const { css, html } = require("ucontent");
+import { css, html } from "ucontent";
 
 const style = css`
   h1,
@@ -44,7 +44,7 @@ const style = css`
   }
 `;
 
-module.exports = ({ groups }) => html`
+export default ({ groups }) => html`
   <!DOCTYPE html>
   <html lang="en">
     <head>

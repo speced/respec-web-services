@@ -1,5 +1,5 @@
-const { main: caniuse } = require("respec-caniuse-route/scraper");
-const { main: xref } = require("respec-xref-route/scraper");
+import { main as xref } from "respec-xref-route/scraper.js";
+import { main as caniuse } from "respec-caniuse-route/scraper.js";
 
 async function update() {
   console.group("caniuse");

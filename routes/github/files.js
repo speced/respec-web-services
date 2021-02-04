@@ -1,12 +1,13 @@
 // @ts-check
-const { getFiles } = require("respec-github-apis/files");
-const { seconds } = require("../../utils/misc");
+import { seconds } from "../../utils/misc.js";
+
+import { getFiles } from "respec-github-apis/files.js";
 
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
  */
-module.exports.route = async function route(req, res) {
+export default async function route(req, res) {
   const { org, repo } = req.params;
   const { path = "", branch = "master" } = req.query;
   const depth = normalizeDepth(parseInt(req.query.depth, 10));
@@ -22,7 +23,7 @@ module.exports.route = async function route(req, res) {
     res.setHeader("Content-Type", "text/plain");
     res.send(error.message);
   }
-};
+}
 
 /** @param {number} depth (could be NaN) */
 function normalizeDepth(depth) {

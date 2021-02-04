@@ -1,21 +1,24 @@
 // @ts-check
-const express = require("express");
-const cors = require("cors");
+import { Router } from "express";
+import cors from "cors";
 
-const gh = express.Router({ mergeParams: true });
+import contributorsRoute from "./contributors.js";
+import issuesRoute from "./issues.js";
+import commitsRoute from "./commits.js";
+import filesRoute from "./files.js";
+
+const gh = Router({ mergeParams: true });
 
 gh.options("/contributors", cors({ methods: ["GET"] }));
-gh.get("/contributors", cors(), require("./contributors").route);
+gh.get("/contributors", cors(), contributorsRoute);
 
 gh.options("/issues", cors({ methods: ["GET"] }));
-gh.get("/issues", cors(), require("./issues").route);
+gh.get("/issues", cors(), issuesRoute);
 
 gh.options("/commits", cors({ methods: ["GET"] }));
-gh.get("/commits", cors(), require("./commits").route);
+gh.get("/commits", cors(), commitsRoute);
 
 gh.options("/files", cors({ methods: ["GET"] }));
-gh.get("/files", cors(), require("./files").route);
+gh.get("/files", cors(), filesRoute);
 
-module.exports = {
-  routes: gh,
-};
+export default gh;
