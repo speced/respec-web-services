@@ -1,4 +1,5 @@
 // @ts-check
+import bodyParser from "body-parser";
 import { createHmac } from "crypto";
 
 /**
@@ -6,8 +7,9 @@ import { createHmac } from "crypto";
  * @param {string} secret
  */
 export default function githubWebhookAuthenticator(secret) {
-  return (req, res, next) => {
+  const verifier = (req, res, next) => {
     if (isValidGithubSignature(req, secret)) {
+      req.body = JSON.parse(req.body.toString());
       if (req.body.zen /** is ping event */) {
         return res.send("pong");
       }
@@ -16,6 +18,7 @@ export default function githubWebhookAuthenticator(secret) {
     const msg = "Failed to authenticate GitHub hook Signature";
     res.status(401).send(msg);
   };
+  return [bodyParser.raw({ type: "application/json" }), verifier];
 }
 
 /**
@@ -23,6 +26,6 @@ export default function githubWebhookAuthenticator(secret) {
  * @param {string} secret
  */
 function isValidGithubSignature(req, secret) {
-  const hash = createHmac("sha1", secret).update(req.rawBody).digest("hex");
+  const hash = createHmac("sha1", secret).update(req.body).digest("hex");
   return req.get("X-Hub-Signature") === `sha1=${hash}`;
 }

@@ -5,7 +5,6 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 
-import rawBodyParser from "../../utils/raw-body-parser.js";
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env } from "../../utils/misc.js";
 
@@ -19,12 +18,7 @@ const xref = express.Router({ mergeParams: true });
 xref.options("/", cors({ methods: ["POST", "GET"] }));
 xref.post("/", bodyParser.json(), cors(), route);
 xref.get("/meta/:field?", cors(), metaRoute);
-xref.post(
-  "/update",
-  bodyParser.json({ verify: rawBodyParser }),
-  authGithubWebhook(env("W3C_WEBREF_SECRET")),
-  updateRoute,
-);
+xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 
 export default xref;
