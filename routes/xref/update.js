@@ -11,15 +11,15 @@ setInterval(() => searchCache.invalidate(), ms("4h"));
 export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
+    res.locals.reason = `ref-not-master`;
     const msg = `Webref payload was for ${req.body.ref}, ignored webhook.`;
-    console.error(msg);
     return res.send(msg);
   }
 
   if (!hasRelevantUpdate(req.body.commits)) {
     res.status(400); // Bad request
+    res.locals.reason = `no-relevant-changes`;
     const msg = "No relevant Webref changes, ignored webhook.";
-    console.error(msg);
     return res.send(msg);
   }
 

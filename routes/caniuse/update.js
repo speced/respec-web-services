@@ -7,8 +7,8 @@ import { main as scraper } from "respec-caniuse-route/scraper.js";
 export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
+    res.locals.reason = `ref-not-master`;
     const msg = `Xref Payload was for ${req.body.ref}, ignored it.`;
-    console.log(msg);
     return res.send(msg);
   }
 
