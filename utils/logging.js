@@ -57,10 +57,14 @@ const formatter = (tokens, req, res) => {
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
 
+  // Cleaner searchParams, while making sure they stay in single line.
+  const searchParams = url.search
+    ? decodeURIComponent(url.search).replace(/(\s+)/g, encodeURIComponent)
+    : "";
   const color = status < 300 ? "green" : status >= 400 ? "red" : "yellow";
   const request =
     chalk[color](`${method.padEnd(4)} ${status}`) +
-    ` ${chalk.blueBright(url.pathname)}${chalk.italic.gray(url.search)}`;
+    ` ${chalk.blueBright(url.pathname)}${chalk.italic.gray(searchParams)}`;
 
   let formattedReferrer;
   if (referrer) {
