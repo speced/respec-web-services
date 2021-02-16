@@ -1,33 +1,37 @@
-// @ts-check
 import path from "path";
 import { readFileSync } from "fs";
 
 import fetch from "node-fetch";
+import { Request, Response } from "express";
 
 import { MemCache } from "../../utils/mem-cache.js";
 import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
-/**
- * @typedef {{ id: number, name: string, URI: string }} GroupMeta
- * @type {{ [type in "wg" | "cg" | "ig" | "bg" | "misc"]: Record<string, GroupMeta> }}
- */
-const groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+
+interface GroupMeta {
+  id: number;
+  name: string;
+  URI: string;
+}
+type GroupType = "wg" | "cg" | "ig" | "bg" | "misc";
+
+const groups: Record<GroupType, Record<string, GroupMeta>> = JSON.parse(
+  readFileSync(dataSource, "utf-8"),
+);
 const API_KEY = env("W3C_API_KEY");
 
-/**
- * @typedef {object} Group
- * @property {number} Group.id
- * @property {string} Group.shortname
- * @property {keyof typeof groups} Group.type
- * @property {string} Group.name
- * @property {string} [Group.URI]
- * @property {string} [Group.patentURI]
- * @property {"PP2017" | "PP2020" | null} [Group.patentPolicy]
- */
-/** @type {MemCache<Group>} */
-const cache = new MemCache(ms("1 day"));
+interface Group {
+  id: number;
+  shortname: string;
+  type: GroupType;
+  name: string;
+  URI?: string;
+  patentURI?: string;
+  patentPolicy?: "PP2017" | "PP2020" | null;
+}
+const cache = new MemCache<Group>(ms("1 day"));
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
@@ -35,11 +39,7 @@ const LEGACY_SHORTNAMES = new Map([
   ["i18n", "i18n-core"], // more than 10 instances
 ]);
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- */
-export default async function route(req, res) {
+export default async function route(req: Request, res: Response) {
   const { shortname, type } = req.params;
   if (!shortname) {
     if (req.headers.accept?.includes("text/html")) {
@@ -57,7 +57,7 @@ export default async function route(req, res) {
   }
 
   try {
-    const requestedType = /** @type {Group["type"]} */ (type);
+    const requestedType = type as GroupType;
     const groupInfo = await getGroupInfo(shortname, requestedType);
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
@@ -68,11 +68,10 @@ export default async function route(req, res) {
   }
 }
 
-/**
- * @param {string} shortname
- * @param {Group["type"]} [requestedType]
- */
-async function getGroupInfo(shortname, requestedType) {
+async function getGroupInfo(
+  shortname: GroupMeta["name"],
+  requestedType: GroupType,
+) {
   const cacheKey = `${shortname}/${requestedType || ""}`;
   if (cache.expires(cacheKey) > 1000) {
     return cache.get(cacheKey);
@@ -88,13 +87,11 @@ async function getGroupInfo(shortname, requestedType) {
   return groupInfo;
 }
 
-/**
- * @param {number} id
- * @param {string} shortname
- * @param {Group["type"]} type
- * @returns {Promise<Group>}
- */
-async function fetchGroupInfo(id, shortname, type) {
+async function fetchGroupInfo(
+  id: GroupMeta["id"],
+  shortname: GroupMeta["name"],
+  type: GroupType,
+) {
   const url = new URL(id.toString(), "https://api.w3.org/groups/");
   url.searchParams.set("apikey", API_KEY);
 
@@ -102,7 +99,15 @@ async function fetchGroupInfo(id, shortname, type) {
   if (!res.ok) {
     throw new HTTPError(res.status, res.statusText);
   }
-  const json = await res.json();
+
+  interface APIResponse {
+    name: string;
+    _links: Record<
+      "homepage" | "pp-status" | "active-charter",
+      { href: string }
+    >;
+  }
+  const json: APIResponse = await res.json();
 
   const { name, _links: links } = json;
 
@@ -121,8 +126,9 @@ async function fetchGroupInfo(id, shortname, type) {
   };
 }
 
-/** @param {string} activeCharterApiUrl */
-async function getPatentPolicy(activeCharterApiUrl) {
+async function getPatentPolicy(
+  activeCharterApiUrl: string,
+): Promise<Required<Group["patentPolicy"]>> {
   const url = new URL(activeCharterApiUrl);
   url.searchParams.set("apikey", API_KEY);
 
@@ -138,23 +144,16 @@ async function getPatentPolicy(activeCharterApiUrl) {
   }
 }
 
-/**
- * @param {string} shortname
- * @param {Group["type"]} [requestedType]
- * */
-function getGroupMeta(shortname, requestedType) {
-  /** @type {Group["type"][]} */
-  // @ts-ignore
-  const types = requestedType ? [requestedType] : Object.keys(groups);
+function getGroupMeta(shortname: string, requestedType: GroupType) {
+  const types = requestedType
+    ? [requestedType]
+    : (Object.keys(groups) as GroupType[]);
   const data = types
+    .filter(type => groups[type].hasOwnProperty(shortname))
     .map(type => {
-      if (groups[type].hasOwnProperty(shortname)) {
-        /** @type {number} */
-        const id = groups[type][shortname].id;
-        return { shortname, type, id };
-      }
-    })
-    .filter(g => g);
+      const id = groups[type][shortname].id;
+      return { shortname, type, id };
+    });
 
   switch (data.length) {
     case 1:
