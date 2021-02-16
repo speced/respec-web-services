@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "ESNext",
+    "removeComments": false,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "noImplicitThis": true,
+    "module": "esnext",
+    "outDir": "build",
+    "sourceMap": true,
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "data",
+    "build",
+    "scripts",
+    "static"
+  ]
+}
