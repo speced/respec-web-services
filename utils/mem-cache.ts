@@ -1,32 +1,23 @@
 // @ts-check
 /**
  * An in-memory cache.
- * @template ValueType
  */
-export class MemCache {
+export class MemCache<ValueType> {
   #ttl = Infinity;
-  /** @type {Map<string, { time: number, value: ValueType }>} */
-  #map = new Map();
+  #map = new Map<string, { time: number; value: ValueType }>();
 
   /**
-   * @param {number} ttl cache TTL in milliseconds
+   * @param ttl cache TTL in milliseconds
    */
-  constructor(ttl) {
+  constructor(ttl: number) {
     this.#ttl = ttl;
   }
 
-  /**
-   * @param {string} key
-   * @param {ValueType} value
-   */
-  set(key, value) {
+  set(key: string, value: ValueType) {
     this.#map.set(key, { time: Date.now(), value });
   }
 
-  /**
-   * @param {string} key
-   */
-  get(key) {
+  get(key: string) {
     if (!this.#map.has(key)) return;
     const { time, value } = this.#map.get(key);
     if (Date.now() - time > this.#ttl) {
@@ -36,17 +27,15 @@ export class MemCache {
     return value;
   }
 
-  /** @param {string} key */
-  has(key) {
+  has(key: string) {
     if (!this.#map.has(key)) return false;
     return Date.now() - this.#map.get(key).time > this.#ttl;
   }
 
   /**
    * Time (in ms) left for given key to expire.
-   * @param {string} key
    */
-  expires(key) {
+  expires(key: string) {
     if (!this.#map.has(key)) return 0;
     const remaining = this.#ttl - (Date.now() - this.#map.get(key).time);
     return Math.max(0, remaining);
@@ -63,8 +52,7 @@ export class MemCache {
     return invalidatedKeys;
   }
 
-  /** @param {string} key */
-  delete(key) {
+  delete(key: string) {
     return this.#map.delete(key);
   }
 
