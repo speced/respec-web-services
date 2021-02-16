@@ -1,11 +1,9 @@
 // @ts-check
 import { Router } from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, seconds } from "../../utils/misc.js";
-import rawBodyParser from "../../utils/raw-body-parser.js";
 
 import { createResponseBody } from "respec-caniuse-route";
 import updateRoute from "./update.js";
@@ -14,12 +12,7 @@ const caniuse = Router({ mergeParams: true });
 
 caniuse.options("/", cors({ methods: ["GET"] }));
 caniuse.get("/", cors(), route);
-caniuse.post(
-  "/update",
-  bodyParser.json({ verify: rawBodyParser }),
-  authGithubWebhook(env("CANIUSE_SECRET")),
-  updateRoute,
-);
+caniuse.post("/update", authGithubWebhook(env("CANIUSE_SECRET")), updateRoute);
 
 export default caniuse;
 
