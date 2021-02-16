@@ -4,7 +4,7 @@ import { writeFile } from "fs/promises";
 
 import fetch from "node-fetch";
 
-import { HTTPError } from "../../utils/misc.js";
+import { HTTPError, legacyDirname } from "../../utils/misc.js";
 /**
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -42,6 +42,7 @@ export async function regenerateDocs() {
   }
 
   const html = await res.text();
+  const __dirname = legacyDirname(import.meta);
   const staticHtmlFile = path.join(__dirname, "../../static/docs/index.html");
   await writeFile(staticHtmlFile, html);
 }
