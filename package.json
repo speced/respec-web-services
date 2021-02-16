@@ -23,13 +23,19 @@
     "ucontent": "^2.0.0"
   },
   "scripts": {
-    "start": "npm run update-data-sources && node app.js",
+    "start": "npm run update-data-sources && node --enable-source-maps build/app.js",
     "start:server": "pm2 start ecosystem.config.js --env production",
+    "build": "tsc",
+    "build:watch": "tsc -w",
     "update-data-sources": "node scripts/update-data-sources.js"
   },
   "prettier": {
     "singleQuote": false,
     "trailingComma": "all",
     "arrowParens": "avoid"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.25",
+    "typescript": "^4.1.3"
   }
 }

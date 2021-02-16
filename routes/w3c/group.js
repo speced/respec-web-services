@@ -144,6 +144,7 @@ async function getPatentPolicy(activeCharterApiUrl) {
  * */
 function getGroupMeta(shortname, requestedType) {
   /** @type {Group["type"][]} */
+  // @ts-ignore
   const types = requestedType ? [requestedType] : Object.keys(groups);
   const data = types
     .map(type => {

@@ -6,3 +6,4 @@ ecosystem.config.js
 node_modules
 public/
 static/docs/index.html
+/build
