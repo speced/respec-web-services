@@ -1,5 +1,6 @@
+import "../build/utils/dotenv.js";
+import caniuse from "../build/routes/caniuse/lib/scraper.js";
 import { main as xref } from "respec-xref-route/scraper.js";
-import { main as caniuse } from "respec-caniuse-route/scraper.js";
 
 async function update() {
   console.group("caniuse");

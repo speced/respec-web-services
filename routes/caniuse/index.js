@@ -5,7 +5,7 @@ import cors from "cors";
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, seconds } from "../../utils/misc.js";
 
-import { createResponseBody } from "respec-caniuse-route";
+import { createResponseBody } from "./lib/index.js";
 import updateRoute from "./update.js";
 
 const caniuse = Router({ mergeParams: true });
