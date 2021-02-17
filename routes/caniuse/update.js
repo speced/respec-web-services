@@ -1,8 +1,8 @@
 // @ts-check
 import { queue } from "../../utils/background-task-queue.js";
 
-import { cache } from "respec-caniuse-route";
-import { main as scraper } from "respec-caniuse-route/scraper.js";
+import { cache } from "./lib/index.js";
+import scraper from "./lib/scraper.js";
 
 export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
