@@ -1,8 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
 
-export const isDevEnv = process.env.NODE_ENV !== "production";
-
 /**
  * Get env variable value
  * @param {string} name name of env variable

@@ -6,7 +6,7 @@ import helmet from "helmet";
 
 import * as logging from "./utils/logging.js";
 import { register as registerViewEngine } from "./utils/view-engine.js";
-import { legacyDirname } from "./utils/misc.js";
+import { PROJECT_ROOT } from "./utils/constants.js";
 import "./utils/dotenv.js";
 
 import xrefRouter from "./routes/xref/index.js";
@@ -16,8 +16,6 @@ import respecRouter from "./routes/respec/index.js";
 import w3cRouter from "./routes/w3c/index.js";
 import docsRouter from "./routes/docs/index.js";
 
-const __dirname = legacyDirname(import.meta);
-
 const app = express();
 app.use(compression());
 
@@ -26,9 +24,9 @@ app.enable("trust proxy"); // for :remote-addr
 app.use(logging.stdout());
 app.use(logging.stderr());
 
-app.use(express.static(path.join(__dirname, "/static")));
+app.use(express.static(path.join(PROJECT_ROOT, "/static")));
 
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(PROJECT_ROOT, "views"));
 registerViewEngine(app);
 
 // Security
