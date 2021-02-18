@@ -2,9 +2,9 @@
 import { queue } from "../../utils/background-task-queue.js";
 import { ms } from "../../utils/misc.js";
 
-import { main as scraper } from "respec-xref-route/scraper.js";
-import { cache as searchCache } from "respec-xref-route/search.js";
-import { store } from "respec-xref-route/store.js";
+import scraper from "./lib/scraper.js";
+import { cache as searchCache } from "./lib/search.js";
+import { store } from "./lib/store-init.js";
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
