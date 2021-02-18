@@ -8,10 +8,12 @@ import bodyParser from "body-parser";
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env } from "../../utils/misc.js";
 
+import { store } from "./lib/store-init.js";
 import metaRoute from "./meta.js";
 import updateRoute from "./update.js";
-import { search } from "respec-xref-route/search.js";
-import { DATA_DIR } from "respec-xref-route/constants.js";
+import { search } from "./lib/search.js";
+
+const DATA_DIR = env("DATA_DIR");
 
 const xref = express.Router({ mergeParams: true });
 
@@ -27,7 +29,7 @@ export function route(req, res) {
   const { options } = req.body;
   // req.body.keys for backward compatibility
   const queries = req.body.queries || req.body.keys || [];
-  const body = search(queries, options);
+  const body = search(queries, store, options);
 
   const errors = getErrorCount(body.result);
   // add error stats to logs

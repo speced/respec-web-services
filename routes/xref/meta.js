@@ -4,8 +4,8 @@ import {
   CONCEPT_TYPES,
   CSS_TYPES,
   MARKUP_TYPES,
-} from "respec-xref-route/constants.js";
-import { store } from "respec-xref-route/store.js";
+} from "./lib/constants.js";
+import { store } from "./lib/store-init.js";
 
 let data = getData();
 
