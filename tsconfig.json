@@ -11,10 +11,11 @@
     "sourceMap": true,
     "resolveJsonModule": true
   },
-  "exclude": [
-    "data",
-    "build",
-    "scripts",
-    "static"
+  "include": [
+    "*.js",
+    "*.ts",
+    "routes",
+    "utils",
+    "@types"
   ]
 }
