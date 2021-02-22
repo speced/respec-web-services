@@ -9,7 +9,7 @@ const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
 /** @type {BackgroundTaskQueue<typeof import("./update.worker")>} */
 const taskQueue = new BackgroundTaskQueue(workerFile, "caniuse_update");
 
-export default function route(req, res) {
+export default async function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     res.locals.reason = `ref-not-master`;
@@ -18,11 +18,15 @@ export default function route(req, res) {
   }
 
   const job = taskQueue.add({ webhookId: req.get("X-GitHub-Delivery") || "" });
-  res.locals.job = job.id;
-  res.status(/** Accepted */ 202).send(job.id);
-
-  job
-    .run()
-    .then(({ updated }) => updated && cache.clear())
-    .catch(() => {});
+  try {
+    const { updated } = await job.run();
+    if (updated) {
+      cache.clear();
+    }
+  } catch {
+    res.status(500);
+  } finally {
+    res.locals.job = job.id;
+    res.send(job.id);
+  }
 }

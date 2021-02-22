@@ -14,7 +14,7 @@ const taskQueue = new BackgroundTaskQueue(workerFile, "xref_update");
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
-export default function route(req, res) {
+export default async function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     res.locals.reason = `ref-not-master`;
@@ -30,18 +30,18 @@ export default function route(req, res) {
   }
 
   const job = taskQueue.add({ webhookId: req.get("X-GitHub-Delivery") || "" });
-  res.locals.job = job.id;
-  res.status(/** Accepted */ 202).send(job.id);
-
-  job
-    .run()
-    .then(({ updated }) => {
-      if (updated) {
-        searchCache.clear();
-        store.fill();
-      }
-    })
-    .catch(() => {});
+  try {
+    const { updated } = await job.run();
+    if (updated) {
+      searchCache.clear();
+      store.fill();
+    }
+  } catch {
+    res.status(500);
+  } finally {
+    res.locals.job = job.id;
+    res.send(job.id);
+  }
 }
 
 /**
