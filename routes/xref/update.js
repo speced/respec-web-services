@@ -1,10 +1,16 @@
 // @ts-check
-import { queue } from "../../utils/background-task-queue.js";
+import path from "path";
+
+import { legacyDirname } from "../../utils/misc.js";
+import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
 import { ms } from "../../utils/misc.js";
 
-import scraper from "./lib/scraper.js";
 import { cache as searchCache } from "./lib/search.js";
 import { store } from "./lib/store-init.js";
+
+const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
+/** @type {BackgroundTaskQueue<typeof import("./update.worker")>} */
+const taskQueue = new BackgroundTaskQueue(workerFile, "xref_update");
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
@@ -23,10 +29,19 @@ export default function route(req, res) {
     return res.send(msg);
   }
 
-  const taskId = `[/xref/update]: ${req.get("X-GitHub-Delivery")}`;
-  queue.add(updateData, taskId);
-  res.status(202); // Accepted
-  res.send();
+  const job = taskQueue.add({ webhookId: req.get("X-GitHub-Delivery") || "" });
+  res.locals.job = job.id;
+  res.status(/** Accepted */ 202).send(job.id);
+
+  job
+    .run()
+    .then(({ updated }) => {
+      if (updated) {
+        searchCache.clear();
+        store.fill();
+      }
+    })
+    .catch(() => {});
 }
 
 /**
@@ -39,14 +54,4 @@ function hasRelevantUpdate(commits) {
     .map(commit => [commit.added, commit.removed, commit.modified])
     .flat(2);
   return changedFiles.some(file => file?.startsWith("ed/dfns/"));
-}
-
-// TODO: Move this to a Worker maybe
-async function updateData() {
-  const hasUpdated = await scraper();
-  if (hasUpdated) {
-    searchCache.clear();
-    store.fill();
-  }
-  return "Succesfully updated.";
 }

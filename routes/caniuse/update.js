@@ -1,8 +1,13 @@
 // @ts-check
-import { queue } from "../../utils/background-task-queue.js";
+import path from "path";
 
+import { legacyDirname } from "../../utils/misc.js";
+import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
 import { cache } from "./lib/index.js";
-import scraper from "./lib/scraper.js";
+
+const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
+/** @type {BackgroundTaskQueue<typeof import("./update.worker")>} */
+const taskQueue = new BackgroundTaskQueue(workerFile, "caniuse_update");
 
 export default function route(req, res) {
   if (req.body.ref !== "refs/heads/master") {
@@ -12,17 +17,12 @@ export default function route(req, res) {
     return res.send(msg);
   }
 
-  const taskId = `[/caniuse/update]: ${req.get("X-GitHub-Delivery")}`;
-  queue.add(updateData, taskId);
-  res.status(202); // Accepted
-  res.send();
-}
+  const job = taskQueue.add({ webhookId: req.get("X-GitHub-Delivery") || "" });
+  res.locals.job = job.id;
+  res.status(/** Accepted */ 202).send(job.id);
 
-// TODO: Move this to a Worker maybe
-async function updateData() {
-  const hasUpdated = await scraper();
-  if (hasUpdated) {
-    cache.clear();
-  }
-  return "Succesfully updated.";
+  job
+    .run()
+    .then(({ updated }) => updated && cache.clear())
+    .catch(() => {});
 }

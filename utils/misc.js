@@ -63,6 +63,12 @@ export class HTTPError extends Error {
   }
 }
 
+// __dirname
 export function legacyDirname(meta) {
   return path.dirname(fileURLToPath(meta.url));
+}
+
+// __filename
+export function legacyFilename(meta) {
+  return fileURLToPath(meta.url);
 }
