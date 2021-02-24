@@ -31,9 +31,15 @@ if (!isMainThread) {
     const { id } = req;
 
     if (req.type === "init") {
-      const mod = await import(req.modulePath);
-      task = mod.default;
-      return parentPort.postMessage({ id, result: "success" });
+      try {
+        const mod = await import(req.modulePath);
+        task = mod.default;
+        const res: Response = { id, type: "success", result: null };
+        return parentPort.postMessage(res);
+      } catch (error) {
+        const res: Response = { id, type: "failure", result: error };
+        return parentPort.postMessage(res);
+      }
     }
 
     if (req.type === "call") {
@@ -216,10 +222,10 @@ export class BackgroundTaskQueue<M extends TaskModule> {
         if (response.id !== id) {
           reject(new Error(`Failed to register worker module: ${modulePath}`));
         } else {
-          if (response.result === "success") {
+          if (response.type === "success") {
             resolve();
           } else {
-            reject(response.result);
+            reject(response.result as Error);
           }
         }
       });
