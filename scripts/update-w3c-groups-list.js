@@ -22,13 +22,15 @@ const mapGroupType = new Map([
   ["_miscellaneous_", "misc"],
 ]);
 
-async function update() {
+export default async function update() {
+  console.log("Updating W3C groups list...");
   const apiUrl = new URL("https://api.w3.org/groups/");
   apiUrl.searchParams.set("apikey", env("W3C_API_KEY"));
   apiUrl.searchParams.set("embed", "true");
   apiUrl.searchParams.set("items", "500");
   const json = await fetch(apiUrl).then(r => r.json());
 
+  console.log("Processing results...");
   const data = Object.fromEntries(
     [...mapGroupType.values()].map(type => [type, {}]),
   );
@@ -70,7 +72,3 @@ async function update() {
   await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
-update().catch(error => {
-  console.log(error);
-  process.exit(1);
-});
