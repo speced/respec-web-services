@@ -13,11 +13,7 @@ async function update() {
   console.groupEnd();
 
   console.group("W3C Groups List");
-  if (process.env.W3C_API_KEY) {
-    await w3cGroupsList();
-  } else {
-    console.log("Skipped.");
-  }
+  await w3cGroupsList();
   console.groupEnd();
 }
 

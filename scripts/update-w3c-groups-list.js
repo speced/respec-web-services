@@ -24,6 +24,19 @@ const mapGroupType = new Map([
 ]);
 
 export default async function update() {
+  const data = Object.fromEntries(
+    [...mapGroupType.values()].map(type => [type, {}]),
+  );
+  if (process.env.W3C_API_KEY === "IGNORE") {
+    console.warn("No W3C_API_KEY is set.");
+    console.warn(
+      `Skipping update, but writing boilerplate data to ${OUTPUT_FILE}`,
+    );
+    await mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
+    await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
+    return;
+  }
+
   console.log("Updating W3C groups list...");
   const apiUrl = new URL("https://api.w3.org/groups/");
   apiUrl.searchParams.set("apikey", env("W3C_API_KEY"));
@@ -32,9 +45,6 @@ export default async function update() {
   const json = await fetch(apiUrl).then(r => r.json());
 
   console.log("Processing results...");
-  const data = Object.fromEntries(
-    [...mapGroupType.values()].map(type => [type, {}]),
-  );
   for (const group of json._embedded.groups) {
     const type = mapGroupType.get(group.type);
     if (!type) continue;
