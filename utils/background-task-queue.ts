@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "fs/promises";
 
 import { nanoid } from "nanoid";
 import split2 from "split2";
+import { serializeError, deserializeError } from "serialize-error";
 
 import { legacyFilename, env } from "./misc.js";
 
@@ -37,7 +38,8 @@ if (!isMainThread) {
         const res: Response = { id, type: "success", result: null };
         return parentPort.postMessage(res);
       } catch (error) {
-        const res: Response = { id, type: "failure", result: error };
+        const result = serializeError(error);
+        const res: Response = { id, type: "failure", result };
         return parentPort.postMessage(res);
       }
     }
@@ -48,7 +50,8 @@ if (!isMainThread) {
         const msg: Response = { id, type: "success", result };
         return parentPort.postMessage(msg);
       } catch (error) {
-        const msg: Response = { id, type: "failure", result: error };
+        const result = serializeError(error);
+        const msg: Response = { id, type: "failure", result };
         return parentPort.postMessage(msg);
       }
     }
@@ -196,7 +199,11 @@ export class BackgroundTaskQueue<M extends TaskModule> {
               this.worker.stderr.off("data", log.onstderr);
               log.markTime("finish");
 
-              type === "success" ? resolve(result as RetType) : reject(result);
+              if (type === "success") {
+                resolve(result as RetType);
+              } else {
+                reject(deserializeError(result));
+              }
             }
           };
           this.worker.addListener("message", listener);
@@ -225,7 +232,7 @@ export class BackgroundTaskQueue<M extends TaskModule> {
           if (response.type === "success") {
             resolve();
           } else {
-            reject(response.result as Error);
+            reject(deserializeError(response.result));
           }
         }
       });
