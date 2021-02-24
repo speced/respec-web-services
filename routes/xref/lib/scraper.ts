@@ -78,8 +78,8 @@ async function updateInputSource() {
   const shouldClone = !existsSync(INPUT_DIR_BASE);
 
   const command = shouldClone
-    ? `git clone ${INPUT_REPO_SRC} ${INPUT_REPO_NAME} --filter=blob:none`
-    : `git pull --depth=1`;
+    ? `git clone ${INPUT_REPO_SRC} ${INPUT_REPO_NAME}`
+    : `git pull`;
   const cwd = shouldClone ? DATA_DIR : INPUT_DIR_BASE;
 
   const stdout = await sh(command, { output: "stream", cwd });
