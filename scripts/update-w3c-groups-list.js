@@ -4,6 +4,7 @@
  */
 
 import path from "path";
+import { fileURLToPath } from "url";
 import { writeFile, mkdir } from "fs/promises";
 
 import fetch from "node-fetch";
@@ -72,3 +73,15 @@ export default async function update() {
   await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
+const runAsScript = (() => {
+  const modulePath = fileURLToPath(import.meta.url);
+  const scriptPath = process.argv[1];
+  return modulePath === scriptPath;
+})();
+
+if (runAsScript) {
+  update().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}
