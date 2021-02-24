@@ -54,6 +54,8 @@ class Lock {
   private emitter = new EventEmitter();
 
   async acquire() {
+    // If we use if, multiple requests can start at once when the lock is released 
+    // (all pending promises resolve at once). The while loop disallows it.
     while (this.isLocked) {
       await new Promise(resolve => this.emitter.once("unlock", resolve));
     }
