@@ -66,6 +66,7 @@ async function updateInputSource() {
   return hasUpdated;
 }
 
+const semverCompare = new Intl.Collator("en", { numeric: true }).compare;
 async function processFile(fileName: string) {
   const inputFile = path.join(INPUT_DIR, fileName);
   const outputFile = path.join(OUTPUT_DIR, fileName);
@@ -75,32 +76,13 @@ async function processFile(fileName: string) {
   const output: Output = {};
   for (const [browserName, browserData] of Object.entries(json.stats)) {
     const stats = Object.entries(browserData)
-      .sort(semverCompare)
+      .sort(([a], [b]) => semverCompare(a, b))
       .map(([version, status]) => [version, formatStatus(status)])
       .reverse() as [string, string[]][];
     output[browserName] = stats;
   }
 
   await writeJSON(outputFile, output);
-}
-
-type BrowserDataEntry = [string, string];
-/**
- * semverCompare
- * https://github.com/substack/semver-compare
- */
-function semverCompare(a: BrowserDataEntry, b: BrowserDataEntry) {
-  const pa = a[0].split(".");
-  const pb = b[0].split(".");
-  for (let i = 0; i < 3; i++) {
-    const na = Number(pa[i]);
-    const nb = Number(pb[i]);
-    if (na > nb) return 1;
-    if (nb > na) return -1;
-    if (!isNaN(na) && isNaN(nb)) return 1;
-    if (isNaN(na) && !isNaN(nb)) return -1;
-  }
-  return 0;
 }
 
 /**  @example "n d #6" => ["n", "d"] */
