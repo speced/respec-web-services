@@ -71,9 +71,10 @@ export async function createResponseBodyHTML(options: NormalizedOptions) {
 
 function normalizeOptions(options: Options): NormalizedOptions {
   const feature = options.feature;
-  const versions = options.versions || defaultOptions.versions;
   const browsers = sanitizeBrowsersList(options.browsers);
   const format = options.format === "html" ? "html" : "json";
+  const versions =
+    format === "html" ? Infinity : options.versions || defaultOptions.versions;
   return { feature, versions, browsers, format };
 }
 
@@ -133,16 +134,53 @@ function formatAsHTML(options: NormalizedOptions, data: Data) {
     return html`<li class="${className}" title="${title}">${text}</li>`;
   };
 
+  const getGroupedVersions = (
+    versions: BrowserVersionData[],
+  ): BrowserVersionData[] => {
+    type SlidingWindow = Record<"start" | "end" | "key", string>;
+
+    const groupedVersions: SlidingWindow[] = [];
+
+    const window: SlidingWindow = { start: null, end: null, key: null };
+    for (const [version, supportKeys] of versions.slice().reverse()) {
+      const key = supportKeys.join(",");
+      if (!window.start) {
+        // start window
+        Object.assign(window, { start: version, end: version, key });
+      } else if (key === window.key) {
+        // extend window
+        window.end = version;
+      } else {
+        // close window
+        groupedVersions.push({ ...window });
+        // and start new window
+        Object.assign(window, { start: version, end: null, key });
+      }
+    }
+    if (window.key) {
+      groupedVersions.push({ ...window });
+    }
+
+    return groupedVersions
+      .reverse() // sort newest-first again
+      .map(({ start, end, key }) => {
+        const versionRange = end && start !== end ? `${start}-${end}` : start;
+        const supportKeys = key.split(",");
+        return [versionRange, supportKeys];
+      });
+  };
+
   const renderBrowser = (
     browser: string,
     browserData: BrowserVersionData[],
   ) => {
     const [latestVersion, ...olderVersions] = browserData;
+    const groupedOlderVersions = getGroupedVersions(olderVersions);
     return html`
       <div class="caniuse-browser">
         ${renderLatestVersion(browser, latestVersion)}
         <ul>
-          ${olderVersions.map(renderOlderVersion)}
+          ${groupedOlderVersions.map(renderOlderVersion)}
         </ul>
       </div>
     `;
