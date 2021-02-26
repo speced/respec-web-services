@@ -1,11 +1,10 @@
-// @ts-check
-import morgan from "morgan";
+import morgan, { FormatFn, Options } from "morgan";
 import chalk from "chalk";
+import { Request, Response } from "express";
 
-/** @param {string} bytes */
-const prettyBytes = bytes => {
+const prettyBytes = (bytes: number) => {
   const threshold = 1024;
-  let size = parseFloat(bytes);
+  let size = bytes;
   for (const unit of ["B", "KB", "MB"]) {
     if (size >= threshold) {
       size /= threshold;
@@ -17,7 +16,8 @@ const prettyBytes = bytes => {
 };
 
 const prettyJSON = (() => {
-  const colored = value => {
+  type BasicTypes = number | boolean | null | string;
+  const colored = (value: BasicTypes) => {
     switch (typeof value) {
       case "number":
         return chalk.cyan(value.toString());
@@ -27,33 +27,29 @@ const prettyJSON = (() => {
         return chalk.yellow(value);
     }
   };
-  return obj =>
+  return (obj: Record<string, BasicTypes>) =>
     Object.entries(obj)
       .map(([key, value]) => chalk.magentaBright(key + "=") + colored(value))
       .join(" ");
 })();
 
-/**
- * @param {string} url
- * @param {string=} base
- */
-const tryURL = (url, base) => {
+const tryURL = (url?: string, base?: string) => {
   try {
+    if (!url) return null;
     return new URL(url, base);
   } catch {
     return null;
   }
 };
 
-/** @type {import('morgan').FormatFn} */
-const formatter = (tokens, req, res) => {
+const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
   const date = tokens.date(req, res, "iso");
   const remoteAddr = tokens["remote-addr"](req, res);
   const method = tokens.method(req, res);
-  const status = parseInt(tokens.status(req, res), 10);
-  const url = tryURL(tokens.url(req, res), "https://respec.org/");
+  const status = parseInt(tokens.status(req, res) || "", 10);
+  const url = tryURL(tokens.url(req, res)!, "https://respec.org/")!;
   const referrer = tryURL(tokens.referrer(req, res));
-  const contentLength = res.get("content-length");
+  const contentLength = res.getHeader("content-length") as number | undefined;
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
 
@@ -63,10 +59,10 @@ const formatter = (tokens, req, res) => {
     : "";
   const color = status < 300 ? "green" : status >= 400 ? "red" : "yellow";
   const request =
-    chalk[color](`${method.padEnd(4)} ${status}`) +
+    chalk[color](`${method!.padEnd(4)} ${status}`) +
     ` ${chalk.blueBright(url.pathname)}${chalk.italic.gray(searchParams)}`;
 
-  let formattedReferrer;
+  let formattedReferrer: string | undefined;
   if (referrer) {
     const { origin, pathname, search } = referrer;
     formattedReferrer =
@@ -77,18 +73,17 @@ const formatter = (tokens, req, res) => {
 
   return [
     chalk.gray(date),
-    chalk.gray(remoteAddr.padStart(15)),
+    remoteAddr ? chalk.gray(remoteAddr.padStart(15)) : unknown,
     request,
-    referrer ? formattedReferrer : unknown,
+    formattedReferrer || unknown,
     contentLength ? chalk.cyan(prettyBytes(contentLength)) : unknown,
     chalk.cyan(responseTime + " ms"),
     locals ? prettyJSON(locals) : unknown,
   ].join(" | ");
 };
 
-/** @type {import('morgan').Options['skip']} */
-const skipCommon = (req, res) => {
-  const { method, path, query } = req;
+const skipCommon = (req: Request, res: Response) => {
+  const { method, query } = req;
   const { statusCode } = res;
   const ref = req.get("referer") || req.get("referrer");
   const referrer = tryURL(ref);
@@ -99,18 +94,16 @@ const skipCommon = (req, res) => {
     // automated tests
     (referrer && referrer.host === "localhost:9876") ||
     // successful healthcheck
-    (query.healthcheck && statusCode < 400)
+    (typeof query.healthcheck !== "undefined" && statusCode < 400)
   );
 };
 
-/** @type {import('morgan').Options} */
-const optionsStdout = {
+const optionsStdout: Options<Request, Response> = {
   skip: (req, res) => res.statusCode >= 400 || skipCommon(req, res),
   stream: process.stdout,
 };
 
-/** @type {import('morgan').Options} */
-const optionsStderr = {
+const optionsStderr: Options<Request, Response> = {
   skip: (req, res) => res.statusCode < 400 || skipCommon(req, res),
   stream: process.stderr,
 };
