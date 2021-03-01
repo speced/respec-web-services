@@ -50,7 +50,7 @@ export async function createResponseBodyJSON(options: NormalizedOptions) {
   }
 
   if (!browsers.length) {
-    browsers.push(...Object.keys(data));
+    browsers.push(...Object.keys(data.all));
   }
 
   const response: Data["all"] = {};
@@ -69,7 +69,7 @@ export async function createResponseBodyHTML(options: NormalizedOptions) {
   }
 
   if (!browsers.length) {
-    browsers.push(...Object.keys(allData));
+    browsers.push(...Object.keys(allData.summary));
   }
 
   const data: Data["summary"] = {};
