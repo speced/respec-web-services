@@ -4,6 +4,7 @@
  */
 
 import path from "path";
+import { fileURLToPath } from "url";
 import { writeFile, mkdir } from "fs/promises";
 
 import fetch from "node-fetch";
@@ -22,16 +23,28 @@ const mapGroupType = new Map([
   ["_miscellaneous_", "misc"],
 ]);
 
-async function update() {
+export default async function update() {
+  const data = Object.fromEntries(
+    [...mapGroupType.values()].map(type => [type, {}]),
+  );
+  if (process.env.W3C_API_KEY === "IGNORE") {
+    console.warn("No W3C_API_KEY is set.");
+    console.warn(
+      `Skipping update, but writing boilerplate data to ${OUTPUT_FILE}`,
+    );
+    await mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
+    await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
+    return;
+  }
+
+  console.log("Updating W3C groups list...");
   const apiUrl = new URL("https://api.w3.org/groups/");
   apiUrl.searchParams.set("apikey", env("W3C_API_KEY"));
   apiUrl.searchParams.set("embed", "true");
   apiUrl.searchParams.set("items", "500");
   const json = await fetch(apiUrl).then(r => r.json());
 
-  const data = Object.fromEntries(
-    [...mapGroupType.values()].map(type => [type, {}]),
-  );
+  console.log("Processing results...");
   for (const group of json._embedded.groups) {
     const type = mapGroupType.get(group.type);
     if (!type) continue;
@@ -70,7 +83,15 @@ async function update() {
   await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
-update().catch(error => {
-  console.log(error);
-  process.exit(1);
-});
+const runAsScript = (() => {
+  const modulePath = fileURLToPath(import.meta.url);
+  const scriptPath = process.argv[1];
+  return modulePath === scriptPath;
+})();
+
+if (runAsScript) {
+  update().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}

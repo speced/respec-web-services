@@ -1,4 +1,4 @@
-import { regenerateDocs } from "../routes/docs/update.js";
+import { regenerateDocs } from "../build/routes/docs/update.js";
 
 (async () => {
   const start = Date.now();
