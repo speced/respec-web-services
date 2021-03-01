@@ -6,6 +6,11 @@ import { html } from "ucontent";
 import { BROWSERS, SUPPORT_TITLES } from "./constants.js";
 import { env } from "../../../utils/misc.js";
 import { MemCache } from "../../../utils/mem-cache.js";
+import {
+  BrowserVersionData,
+  SupportKeys,
+  ScraperOutput as Data,
+} from "./constants.js";
 
 const DATA_DIR = env("DATA_DIR");
 
@@ -16,14 +21,6 @@ interface Options {
   format?: "html" | "json";
 }
 type NormalizedOptions = Required<Options>;
-
-type SupportKeys = ("y" | "n" | "a" | string)[];
-// [ version, ['y', 'n'] ]
-type BrowserVersionData = [string, SupportKeys];
-
-interface Data {
-  [browserName: string]: BrowserVersionData[];
-}
 
 const defaultOptions = {
   browsers: ["chrome", "firefox", "safari", "edge"],
@@ -53,27 +50,41 @@ export async function createResponseBodyJSON(options: NormalizedOptions) {
   }
 
   if (!browsers.length) {
-    browsers.push(...Object.keys(data));
+    browsers.push(...Object.keys(data.all));
   }
 
-  const response: Data = Object.create(null);
+  const response: Data["all"] = {};
   for (const browser of browsers) {
-    const browserData = data[browser] || [];
+    const browserData = data.all[browser] || [];
     response[browser] = browserData.slice(0, versions);
   }
   return response;
 }
 
 export async function createResponseBodyHTML(options: NormalizedOptions) {
-  const data = await createResponseBodyJSON(options);
-  return data === null ? null : formatAsHTML(options, data);
+  const { feature, browsers } = options;
+  const allData = await getData(feature);
+  if (!allData) {
+    return null;
+  }
+
+  if (!browsers.length) {
+    browsers.push(...Object.keys(allData.summary));
+  }
+
+  const data: Data["summary"] = {};
+  for (const browser of browsers) {
+    data[browser] = allData.summary[browser] || [];
+  }
+  return formatAsHTML(options, data);
 }
 
 function normalizeOptions(options: Options): NormalizedOptions {
   const feature = options.feature;
-  const versions = options.versions || defaultOptions.versions;
   const browsers = sanitizeBrowsersList(options.browsers);
   const format = options.format === "html" ? "html" : "json";
+  // versions is used only with format="json"
+  const versions = options.versions || defaultOptions.versions;
   return { feature, versions, browsers, format };
 }
 
@@ -106,7 +117,10 @@ async function getData(feature: string) {
   }
 }
 
-function formatAsHTML(options: NormalizedOptions, data: Data) {
+function formatAsHTML(
+  options: NormalizedOptions,
+  data: Data["summary"],
+): string {
   const getSupportTitle = (keys: SupportKeys) => {
     return keys
       .filter(key => SUPPORT_TITLES.has(key))

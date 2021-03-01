@@ -26,3 +26,12 @@ export const SUPPORT_TITLES = new Map([
   ['x', 'Requires prefix to work.'],
   ['d', 'Disabled by default (needs to enabled).'],
 ]);
+
+export type SupportKeys = ("y" | "n" | "a" | string)[];
+// [ version, ['y', 'n'] ]
+export type BrowserVersionData = [string, SupportKeys];
+
+export interface ScraperOutput {
+  all: { [browserName: string]: BrowserVersionData[] };
+  summary: { [browserName: string]: BrowserVersionData[] };
+}

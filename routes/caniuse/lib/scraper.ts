@@ -10,15 +10,12 @@ import { readFile, writeFile, readdir, mkdir } from "fs/promises";
 
 import sh from "../../../utils/sh.js";
 import { env } from "../../../utils/misc.js";
+import { BrowserVersionData, ScraperOutput as Output } from "./constants.js";
 
 interface Input {
   stats: {
     [browserName: string]: { [version: string]: string };
   };
-}
-
-interface Output {
-  [browserName: string]: [string, ReturnType<typeof formatStatus>][];
 }
 
 const DATA_DIR = env("DATA_DIR");
@@ -73,13 +70,14 @@ async function processFile(fileName: string) {
 
   const json = await readJSON(inputFile);
 
-  const output: Output = {};
+  const output: Output = { all: {}, summary: {} };
   for (const [browserName, browserData] of Object.entries(json.stats)) {
     const stats = Object.entries(browserData)
       .sort(([a], [b]) => semverCompare(a, b))
       .map(([version, status]) => [version, formatStatus(status)])
-      .reverse() as [string, string[]][];
-    output[browserName] = stats;
+      .reverse() as BrowserVersionData[];
+    output.all[browserName] = stats;
+    output.summary[browserName] = groupStats(stats);
   }
 
   await writeJSON(outputFile, output);
@@ -91,6 +89,54 @@ function formatStatus(status: string) {
     .split("#", 1)[0] // don't care about footnotes.
     .split(" ")
     .filter(item => item);
+}
+
+/**
+ * @example
+ * ```js
+ * const Y = ['y'];
+ * const N = ['n'];
+ * assert.equal(
+ *   groupStats([ ['1', Y], ['2', Y], ['3', Y], ['4', Y], ['5', N], ['6', N] ]),
+ *   [ ['1', Y], ['2-4', Y], ['5-6', N] ]
+ * )
+ * ```
+ */
+function groupStats(versions: BrowserVersionData[]): BrowserVersionData[] {
+  type SlidingWindow = Record<"start" | "end" | "key", string>;
+  const [latestVersion, ...olderVersions] = versions;
+
+  const groupedVersions: SlidingWindow[] = [];
+
+  const window: SlidingWindow = { start: null, end: null, key: null };
+  for (const [version, supportKeys] of olderVersions.reverse()) {
+    const key = supportKeys.join(",");
+    if (!window.start) {
+      // start window
+      Object.assign(window, { start: version, end: version, key });
+    } else if (key === window.key) {
+      // extend window
+      window.end = version;
+    } else {
+      // close window
+      groupedVersions.push({ ...window });
+      // and start new window
+      Object.assign(window, { start: version, end: null, key });
+    }
+  }
+  if (window.key) {
+    groupedVersions.push({ ...window });
+  }
+
+  const groupedOlderVersions: BrowserVersionData[] = groupedVersions
+    .reverse() // sort newest-first again
+    .map(({ start, end, key }) => {
+      const versionRange = end && start !== end ? `${start}-${end}` : start;
+      const supportKeys = key.split(",");
+      return [versionRange, supportKeys];
+    });
+
+  return [latestVersion].concat(groupedOlderVersions);
 }
 
 async function readJSON(file: string) {
