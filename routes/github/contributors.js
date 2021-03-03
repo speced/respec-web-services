@@ -1,11 +1,11 @@
 // @ts-check
 import { ms, seconds } from "../../utils/misc.js";
+import { DiskCache } from "../../utils/disk-cache.js";
 
 import { getContributors } from "respec-github-apis/contributors.js";
 import { getUsersDetails } from "respec-github-apis/users.js";
-import { TTLCache } from "respec-github-apis/utils/cache.js";
 
-const cache = new TTLCache(ms("3 days"));
+const cache = new DiskCache({ ttl: ms("3 days"), path: "github/contributors" });
 
 /**
  * @param {import('express').Request} req
@@ -17,7 +17,7 @@ export default async function route(req, res) {
 
   res.set("Cache-Control", `max-age=${seconds("24h")}`);
 
-  const cachedData = cache.get(cacheKey);
+  const cachedData = await cache.get(cacheKey);
   if (typeof cachedData !== "undefined") {
     res.set("X-Cache", "HIT");
     if (Array.isArray(cachedData)) {
@@ -38,7 +38,7 @@ export default async function route(req, res) {
     }
   } catch (err) {
     if (err.message && err.message.includes("404 Not Found")) {
-      cache.set(cacheKey, null);
+      await cache.set(cacheKey, null);
       return res.sendStatus(404);
     } else {
       res.removeHeader("Cache-Control");
@@ -63,6 +63,6 @@ export default async function route(req, res) {
     result.push({ name, ...contributor });
   }
 
-  cache.set(cacheKey, result);
+  await cache.set(cacheKey, result);
   return res.json(result);
 }
