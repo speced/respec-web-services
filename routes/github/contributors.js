@@ -2,8 +2,8 @@
 import { ms, seconds } from "../../utils/misc.js";
 import { DiskCache } from "../../utils/disk-cache.js";
 
-import { getContributors } from "respec-github-apis/contributors.js";
-import { getUsersDetails } from "respec-github-apis/users.js";
+import { getContributors } from "./lib/contributors.js";
+import { getUsersDetails } from "./lib/users.js";
 
 const cache = new DiskCache({ ttl: ms("3 days"), path: "github/contributors" });
 
