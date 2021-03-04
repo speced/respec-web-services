@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * An in-memory cache.
  */
@@ -13,23 +12,22 @@ export class MemCache<ValueType> {
     this.#ttl = ttl;
   }
 
-  set(key: string, value: ValueType) {
-    this.#map.set(key, { time: Date.now(), value });
+  set(key: string, value: ValueType, time = Date.now()) {
+    this.#map.set(key, { time, value });
   }
 
-  get(key: string) {
-    if (!this.#map.has(key)) return;
+  get(key: string, allowStale?: boolean) {
+    if (!this.#map.has(key)) return undefined;
     const { time, value } = this.#map.get(key);
-    if (Date.now() - time > this.#ttl) {
+    if (this.isBusted(time) && !allowStale) {
       this.#map.delete(key);
       return;
     }
     return value;
   }
 
-  has(key: string) {
-    if (!this.#map.has(key)) return false;
-    return Date.now() - this.#map.get(key).time > this.#ttl;
+  has(key: string, stale?: boolean) {
+    return this.get(key, stale) !== undefined;
   }
 
   /**
@@ -42,9 +40,9 @@ export class MemCache<ValueType> {
   }
 
   invalidate() {
-    const invalidatedKeys = [];
+    const invalidatedKeys: string[] = [];
     for (const [key, { time }] of this.#map.entries()) {
-      if (Date.now() - time > this.#ttl) {
+      if (this.isBusted(time)) {
         this.#map.delete(key);
         invalidatedKeys.push(key);
       }
@@ -58,5 +56,9 @@ export class MemCache<ValueType> {
 
   clear() {
     this.#map.clear();
+  }
+
+  private isBusted(time: number) {
+    return Date.now() - time > this.#ttl;
   }
 }
