@@ -1,7 +1,6 @@
 // @ts-check
 import { seconds } from "../../utils/misc.js";
-
-import { getIssues } from "respec-github-apis/issues.js";
+import { getIssues } from "./lib/issues.js";
 
 /**
  * @param {import('express').Request} req
