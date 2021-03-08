@@ -2,11 +2,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 /**
- * Get env variable value
- * @param {string} name name of env variable
+ * Ensure env variable exists and get its value.
+ * @param name name of env variable
  * @throws if env variable is not set
  */
-export function env(name) {
+export function env(name: string) {
   const value = process.env[name];
   if (value) return value;
   throw `env variable \`${name}\` is not set.`;
@@ -20,15 +20,23 @@ const AS_SECONDS = {
   w: 60 * 60 * 24 * 7,
 };
 
+type DurationShort = "s" | "m" | "h" | "d" | "w";
+type DurationLong = "second" | "minute" | "hour" | "day" | "week";
+type Duration = `${number}${
+  | DurationShort
+  | DurationLong
+  | ` ${DurationLong}`
+  | `${DurationLong}s`
+  | ` ${DurationLong}s`}`;
+
 /**
  * Convert a human readable duration string to seconds value.
- * @param {string} duration
  * ``` js
  * seconds("1m") // 60
  * seconds("1.5m") // 90
  * ```
  */
-export function seconds(duration) {
+export function seconds(duration: Duration) {
   const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
   if (matches && matches.length === 3) {
     const value = parseFloat(matches[1]);
@@ -43,7 +51,6 @@ export function seconds(duration) {
 
 /**
  * Convert a human readable duration string to milliseconds value.
- * @param {string} duration
  * @example
  * ``` js
  * ms("1m") // 60_000
@@ -51,24 +58,22 @@ export function seconds(duration) {
  * ms("10.5s") // 10_500
  * ```
  */
-export function ms(duration) {
+export function ms(duration: Duration) {
   return seconds(duration) * 1000;
 }
 
 export class HTTPError extends Error {
-  constructor(statusCode, message, url) {
+  constructor(public statusCode: number, message: string, public url?: string) {
     super(message);
-    this.statusCode = statusCode;
-    this.url = url;
   }
 }
 
 // __dirname
-export function legacyDirname(meta) {
+export function legacyDirname(meta: ImportMeta) {
   return path.dirname(fileURLToPath(meta.url));
 }
 
 // __filename
-export function legacyFilename(meta) {
+export function legacyFilename(meta: ImportMeta) {
   return fileURLToPath(meta.url);
 }
