@@ -13,7 +13,7 @@ export default async function route(req, res) {
   if (req.body.ref !== "refs/heads/main") {
     res.status(400); // Bad request
     res.locals.reason = `ref-not-main`;
-    const msg = `Xref Payload was for ${req.body.ref}, ignored it.`;
+    const msg = `Caniuse payload was for ${req.body.ref}, ignored it.`;
     return res.send(msg);
   }
 
