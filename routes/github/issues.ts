@@ -1,12 +1,12 @@
-// @ts-check
+import { Request, Response } from "express";
 import { seconds } from "../../utils/misc.js";
 import { getIssues } from "./lib/issues.js";
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- */
-export default async function route(req, res) {
+type Params = { org: string; repo: string };
+type Query = { issues: string | string[] };
+type IRequest = Request<Params, any, any, Query>;
+
+export default async function route(req: IRequest, res: Response) {
   const { org, repo } = req.params;
   if (!req.query.issues) {
     res.set("Content-Type", "text/plain");
@@ -18,7 +18,7 @@ export default async function route(req, res) {
   }
   const issues = [
     ...new Set(
-      /** @type {string} */ (req.query.issues)
+      req.query.issues
         .split(/\,/)
         .map(issue => parseInt(issue.trim(), 10))
         .filter(issue => !Number.isNaN(issue) && issue > 0),

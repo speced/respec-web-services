@@ -7,6 +7,10 @@ export interface User {
   login: string;
 }
 
+export interface Users {
+  [login: string]: User;
+}
+
 const cache = new MemCache<User>(ms("7d"));
 
 /**
