@@ -20,15 +20,6 @@ const AS_SECONDS = {
   w: 60 * 60 * 24 * 7,
 };
 
-type DurationShort = "s" | "m" | "h" | "d" | "w";
-type DurationLong = "second" | "minute" | "hour" | "day" | "week";
-type Duration = `${number}${
-  | DurationShort
-  | DurationLong
-  | ` ${DurationLong}`
-  | `${DurationLong}s`
-  | ` ${DurationLong}s`}`;
-
 /**
  * Convert a human readable duration string to seconds value.
  * ``` js
@@ -36,7 +27,7 @@ type Duration = `${number}${
  * seconds("1.5m") // 90
  * ```
  */
-export function seconds(duration: Duration) {
+export function seconds(duration: string) {
   const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
   if (matches && matches.length === 3) {
     const value = parseFloat(matches[1]);
@@ -58,7 +49,7 @@ export function seconds(duration: Duration) {
  * ms("10.5s") // 10_500
  * ```
  */
-export function ms(duration: Duration) {
+export function ms(duration: string) {
   return seconds(duration) * 1000;
 }
 
