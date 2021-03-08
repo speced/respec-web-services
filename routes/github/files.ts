@@ -1,15 +1,15 @@
-// @ts-check
+import { Request, Response } from "express";
 import { seconds } from "../../utils/misc.js";
 import { getFiles } from "./lib/files.js";
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- */
-export default async function route(req, res) {
+type Params = { org: string; repo: string };
+type Query = { path?: string; branch?: string; depth?: string };
+type IRequest = Request<Params, any, any, Query>;
+
+export default async function route(req: IRequest, res: Response) {
   const { org, repo } = req.params;
   const { path = "", branch = "master" } = req.query;
-  const depth = normalizeDepth(parseInt(req.query.depth, 10));
+  const depth = normalizeDepth(req.query.depth);
 
   try {
     const options = { path, branch, depth };
@@ -24,10 +24,11 @@ export default async function route(req, res) {
   }
 }
 
-/** @param {number} depth (could be NaN) */
-function normalizeDepth(depth) {
+function normalizeDepth(depth?: string) {
   const MIN_DEPTH = 1;
   const MAX_DEPTH = 6;
   const DEFAULT_DEPTH = 3;
-  return Math.max(MIN_DEPTH, Math.min(depth || DEFAULT_DEPTH, MAX_DEPTH));
+  return !depth || Number.isNaN(parseInt(depth, 10))
+    ? DEFAULT_DEPTH
+    : Math.max(MIN_DEPTH, Math.min(parseInt(depth, 10), MAX_DEPTH));
 }

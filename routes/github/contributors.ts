@@ -1,17 +1,18 @@
-// @ts-check
+import { Request, Response } from "express";
 import { ms, seconds } from "../../utils/misc.js";
 import { DiskCache } from "../../utils/disk-cache.js";
 
-import { getContributors } from "./lib/contributors.js";
-import { getUsersDetails } from "./lib/users.js";
+import { Contributor, getContributors } from "./lib/contributors.js";
+import { getUsersDetails, User, Users } from "./lib/users.js";
 
-const cache = new DiskCache({ ttl: ms("3 days"), path: "github/contributors" });
+type Contributors = (Contributor & User)[];
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- */
-export default async function route(req, res) {
+const cache = new DiskCache<null | Contributors>({
+  ttl: ms("3 days"),
+  path: "github/contributors",
+});
+
+export default async function route(req: Request, res: Response) {
   const { org, repo } = req.params;
   const cacheKey = `${org}/${repo}`;
 
@@ -31,7 +32,7 @@ export default async function route(req, res) {
   res.set("X-Cache", "MISS");
 
   // get basic list of contributors
-  const contributors = [];
+  const contributors: Contributor[] = [];
   try {
     for await (const contributor of getContributors(org, repo)) {
       contributors.push(contributor);
@@ -47,7 +48,7 @@ export default async function route(req, res) {
   }
 
   // get optional user details (like full name)
-  let users;
+  let users: Users;
   try {
     const logins = contributors.map(contributor => contributor.login);
     users = await getUsersDetails(logins);
@@ -57,7 +58,7 @@ export default async function route(req, res) {
   }
 
   // merge basic contributor details with user details
-  const result = [];
+  const result: Contributors = [];
   for (const contributor of contributors) {
     const { name } = users[contributor.login] || {};
     result.push({ name, ...contributor });
