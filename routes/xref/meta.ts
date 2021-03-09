@@ -1,4 +1,5 @@
-// @ts-check
+import { Request, Response } from "express";
+
 import {
   IDL_TYPES,
   CONCEPT_TYPES,
@@ -11,7 +12,11 @@ let data = getData();
 
 const supportedFields = new Set(Object.keys(data));
 
-export default function route(req, res) {
+type FieldType = "version" | "types" | "specs" | "terms";
+type Params = { field?: FieldType };
+type Query = { fields?: string };
+type IRequest = Request<Params, any, any, Query>;
+export default function route(req: IRequest, res: Response) {
   if (data.version < store.version) {
     data = getData();
   }
@@ -36,7 +41,7 @@ export default function route(req, res) {
 
   const fields = (req.query.fields || "")
     .split(",")
-    .filter(field => supportedFields.has(field));
+    .filter((field): field is FieldType => supportedFields.has(field));
 
   if (!fields.length) {
     res.json(data);
@@ -63,9 +68,9 @@ function getData() {
   };
 }
 
-function pickFields(fields, data) {
+function pickFields<T, K extends keyof T>(fields: K[], data: T): Pick<T, K> {
   return fields.reduce((result, field) => {
     result[field] = data[field];
     return result;
-  }, {});
+  }, {} as Pick<T, K>);
 }

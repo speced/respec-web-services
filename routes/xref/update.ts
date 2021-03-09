@@ -1,5 +1,6 @@
-// @ts-check
 import path from "path";
+
+import { Request, Response } from "express";
 
 import { legacyDirname } from "../../utils/misc.js";
 import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
@@ -9,12 +10,14 @@ import { cache as searchCache } from "./lib/search.js";
 import { store } from "./lib/store-init.js";
 
 const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
-/** @type {BackgroundTaskQueue<typeof import("./update.worker")>} */
-const taskQueue = new BackgroundTaskQueue(workerFile, "xref_update");
+const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
+  workerFile,
+  "xref_update",
+);
 
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
-export default async function route(req, res) {
+export default async function route(req: Request, res: Response) {
   if (req.body.ref !== "refs/heads/master") {
     res.status(400); // Bad request
     res.locals.reason = `ref-not-master`;
@@ -44,11 +47,14 @@ export default async function route(req, res) {
   }
 }
 
-/**
- * @typedef {{ message: string, added: string[], removed: string[], modified: string[] }} Commit
- * @param {Commit[]} commits
- */
-function hasRelevantUpdate(commits) {
+interface Commit {
+  message: string;
+  added: string[];
+  removed: string[];
+  modified: string[];
+}
+
+function hasRelevantUpdate(commits: Commit[]) {
   if (!Array.isArray(commits)) return false;
   const changedFiles = commits
     .map(commit => [commit.added, commit.removed, commit.modified])
