@@ -1,16 +1,13 @@
-// @ts-check
 import path from "path";
 import { writeFile } from "fs/promises";
 
 import fetch from "node-fetch";
+import { Request, Response } from "express";
 
 import { HTTPError } from "../../utils/misc.js";
 import { PROJECT_ROOT } from "../../utils/constants.js";
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- */
-export default async function route(req, res) {
+
+export default async function route(_req: Request, res: Response) {
   try {
     const start = Date.now();
     console.log("Regenerating docs...");
