@@ -16,11 +16,17 @@ const DATA_DIR = env("DATA_DIR");
 
 interface Options {
   feature: string;
-  browsers?: string[];
+  browsers?: string | string[];
   versions?: number;
   format?: "html" | "json";
 }
-type NormalizedOptions = Required<Options>;
+
+interface NormalizedOptions {
+  feature: string;
+  browsers: string[];
+  versions?: number;
+  format: "html" | "json";
+}
 
 const defaultOptions = {
   browsers: ["chrome", "firefox", "safari", "edge"],
