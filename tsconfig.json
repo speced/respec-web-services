@@ -15,6 +15,7 @@
     "*.js",
     "*.ts",
     "routes",
+    "scripts",
     "utils",
     "@types"
   ]
