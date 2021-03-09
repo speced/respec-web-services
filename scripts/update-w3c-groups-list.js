@@ -9,7 +9,7 @@ import { writeFile, mkdir } from "fs/promises";
 
 import fetch from "node-fetch";
 
-import { env } from "../utils/misc.js";
+import { env } from "../build/utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
 const OUTPUT_FILE = path.join(DATA_DIR, "w3c/groups.json");
