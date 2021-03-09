@@ -2,7 +2,6 @@ import path from "path";
 
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import { Request, Response } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
@@ -18,7 +17,7 @@ const DATA_DIR = env("DATA_DIR");
 const xref = express.Router({ mergeParams: true });
 
 xref.options("/", cors({ methods: ["POST", "GET"] }));
-xref.post("/", bodyParser.json(), cors(), route);
+xref.post("/", express.json(), cors(), route);
 xref.get("/meta/:field?", cors(), metaRoute);
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
