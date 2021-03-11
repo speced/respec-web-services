@@ -23,8 +23,30 @@ const mapGroupType = new Map([
   ["_miscellaneous_", "misc"],
 ]);
 
+interface GroupResponse {
+  type?: string;
+  shortname: string;
+  id: number;
+  name: string;
+  _links: {
+    homepage?: { href: string };
+  };
+}
+
+interface APIResponse {
+  _embedded: {
+    groups: GroupResponse[];
+  };
+}
+
+interface Group {
+  id: number;
+  name: string;
+  URI: string;
+}
+
 export default async function update() {
-  const data = Object.fromEntries(
+  const data: Record<string, Record<string, Group>> = Object.fromEntries(
     [...mapGroupType.values()].map(type => [type, {}]),
   );
   if (process.env.W3C_API_KEY === "IGNORE") {
@@ -42,7 +64,7 @@ export default async function update() {
   apiUrl.searchParams.set("apikey", env("W3C_API_KEY"));
   apiUrl.searchParams.set("embed", "true");
   apiUrl.searchParams.set("items", "500");
-  const json = await fetch(apiUrl).then(r => r.json());
+  const json: APIResponse = await fetch(apiUrl).then(r => r.json());
 
   console.log("Processing results...");
   for (const group of json._embedded.groups) {
@@ -61,7 +83,9 @@ export default async function update() {
   }
 
   // Exceptional groups that don't follow norms like other group types.
-  const miscGroupFilters = [group => group.shortname === "tag"];
+  const miscGroupFilters = [
+    (group: GroupResponse) => group.shortname === "tag",
+  ];
   for (const filter of miscGroupFilters) {
     const group = json._embedded.groups.find(filter);
     if (!group) continue;

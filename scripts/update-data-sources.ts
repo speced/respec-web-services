@@ -1,15 +1,15 @@
-import "../build/utils/dotenv.js";
-import caniuse from "../build/routes/caniuse/lib/scraper.js";
-import xref from "../build/routes/xref/lib/scraper.js";
+import "../utils/dotenv.js";
+import caniuse from "../routes/caniuse/lib/scraper.js";
+import xref from "../routes/xref/lib/scraper.js";
 import w3cGroupsList from "./update-w3c-groups-list.js";
 
 async function update() {
   console.group("caniuse");
-  await caniuse();
+  await caniuse({ forceUpdate: true });
   console.groupEnd();
 
   console.group("xref");
-  await xref();
+  await xref({ forceUpdate: true });
   console.groupEnd();
 
   console.group("W3C Groups List");

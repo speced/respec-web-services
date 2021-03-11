@@ -28,7 +28,7 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "update-data-sources": "node scripts/update-data-sources.js"
+    "update-data-sources": "node build/scripts/update-data-sources.js"
   },
   "prettier": {
     "singleQuote": false,
