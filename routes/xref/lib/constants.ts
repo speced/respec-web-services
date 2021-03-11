@@ -17,7 +17,7 @@ export const IDL_TYPES = new Set([
 // XXX: `CONCEPT_TYPES` includes `element`: otherwise it'll break many specs.
 // https://github.com/sidvishnoi/respec-xref-route/issues/57
 export const CONCEPT_TYPES = new Set(["_CONCEPT_", "dfn", "event", "element"]);
-export const MARKUP_TYPES = new Set(["element", "element-attr"]);
+export const MARKUP_TYPES = new Set(["element", "element-attr", "attr-value"]);
 export const CSS_TYPES_INPUT = new Set([
   "property",
   "descriptor",
