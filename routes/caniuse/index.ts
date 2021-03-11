@@ -1,6 +1,6 @@
-// @ts-check
 import { Router } from "express";
 import cors from "cors";
+import { Request, Response } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, seconds } from "../../utils/misc.js";
@@ -16,7 +16,15 @@ caniuse.post("/update", authGithubWebhook(env("CANIUSE_SECRET")), updateRoute);
 
 export default caniuse;
 
-export async function route(req, res) {
+interface Query {
+  feature: string;
+  browsers?: string;
+  versions?: string;
+  format?: "html" | "json";
+}
+type IRequest = Request<any, any, any, Query>;
+
+export async function route(req: IRequest, res: Response) {
   const options = {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",

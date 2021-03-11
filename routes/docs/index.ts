@@ -1,4 +1,3 @@
-// @ts-check
 import { Router } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";

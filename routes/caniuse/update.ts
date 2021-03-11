@@ -1,15 +1,17 @@
-// @ts-check
 import path from "path";
 
 import { legacyDirname } from "../../utils/misc.js";
 import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
 import { cache } from "./lib/index.js";
+import { Request, Response } from "express";
 
 const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
-/** @type {BackgroundTaskQueue<typeof import("./update.worker")>} */
-const taskQueue = new BackgroundTaskQueue(workerFile, "caniuse_update");
+const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
+  workerFile,
+  "caniuse_update",
+);
 
-export default async function route(req, res) {
+export default async function route(req: Request, res: Response) {
   if (req.body.ref !== "refs/heads/main") {
     res.status(400); // Bad request
     res.locals.reason = `ref-not-main`;

@@ -1,9 +1,8 @@
-// @ts-check
 import path from "path";
 
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
+import { Request, Response } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env } from "../../utils/misc.js";
@@ -11,21 +10,28 @@ import { env } from "../../utils/misc.js";
 import { store } from "./lib/store-init.js";
 import metaRoute from "./meta.js";
 import updateRoute from "./update.js";
-import { search } from "./lib/search.js";
+import { search, Options, Query } from "./lib/search.js";
 
 const DATA_DIR = env("DATA_DIR");
 
 const xref = express.Router({ mergeParams: true });
 
 xref.options("/", cors({ methods: ["POST", "GET"] }));
-xref.post("/", bodyParser.json(), cors(), route);
+xref.post("/", express.json(), cors(), route);
 xref.get("/meta/:field?", cors(), metaRoute);
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 
 export default xref;
 
-export function route(req, res) {
+interface RequestBody {
+  options: Partial<Options>;
+  queries: Query[];
+  keys: Query[];
+}
+type IRequest = Request<any, any, RequestBody>;
+
+export function route(req: IRequest, res: Response) {
   const { options } = req.body;
   // req.body.keys for backward compatibility
   const queries = req.body.queries || req.body.keys || [];
@@ -38,7 +44,7 @@ export function route(req, res) {
   res.json(body);
 }
 
-function getErrorCount(results) {
+function getErrorCount(results: [string, any[]][]) {
   let errorCount = 0;
   for (const [, entries] of results) {
     if (entries.length !== 1) {

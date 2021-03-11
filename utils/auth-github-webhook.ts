@@ -1,6 +1,6 @@
 import { createHmac } from "crypto";
 
-import bodyParser from "body-parser";
+import express from "express";
 import { NextFunction, Request, Response } from "express";
 
 type RawRequest = Request<unknown, unknown, Buffer>;
@@ -20,7 +20,7 @@ export default function githubWebhookAuthenticator(secret: string) {
     const msg = "Failed to authenticate GitHub hook Signature";
     res.status(401).send(msg);
   };
-  return [bodyParser.raw({ type: "application/json" }), verifier];
+  return [express.raw({ type: "application/json" }), verifier];
 }
 
 /**

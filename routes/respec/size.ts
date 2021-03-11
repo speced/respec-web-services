@@ -1,6 +1,8 @@
-// @ts-check
-import { existsSync, mkdirSync, writeFileSync, promises as fs } from "fs";
 import path from "path";
+import { appendFile, readFile } from "fs/promises";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+
+import { Request, Response } from "express";
 
 import { env } from "../../utils/misc.js";
 
@@ -15,60 +17,60 @@ if (!existsSync(FILE_PATH)) {
 
 export { getHandler as get };
 export { putHandler as put };
-/**
- * @param {import('express').Request} _req
- * @param {import('express').Response} res
- */
-async function getHandler(_req, res) {
+
+async function getHandler(_req: Request, res: Response) {
   res.setHeader("Content-Type", "text/plain");
   res.setHeader("Cache-Control", "max-age=1800");
-  const text = await fs.readFile(FILE_PATH);
+  const text = await readFile(FILE_PATH);
   res.send(text);
 }
 
+interface Entry {
+  time: number;
+  sha: string;
+  size: number;
+  xferSize: number;
+}
 /**
  * We store last few commits in a buffer and later search it to ensure we don't
  * add duplicates. This is an optimization over reading and parsing entire file
  * from disk and checking for duplicates.
- * @type {Entry[]}
  */
-const lastFewEntries = [];
+const lastFewEntries: Entry[] = [];
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- *
- * @typedef {{ sha: string, time: number, size: number, xferSize: number }} Entry
- * @typedef {{ commits: Entry[] }} Data
- */
-async function putHandler(req, res) {
+interface PutRequestBody {
+  sha: string;
+  size: string;
+  xferSize: string;
+  timestamp: string;
+}
+type IRequest = Request<any, any, PutRequestBody>;
+async function putHandler(req: IRequest, res: Response) {
   if (req.get("Authorization") !== RESPEC_GH_ACTION_SECRET) {
     return res.sendStatus(401);
   }
 
-  /** @type {string} */
-  const sha = req.body.sha;
+  const sha: string = req.body.sha;
   const size = parseInt(req.body.size, 10);
   const xferSize = parseInt(req.body.xferSize, 10);
   const time = parseInt(req.body.timestamp, 10);
   if (!size || !xferSize || !time || !/^([a-f0-9]{40})$/.test(sha)) {
     return res.sendStatus(400);
   }
-  const entry = { sha: sha.slice(0, 10), time, size, xferSize };
+  const entry = { time, sha: sha.slice(0, 10), size, xferSize };
 
   if (!ensureUnique(entry)) {
     return res.sendStatus(412);
   }
 
-  await fs.appendFile(FILE_PATH, `${JSON.stringify(entry)}\n`);
+  await appendFile(FILE_PATH, `${JSON.stringify(entry)}\n`);
   res.sendStatus(201);
 }
 
 /**
  * Make sure we don't end up adding duplicates to data file.
- * @param {Entry} entry
  */
-function ensureUnique(entry) {
+function ensureUnique(entry: Entry) {
   if (lastFewEntries.some(e => e.sha === entry.sha)) {
     return false;
   }
