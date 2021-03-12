@@ -19,13 +19,18 @@ const DATA_DIR = env("DATA_DIR");
 const INPUT_REPO_SRC = "https://github.com/w3c/webref.git";
 const INPUT_REPO_NAME = "webref";
 
-const INPUT_DIR_BASE = path.join(DATA_DIR, INPUT_REPO_NAME, "ed");
-const SPECS_JSON = path.resolve(INPUT_DIR_BASE, "./index.json");
+const INPUT_DIR_BASE = path.join(DATA_DIR, INPUT_REPO_NAME);
 
 const OUT_DIR_BASE = path.join(DATA_DIR, "xref");
 const OUTFILE_BY_TERM = path.resolve(OUT_DIR_BASE, "./xref.json");
 const OUTFILE_BY_SPEC = path.resolve(OUT_DIR_BASE, "./specs.json");
 const OUTFILE_SPECMAP = path.resolve(OUT_DIR_BASE, "./specmap.json");
+
+type Status = "current" | "snapshot";
+const dirToStatus = [
+  ["ed", "current"],
+  ["tr", "snapshot"],
+] as const;
 
 type ParsedDataEntry = ReturnType<typeof parseData>[0];
 
@@ -47,19 +52,30 @@ export default async function main(options: Partial<Options> = {}) {
     return false;
   }
 
-  const { specMap, dfnSources } = await getAllData();
-
   const dataByTerm: DataByTerm = Object.create(null);
   const dataBySpec: DataBySpec = Object.create(null);
-  console.log(`Processing ${dfnSources.length} files...`);
-  for (const source of dfnSources) {
-    try {
-      const terms = parseData(source);
-      updateDataByTerm(terms, dataByTerm);
-      updateDataBySpec(terms, dataBySpec);
-    } catch (error) {
-      console.error(`Error while processing ${source.spec}`);
-      throw error;
+  const specificationsMap = {
+    current: {} as Store["specmap"],
+    snapshot: {} as Store["specmap"],
+  };
+
+  for (const [dir, status] of dirToStatus) {
+    const { specMap, dfnSources } = await getAllData(
+      path.join(INPUT_DIR_BASE, dir),
+    );
+
+    specificationsMap[status] = specMap;
+
+    console.log(`Processing ${dfnSources.length} files...`);
+    for (const source of dfnSources) {
+      try {
+        const terms = parseData(source, status);
+        updateDataByTerm(terms, dataByTerm);
+        updateDataBySpec(terms, dataBySpec);
+      } catch (error) {
+        console.error(`Error while processing ${source.spec}`);
+        throw error;
+      }
     }
   }
 
@@ -68,7 +84,7 @@ export default async function main(options: Partial<Options> = {}) {
   await Promise.all([
     writeFile(OUTFILE_BY_TERM, JSON.stringify(dataByTerm, null, 2)),
     writeFile(OUTFILE_BY_SPEC, JSON.stringify(dataBySpec, null, 2)),
-    writeFile(OUTFILE_SPECMAP, JSON.stringify(specMap, null, 2)),
+    writeFile(OUTFILE_SPECMAP, JSON.stringify(specificationsMap, null, 2)),
   ]);
   return true;
 }
@@ -92,9 +108,9 @@ async function updateInputSource() {
  *
  * @param source content of an dfns data file
  */
-function parseData(source: DfnsJSON) {
+function parseData(source: DfnsJSON, status: Status) {
   const { dfns, spec, series, url } = source;
-  const specMetaData = { spec, shortname: series, url };
+  const specMetaData = { spec, shortname: series, url, status };
   const termData = [];
   for (const dfn of dfns) {
     for (const term of dfn.linkingText) {
@@ -113,7 +129,7 @@ function parseData(source: DfnsJSON) {
 function mapDefinition(
   dfn: InputDfn,
   term: string,
-  spec: Record<"spec" | "shortname" | "url", string>,
+  spec: { spec: string; shortname: string; url: string; status: Status },
 ) {
   const normalizedType = CSS_TYPES_INPUT.has(dfn.type)
     ? `css-${dfn.type}`
@@ -124,7 +140,7 @@ function mapDefinition(
     type: normalizedType,
     spec: spec.spec.toLowerCase(),
     shortname: spec.shortname.toLowerCase(),
-    status: "current",
+    status: spec.status,
     uri: dfn.href.replace(spec.url, ""), // This is full URL to term here
     normative: !dfn.informative,
     for: dfn.for.length > 0 ? dfn.for : undefined,
@@ -165,7 +181,8 @@ function normalizeTerm(term: string, type: string) {
   return term;
 }
 
-async function getAllData() {
+async function getAllData(baseDir: string) {
+  const SPECS_JSON = path.resolve(baseDir, "./index.json");
   console.log(`Getting data from ${SPECS_JSON}`);
   const urlFileContent = await readJSON(SPECS_JSON);
   const data: SpecsJSON[] = urlFileContent.results;
@@ -178,7 +195,7 @@ async function getAllData() {
     specUrls.add(entry.nightly.url);
     if (entry.release?.url) specUrls.add(entry.release.url);
     if (entry.dfns) {
-      const dfnsData = await readJSON(path.join(INPUT_DIR_BASE, entry.dfns));
+      const dfnsData = await readJSON(path.join(baseDir, entry.dfns));
       const dfns: InputDfn[] = dfnsData.dfns;
       dfnSources.push({
         series: entry.series.shortname,

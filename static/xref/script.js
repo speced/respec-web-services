@@ -77,7 +77,8 @@ const caption = document.querySelector('table caption');
 
 let metadata;
 const options = {
-  fields: ['shortname', 'spec', 'uri', 'type', 'for'],
+  fields: ['shortname', 'spec', 'uri', 'type', 'for', 'status'],
+  spec_type: ['draft', 'snapshot'],
   all: true,
 };
 
@@ -137,8 +138,9 @@ function renderResults(entries, query) {
 
   let html = '';
   for (const entry of entries) {
-    const link = metadata.specs[entry.spec].url + entry.uri;
-    const title = metadata.specs[entry.spec].title;
+    const specInfo = metadata.specs[entry.status][entry.spec];
+    const link = new URL(entry.uri, specInfo.url).href;
+    const title = specInfo.title;
     const cite = metadata.types.idl.has(entry.type)
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
@@ -221,7 +223,11 @@ async function ready() {
   const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
   const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
 
-  const shortnames = [...new Set(Object.values(specs).map(s => s.shortname))];
+  const shortnames = [
+    ...new Set(
+      Object.values(specs).flatMap(s => Object.values(s).map(s => s.shortname)),
+    ),
+  ];
   updateInput(form.specs, shortnames.sort());
 
   const allTypes = [].concat(...Object.values(types)).sort();
