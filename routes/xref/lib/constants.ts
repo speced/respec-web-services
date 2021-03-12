@@ -1,4 +1,3 @@
-import { resolve } from "path";
 export const IDL_TYPES = new Set([
   "_IDL_",
   "attribute",
