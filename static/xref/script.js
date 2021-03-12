@@ -75,6 +75,13 @@ const form = document.getElementById('xref-search');
 const output = document.getElementById('output');
 const caption = document.querySelector('table caption');
 
+const specStatusType = {
+  'prefer-draft': ['draft', 'snapshot'],
+  'prefer-snapshot': ['snapshot', 'draft'],
+  'only-draft': ['draft'],
+  'only-snapshot': ['snapshot'],
+};
+
 let metadata;
 const options = {
   fields: ['shortname', 'spec', 'uri', 'type', 'for', 'status'],
@@ -253,6 +260,9 @@ async function ready() {
   });
   form.all.addEventListener('change', ev => {
     options.all = ev.target.checked;
+  });
+  form.spec_type.addEventListener('change', ev => {
+    options.spec_type = specStatusType[ev.target.value];
   });
 
   const { searchParams } = new URL(window.location.href);
