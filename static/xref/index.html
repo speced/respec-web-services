@@ -30,8 +30,19 @@
       </div>
       <button type="submit" disabled>Search</button>
       <div class="field">
+        <label for="spec_type">
+          Spec Status
+          <select name="spec_type">
+            <option value="prefer-draft" selected>Prefer drafts</option>
+            <option value="prefer-snapshot">Prefer snapshots</option>
+            <option value="only-draft">Drafts only</option>
+            <option value="only-snapshot">Snapshots only</option>
+          </select>
+        </label>
+      </div>
+      <div class="field">
         <label> <input type="checkbox" name="all" checked /> Show every match (ignore "for" context). </label>
-        <label> <input type="checkbox" name="advanced" /> Advanced Search. </label>
+        <label style="float: right;"> <input type="checkbox" name="advanced" /> Advanced Search. </label>
       </div>
     </form>
     <section>
