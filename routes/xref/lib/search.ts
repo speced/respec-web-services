@@ -194,6 +194,9 @@ function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   if (!specTypes.length) return data;
 
   const preferredType = specStatusAlias.get(specTypes[0]) || specTypes[0];
+  if (specTypes.length === 1) {
+    return data.filter(entry => entry.status === preferredType);
+  }
   const sorted = [...data].sort((a, b) =>
     a.status === preferredType ? -1 : b.status === preferredType ? 1 : 0,
   );
