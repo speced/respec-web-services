@@ -5,7 +5,7 @@ import cors from "cors";
 import { Request, Response } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
-import { env } from "../../utils/misc.js";
+import { env, ms } from "../../utils/misc.js";
 
 import { store } from "./lib/store-init.js";
 import metaRoute from "./meta.js";
@@ -16,7 +16,7 @@ const DATA_DIR = env("DATA_DIR");
 
 const xref = express.Router({ mergeParams: true });
 
-xref.options("/", cors({ methods: ["POST", "GET"] }));
+xref.options("/", cors({ methods: ["POST"], maxAge: ms("1day") }));
 xref.post("/", express.json(), cors(), route);
 xref.get("/meta/:field?", cors(), metaRoute);
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
