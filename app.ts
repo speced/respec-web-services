@@ -31,9 +31,12 @@ registerViewEngine(app);
 
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
-app.use(helmet({
-  frameguard: false, // Allow for UI inclusion as iframe in ReSpec pill.
-}));
+app.use(
+  helmet({
+    // Allow for UI inclusion as iframe in ReSpec pill.
+    frameguard: false,
+  }),
+);
 
 app.use("/xref", xrefRouter);
 app.use("/caniuse", caniuseRouter);
@@ -41,7 +44,7 @@ app.use("/github/:org/:repo", githubRouter);
 app.use("/respec", respecRouter);
 app.use("/w3c", w3cRouter);
 app.use("/docs", docsRouter);
-app.get("/", (req, res) => res.redirect("/docs/"));
+app.get("/", (_req, res) => res.redirect("/docs/"));
 
 const port = parseInt(process.env.PORT, 10) || 8000;
 app.listen(port, () => console.log(`Listening on port ${port}!`));
