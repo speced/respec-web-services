@@ -10,7 +10,6 @@ import updateRoute from "./update.js";
 
 const caniuse = Router({ mergeParams: true });
 
-caniuse.options("/", cors({ methods: ["GET"] }));
 caniuse.get("/", cors(), route);
 caniuse.post("/update", authGithubWebhook(env("CANIUSE_SECRET")), updateRoute);
 
