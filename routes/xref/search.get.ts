@@ -14,8 +14,7 @@ interface QueryParams {
 type IRequest = Request<never, any, never, QueryParams>;
 
 export default async function route(req: IRequest, res: Response) {
-  const term = req.query.term;
-  const forContext = req.query.for;
+  const { term, for: forContext } = req.query;
   const specs = splitQueryParam(req.query.specs);
   const types = splitQueryParam(req.query.type)?.flat(2) as Query["types"];
 
