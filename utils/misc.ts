@@ -31,7 +31,7 @@ export function seconds(duration: string) {
   const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
   if (matches && matches.length === 3) {
     const value = parseFloat(matches[1]);
-    const unit = matches[2].toLowerCase();
+    const unit = matches[2].toLowerCase() as keyof typeof AS_SECONDS;
     if (value && AS_SECONDS[unit]) {
       return value * AS_SECONDS[unit];
     }

@@ -82,7 +82,7 @@ class Logger {
 
   id: string;
   input: unknown;
-  timings = {};
+  timings: Record<string, Date> = {};
   result: { type: "success" | "failure"; value: unknown };
   stdout: [date: Date, line: string][] = [];
   stderr: [date: Date, line: string][] = [];
