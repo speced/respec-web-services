@@ -28,7 +28,7 @@ interface Response extends Message {
 
 if (!isMainThread) {
   let task: (input: CallRequest["input"]) => Promise<unknown>;
-  parentPort.addListener("message", async (req: Request) => {
+  parentPort!.addListener("message", async (req: Request) => {
     const { id } = req;
 
     if (req.type === "init") {
@@ -36,11 +36,11 @@ if (!isMainThread) {
         const mod = await import(req.modulePath);
         task = mod.default;
         const res: Response = { id, type: "success", result: null };
-        return parentPort.postMessage(res);
+        return parentPort!.postMessage(res);
       } catch (error) {
         const result = serializeError(error);
         const res: Response = { id, type: "failure", result };
-        return parentPort.postMessage(res);
+        return parentPort!.postMessage(res);
       }
     }
 
@@ -48,11 +48,11 @@ if (!isMainThread) {
       try {
         const result = await task(req.input);
         const msg: Response = { id, type: "success", result };
-        return parentPort.postMessage(msg);
+        return parentPort!.postMessage(msg);
       } catch (error) {
         const result = serializeError(error);
         const msg: Response = { id, type: "failure", result };
-        return parentPort.postMessage(msg);
+        return parentPort!.postMessage(msg);
       }
     }
   });
@@ -63,7 +63,7 @@ class Lock {
   private emitter = new EventEmitter();
 
   async acquire() {
-    // If we use if, multiple requests can start at once when the lock is released 
+    // If we use if, multiple requests can start at once when the lock is released
     // (all pending promises resolve at once). The while loop disallows it.
     while (this.isLocked) {
       await new Promise(resolve => this.emitter.once("unlock", resolve));

@@ -34,7 +34,7 @@ export async function regenerateDocs() {
     throw new HTTPError(res.status, error);
   }
 
-  const errorCount = parseInt(res.headers.get("x-errors-count")) || 0;
+  const errorCount = parseInt(res.headers.get("x-errors-count") || "0");
   if (errorCount > 0) {
     throw new Error(`There were ${errorCount} errors in processing.`);
   }

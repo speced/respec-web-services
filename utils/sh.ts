@@ -39,11 +39,11 @@ export default async function sh(
         env: { ...process.env, ...execOptions.env },
         encoding: "utf-8",
       });
-      child.stdout.pipe(split()).on("data", (line: string) => {
+      child.stdout!.pipe(split()).on("data", (line: string) => {
         if (shouldStream) log.out(line);
         stdout.push(line);
       });
-      child.stderr.pipe(split()).on("data", (line: string) => {
+      child.stderr!.pipe(split()).on("data", (line: string) => {
         if (shouldStream) log.err(line);
         stderr.push(line);
       });

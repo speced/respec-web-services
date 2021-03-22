@@ -24,7 +24,7 @@ const mapGroupType = new Map([
 ]);
 
 interface GroupResponse {
-  type?: string;
+  type: string;
   shortname: string;
   id: number;
   name: string;
@@ -42,7 +42,7 @@ interface APIResponse {
 interface Group {
   id: number;
   name: string;
-  URI: string;
+  URI?: string;
 }
 
 export default async function update() {

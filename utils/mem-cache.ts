@@ -18,7 +18,7 @@ export class MemCache<ValueType> {
 
   get(key: string, allowStale?: boolean) {
     if (!this.#map.has(key)) return undefined;
-    const { time, value } = this.#map.get(key);
+    const { time, value } = this.#map.get(key)!;
     if (this.isBusted(time) && !allowStale) {
       this.#map.delete(key);
       return;
@@ -35,7 +35,7 @@ export class MemCache<ValueType> {
    */
   expires(key: string) {
     if (!this.#map.has(key)) return 0;
-    const remaining = this.#ttl - (Date.now() - this.#map.get(key).time);
+    const remaining = this.#ttl - (Date.now() - this.#map.get(key)!.time);
     return Math.max(0, remaining);
   }
 

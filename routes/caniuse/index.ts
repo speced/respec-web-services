@@ -27,7 +27,7 @@ export async function route(req: IRequest, res: Response) {
   const options = {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",
-    versions: parseInt(req.query.versions, 10),
+    versions: parseInt(req.query.versions || "", 10),
     format: req.query.format,
   };
   if (!options.feature) {

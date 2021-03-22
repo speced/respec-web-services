@@ -108,7 +108,7 @@ function groupStats(versions: BrowserVersionData[]): BrowserVersionData[] {
 
   const groupedVersions: SlidingWindow[] = [];
 
-  const window: SlidingWindow = { start: null, end: null, key: null };
+  const window: SlidingWindow = { start: "", end: "", key: "" };
   for (const [version, supportKeys] of olderVersions.reverse()) {
     const key = supportKeys.join(",");
     if (!window.start) {
