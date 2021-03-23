@@ -4,25 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search cross references</title>
+    <link rel="stylesheet" href="https://unpkg.com/@yaireo/tagify@3.23.1/dist/tagify.css" />
     <link rel="stylesheet" href="style.css?v=0e4aa500" />
-    <script src="//unpkg.com/@ungap/custom-elements-builtin"></script>
-    <script src="script.js?v=5998df8f" type="module" defer></script>
+    <script src="https://unpkg.com/@yaireo/tagify@3.23.1/dist/tagify.min.js" defer></script>
+    <script src="script.js?v=5998df8f" type="module"></script>
   </head>
   <body>
     <form action="/xref" id="xref-search" name="xref-search" method="post">
       <div class="field">
         <label for="term">Terms, concept, or WebIDL</label>
-        <input name="term" placeholder="event target, EventTarget"  autocomplete="off" aria-autocomplete="list" required autofocus/>
+        <input name="term" autocomplete="off" required />
       </div>
       <div class="field advanced" hidden>
         <label for="specs">Specification(s) short name</label>
-        <div class="selections" data-for="specs"></div>
-        <input name="specs" is="option-selector" placeholder="html, webidl, infra..." />
+        <input name="specs" />
       </div>
       <div class="field advanced" hidden>
         <label for="types">Types</label>
-        <div class="selections" data-for="types"></div>
-        <input name="types" is="option-selector" placeholder="dfn,interface,_IDL_" />
+        <input name="types" />
       </div>
       <div class="field advanced" hidden>
         <label for="for">For</label>

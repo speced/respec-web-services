@@ -1,79 +1,7 @@
-import { autocomplete } from './autocomplete.js?v=5.0.1';
-import Fuse from './fuse.js?v=6.0.4';
-
-class OptionSelector extends HTMLInputElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ['data-options'];
-  }
-
-  /** @returns {string[]} */
-  get values() {
-    return Array.from(this.selectedValues);
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'data-options') {
-      this.options = [...new Set(newValue.split('|'))];
-      this.fuse = new Fuse(this.options);
-    }
-  }
-
-  connectedCallback() {
-    this.fuse = new Fuse(this.options);
-    const limit = parseInt(this.dataset.limit, 10) || 10;
-    const self = this;
-    autocomplete({
-      input: self,
-      fetch(text, update) {
-        text = text.toLowerCase();
-        const searchResults = self.fuse.search(text).slice(0, limit);
-        const values = searchResults.map(r => r.item);
-        update(values);
-      },
-      onSelect(value) {
-        self.select(value.trim());
-      },
-    });
-
-    const name = this.getAttribute('name');
-    const sel = `.selections[data-for="${name}"]`;
-    this.elSelections = document.querySelector(sel);
-    if (!this.elSelections) {
-      throw new Error(`${sel} not found`);
-    }
-
-    this.selectedValues = new Set();
-    const options = this.dataset.options || '';
-    this.options = Array.from(new Set(options.split('|')));
-  }
-
-  select(value) {
-    const { selectedValues, elSelections, options } = this;
-    if (value === '' || selectedValues.has(value) || !options.includes(value)) {
-      return;
-    }
-
-    this.value = '';
-    selectedValues.add(value);
-
-    const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.textContent = value;
-    button.addEventListener('click', ev => {
-      button.remove();
-      selectedValues.delete(value);
-    });
-    elSelections.appendChild(button);
-  }
-}
-
 const form = document.getElementById('xref-search');
 const output = document.getElementById('output');
 const caption = document.querySelector('table caption');
+const inputs = {};
 
 const specStatusType = {
   'prefer-draft': ['draft', 'snapshot'],
@@ -99,10 +27,11 @@ const exceptionExceptions = new Set([
 ]);
 
 function getFormData() {
-  const { value: term } = form.term;
-  const { values: specs } = form.specs;
-  const { values: types } = form.types;
-  const { value: forContext } = form.for;
+  const getValues = key => inputs[key].value.map(({ value }) => value);
+  const term = getValues('term')[0];
+  const types = getValues('types');
+  const specs = getValues('specs');
+  const forContext = getValues('for')[0];
   return {
     term,
     ...(specs.length && { specs }),
@@ -113,12 +42,12 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === '') return;
+  if (!data.term) return;
 
   const params = new URLSearchParams(Object.entries(data));
   history.replaceState(null, null, `?${params}`);
 
-  const body = { keys: [data], options };
+  const body = { queries: [data], options };
   try {
     const response = await fetch(form.action, {
       method: 'POST',
@@ -221,36 +150,51 @@ function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-async function ready() {
-  const updateInput = (el, values) => {
-    el.setAttribute('placeholder', values.slice(0, 5).join(','));
-    el.dataset.options = values.join('|');
-  };
+/**
+ * Sort terms ignoring any initial non-alpha character.
+ * @example
+ * ```
+ * input = ["-a", "_a", "1a", "A", "a"];
+ * [...input].sort(); // [ "-a", "1a", "A", "_a", "a" ]
+ * [...input].sort(sortTerms); // [ "a", "A", "-a", "_a", "1a" ]
+ * ```
+ */
+function sortTerms(a, b) {
+  return a.replace(/^[^a-z]/i, 'Z').localeCompare(b.replace(/^[^a-z]/i, 'Z'));
+}
 
+async function ready() {
   const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
   const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
 
-  const shortnames = [
-    ...new Set(
-      Object.values(specs).flatMap(s => Object.values(s).map(s => s.shortname)),
-    ),
-  ];
-  updateInput(form.specs, shortnames.sort());
+  const allShortnames = Object.values(specs).flatMap(specsListByStatus =>
+    Object.values(specsListByStatus).map(s => s.shortname),
+  );
+  const allTypes = Object.values(types).flat(2);
 
-  const allTypes = [].concat(...Object.values(types)).sort();
-  updateInput(form.types, allTypes);
+  Object.assign(inputs, {
+    term: new Tagify(form.term, {
+      whitelist: [...terms].sort(sortTerms).sort(() => 0.5 - Math.random()),
+      dropdown: { enabled: 0, maxItems: 20, closeOnSelect: true },
+    }),
 
-  const fuse = new Fuse(terms);
-  autocomplete({
-    input: form.term,
-    fetch(text, update) {
-      const searchResults = fuse.search(text).slice(0, 15);
-      const suggestions = searchResults.map(r => r.item);
-      update(suggestions);
-    },
-    onSelect(suggestion) {
-      this.input.value = suggestion;
-    },
+    specs: new Tagify(form.specs, {
+      whitelist: [...new Set(allShortnames)].sort(),
+      enforceWhitelist: true,
+      dropdown: { enabled: 0, classname: 'tags-look' },
+    }),
+
+    types: new Tagify(form.types, {
+      whitelist: [...new Set(allTypes)].sort(),
+      enforceWhitelist: true,
+      dropdown: { enabled: 0, maxItems: 20, classname: 'tags-look' },
+    }),
+
+    for: new Tagify(form.for, {
+      whitelist: [],
+      enforceWhitelist: false,
+      dropdown: { enabled: 0, classname: 'tags-look' },
+    }),
   });
 
   form.querySelector("button[type='submit']").removeAttribute('disabled');
@@ -314,7 +258,4 @@ async function ready() {
   };
 }
 
-customElements.define('option-selector', OptionSelector, {
-  extends: 'input',
-});
 ready();

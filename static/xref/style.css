@@ -32,7 +32,7 @@ form label {
 form input:not([type='checkbox']) {
   padding: 0.5rem;
   width: 100%;
-  border: 1px solid #005a9c;
+  border: 1px solid #ddd;
   border-radius: 2px;
 }
 
@@ -63,29 +63,6 @@ form button:not(:disabled):focus {
   cursor: pointer;
 }
 
-.selections button {
-  padding: 0.2rem 1rem 0.2rem 0.5rem;
-  margin: 2px 0;
-  margin-right: 0.5rem;
-  position: relative;
-}
-
-.selections button:after {
-  position: absolute;
-  display: flex;
-  right: -0.25rem;
-  top: -0.25rem;
-  background: #f44336;
-  border-radius: 50%;
-  content: 'x';
-  font-size: 60%;
-  padding: 0.2rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  justify-content: center;
-  align-items: center;
-}
-
 table {
   width: 100%;
 }
@@ -108,25 +85,14 @@ table th {
   text-align: left;
 }
 
-.autocomplete {
-  background: white;
-  z-index: 1000;
-  font: 1em/1.5 '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  overflow: auto;
-  border: 1px solid #005a9c;
-}
-
-.autocomplete > li {
-  padding: 0.2rem;
-  list-style: none;
-}
-
-.autocomplete > li:hover {
-  background-color: #005a9c75;
-  cursor: pointer;
-}
-.autocomplete > li.selected {
-  background: #005a9c;
-  color: #fff;
+.tags-look .tagify__dropdown__item {
+  display: inline-block;
+  border-radius: 3px;
+  padding: 0.3em 0.5em;
+  border: 1px solid #ccc;
+  background: #f3f3f3;
+  margin: 0.2em;
+  font-size: 0.85em;
+  color: black;
+  transition: 0s;
 }
