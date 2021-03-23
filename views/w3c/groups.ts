@@ -1,4 +1,5 @@
 import { css, html } from "ucontent";
+import { GroupMeta, Groups, GroupsByType } from "../../routes/w3c/group.js";
 
 const style = css`
   h1,
@@ -44,7 +45,7 @@ const style = css`
   }
 `;
 
-export default ({ groups }) => html`
+export default ({ groups }: { groups: GroupsByType }) => html`
   <!DOCTYPE html>
   <html lang="en">
     <head>
@@ -72,7 +73,7 @@ export default ({ groups }) => html`
   </html>
 `;
 
-function renderTable(groups, caption) {
+function renderTable(groups: Groups, caption: string) {
   return html`
     <table>
       <caption>
@@ -92,7 +93,7 @@ function renderTable(groups, caption) {
   `;
 }
 
-function renderGroup([shortname, { id, URI, name }]) {
+function renderGroup([shortname, { id, URI, name }]: [string, GroupMeta]) {
   return html`
     <tr>
       <td><code>${shortname}</code></td>

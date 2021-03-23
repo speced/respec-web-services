@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "maxNodeModuleJsDepth": 1,
     "target": "ESNext",
     "removeComments": false,
     "allowSyntheticDefaultImports": true,
@@ -17,6 +18,7 @@
     "routes",
     "scripts",
     "utils",
+    "views",
     "@types"
   ]
 }

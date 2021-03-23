@@ -10,16 +10,16 @@ import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
 
-interface GroupMeta {
+export interface GroupMeta {
   id: number;
   name: string;
   URI: string;
 }
 type GroupType = "wg" | "cg" | "ig" | "bg" | "misc";
+export type Groups = Record<string, GroupMeta>;
+export type GroupsByType = Record<GroupType, Groups>;
 
-const groups: Record<GroupType, Record<string, GroupMeta>> = JSON.parse(
-  readFileSync(dataSource, "utf-8"),
-);
+const groups: GroupsByType = JSON.parse(readFileSync(dataSource, "utf-8"));
 const API_KEY = env("W3C_API_KEY");
 
 interface Group {
