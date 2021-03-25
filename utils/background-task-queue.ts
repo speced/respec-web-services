@@ -78,7 +78,7 @@ class Lock {
 }
 
 class Logger {
-  static LOG_DIR = path.join(env("DATA_DIR"), "jobs");
+  static LOG_DIR = path.join(env("LOG_DIR"), "jobs");
 
   id: string;
   input: unknown;

@@ -1,3 +1,5 @@
+import "./utils/dotenv.js";
+
 import path from "path";
 
 import express from "express";
@@ -7,7 +9,6 @@ import helmet from "helmet";
 import * as logging from "./utils/logging.js";
 import { register as registerViewEngine } from "./utils/view-engine.js";
 import { PROJECT_ROOT } from "./utils/constants.js";
-import "./utils/dotenv.js";
 
 import xrefRouter from "./routes/xref/index.js";
 import caniuseRouter from "./routes/caniuse/index.js";
@@ -23,6 +24,7 @@ app.use(compression());
 app.enable("trust proxy"); // for :remote-addr
 app.use(logging.stdout());
 app.use(logging.stderr());
+app.use(logging.access());
 
 app.use(express.static(path.join(PROJECT_ROOT, "/static")));
 
