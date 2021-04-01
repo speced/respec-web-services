@@ -6,6 +6,7 @@ import helmet from "helmet";
 
 import * as logging from "./utils/logging.js";
 import { register as registerViewEngine } from "./utils/view-engine.js";
+import { legacyDirname } from "./utils/misc.js";
 import { PROJECT_ROOT } from "./utils/constants.js";
 import "./utils/dotenv.js";
 
@@ -26,7 +27,7 @@ app.use(logging.stderr());
 
 app.use(express.static(path.join(PROJECT_ROOT, "/static")));
 
-app.set("views", path.join(PROJECT_ROOT, "views"));
+app.set("views", path.join(legacyDirname(import.meta), "views"));
 registerViewEngine(app);
 
 // Security
