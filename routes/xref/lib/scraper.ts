@@ -79,9 +79,7 @@ export default async function main(options: Partial<Options> = {}) {
     }
   }
 
-  for (const term of Object.keys(dataByTerm)) {
-    dataByTerm[term] = uniq(dataByTerm[term]);
-  }
+  compactDataByTerm(dataByTerm);
 
   console.log("Writing processed data files...");
   await mkdir(OUT_DIR_BASE, { recursive: true });
@@ -222,4 +220,10 @@ async function getAllData(baseDir: string) {
 async function readJSON(filePath: string) {
   const text = await readFile(filePath, "utf-8");
   return JSON.parse(text);
+}
+
+function compactDataByTerm(dataByTerm: DataByTerm): void {
+  for (const term of Object.keys(dataByTerm)) {
+    dataByTerm[term] = uniq(dataByTerm[term]);
+  }
 }
