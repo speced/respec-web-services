@@ -79,6 +79,10 @@ export default async function main(options: Partial<Options> = {}) {
     }
   }
 
+  for (const term of Object.keys(dataByTerm)) {
+    dataByTerm[term] = uniq(dataByTerm[term]);
+  }
+
   console.log("Writing processed data files...");
   await mkdir(OUT_DIR_BASE, { recursive: true });
   await Promise.all([
