@@ -4,6 +4,24 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+footer {
+  grid-column-start: -1;
+  text-align: center;
+  background: #fdfdfd;
+  padding: 1em;
+  font-size: smaller;
+}
+
 form,
 form input,
 form button,
