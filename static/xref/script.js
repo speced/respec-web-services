@@ -227,8 +227,18 @@ async function ready() {
     el.dataset.options = values.join('|');
   };
 
-  const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
-  const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
+  const metaURL = new URL(
+    `${form.action}/meta?fields=types,specs,terms,version`,
+  ).href;
+  const { specs, types, terms, version } = await fetch(metaURL).then(res =>
+    res.json(),
+  );
+
+  const lastUpdated = new Date(version);
+  /** @type {HTMLTimeElement} */
+  const lastUpdatedEl = document.getElementById('last-updated-date');
+  lastUpdatedEl.textContent = lastUpdated.toLocaleString();
+  lastUpdatedEl.dateTime = lastUpdated.toISOString();
 
   const shortnames = [
     ...new Set(
