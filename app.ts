@@ -47,5 +47,5 @@ app.use("/w3c", w3cRouter);
 app.use("/docs", docsRouter);
 app.get("/", (_req, res) => res.redirect("/docs/"));
 
-const port = parseInt(process.env.PORT, 10) || 8000;
+const port = parseInt(process.env.PORT || "", 10) || 8000;
 app.listen(port, () => console.log(`Listening on port ${port}!`));

@@ -25,7 +25,10 @@ export interface Issue {
   labels: Label[];
 }
 
-const cache = new DiskCache<Issue>({ ttl: ms("12h"), path: "gh/issues" });
+const cache = new DiskCache<Issue | null>({
+  ttl: ms("12h"),
+  path: "gh/issues",
+});
 
 /**
  * @param owner Repository owner/organization
