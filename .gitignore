@@ -2,7 +2,7 @@
 .env
 .vscode
 data
-ecosystem.config.js
+ecosystem.config.cjs
 node_modules
 public/
 static/docs/index.html
