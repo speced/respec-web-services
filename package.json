@@ -26,7 +26,8 @@
     "build": "tsc",
     "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
     "start:server": "pm2 start ecosystem.config.cjs --env production",
-    "start": "npm run build && npm run update-data-sources && npm run regenerate-docs && node --enable-source-maps build/app.js",
+    "prestart": "npm run build && npm run update-data-sources && npm run regenerate-docs",
+    "start": "node --enable-source-maps build/app.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "update-data-sources": "node build/scripts/update-data-sources.js"
   },
