@@ -22,13 +22,13 @@
     "ucontent": "^2.0.0"
   },
   "scripts": {
-    "build:watch": "tsc -w",
     "build": "tsc",
-    "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
-    "start:server": "pm2 start ecosystem.config.cjs --env production",
+    "build:watch": "tsc -w",
     "prestart": "npm run build && npm run update-data-sources && npm run regenerate-docs",
     "start": "node --enable-source-maps build/app.js",
+    "start:server": "pm2 start ecosystem.config.cjs --env production",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
     "update-data-sources": "node build/scripts/update-data-sources.js"
   },
   "prettier": {
