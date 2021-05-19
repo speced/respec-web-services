@@ -62,13 +62,13 @@ export default ({ groups }: { groups: GroupsByType }) => html`
         List of possible values for
         <a href="/docs/#group"><code>respecConfig.group</code></a>.
       </p>
-      <section class="tables">
+      <div class="tables">
         ${renderTable(groups.wg, "Working Groups")}
         ${renderTable(groups.bg, "Business Groups")}
         ${renderTable(groups.ig, "Interest Groups")}
         ${renderTable(groups.misc, "Miscellaneous Groups")}
         ${renderTable(groups.cg, "Community Groups")}
-      </section>
+      </div>
     </body>
   </html>
 `;
@@ -82,6 +82,7 @@ function renderTable(groups: Groups, caption: string) {
       <thead>
         <tr>
           <th><code>group</code></th>
+          <th>Group ID</th>
           <th>Group Name</th>
         </tr>
       </thead>
@@ -96,6 +97,7 @@ function renderGroup([shortname, { id, URI, name }]: [string, GroupMeta]) {
   return html`
     <tr>
       <td><code>${shortname}</code></td>
+      <td>${id}</td>
       <td>${URI && name ? html`<a href="${URI}">${name}</a>` : ""}</td>
     </tr>
   `;
