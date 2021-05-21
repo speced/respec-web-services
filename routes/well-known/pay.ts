@@ -22,7 +22,7 @@ function random<T>(list: T[]) {
 // https://paymentpointers.org/syntax-resolution/
 function paymentPointerToURL(pointer: string) {
   const url = new URL(pointer.replace(/^\$/, "https://"));
-  if (!url.pathname) {
+  if (url.pathname === "/") {
     url.pathname = "/.well-known/pay";
   }
   return url;
