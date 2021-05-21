@@ -15,6 +15,7 @@ import caniuseRouter from "./routes/caniuse/index.js";
 import githubRouter from "./routes/github/index.js";
 import respecRouter from "./routes/respec/index.js";
 import w3cRouter from "./routes/w3c/index.js";
+import wellKnownRouter from "./routes/well-known/index.js";
 import docsRouter from "./routes/docs/index.js";
 
 const app = express();
@@ -44,6 +45,7 @@ app.use("/caniuse", caniuseRouter);
 app.use("/github/:org/:repo", githubRouter);
 app.use("/respec", respecRouter);
 app.use("/w3c", w3cRouter);
+app.use("/.well-known", wellKnownRouter);
 app.use("/docs", docsRouter);
 app.get("/", (_req, res) => res.redirect("/docs/"));
 
