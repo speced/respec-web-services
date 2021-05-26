@@ -1,3 +1,4 @@
+import "dotenv/config";
 import path from "path";
 
 import express from "express";
@@ -8,7 +9,6 @@ import * as logging from "./utils/logging.js";
 import { register as registerViewEngine } from "./utils/view-engine.js";
 import { legacyDirname } from "./utils/misc.js";
 import { PROJECT_ROOT } from "./utils/constants.js";
-import "./utils/dotenv.js";
 
 import xrefRouter from "./routes/xref/index.js";
 import caniuseRouter from "./routes/caniuse/index.js";

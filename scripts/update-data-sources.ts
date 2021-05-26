@@ -1,4 +1,4 @@
-import "../utils/dotenv.js";
+import "dotenv/config";
 import { mkdir } from "fs/promises";
 import { env } from "../utils/misc.js";
 import caniuse from "../routes/caniuse/lib/scraper.js";
