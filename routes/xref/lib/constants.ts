@@ -2,6 +2,7 @@ export const IDL_TYPES = new Set([
   "_IDL_",
   "attribute",
   "callback",
+  "const",
   "dict-member",
   "dictionary",
   "enum-value",
