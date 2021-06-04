@@ -135,9 +135,7 @@ function mapDefinition(
   term: string,
   spec: { spec: string; shortname: string; url: string; status: Status },
 ) {
-  const normalizedType = CSS_TYPES_INPUT.has(dfn.type)
-    ? `css-${dfn.type}`
-    : dfn.type;
+  const normalizedType = normalizeType(dfn.type);
   return {
     term: normalizeTerm(term, normalizedType),
     isExported: dfn.access === "public",
@@ -170,6 +168,12 @@ function updateDataBySpec(terms: ParsedDataEntry[], data: DataBySpec) {
     if (!data[shortname]) data[shortname] = [];
     data[shortname].push(termData);
   }
+}
+
+function normalizeType(type: string) {
+  if (CSS_TYPES_INPUT.has(type)) return `css-${type}`;
+  if (type === "abstract-op") return "dfn";
+  return type;
 }
 
 function normalizeTerm(term: string, type: string) {
