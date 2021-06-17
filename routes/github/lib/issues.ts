@@ -26,7 +26,7 @@ export interface Issue {
 }
 
 const cache = new DiskCache<Issue | null>({
-  ttl: ms("12h"),
+  ttl: ms("6h"),
   path: "gh/issues",
 });
 
