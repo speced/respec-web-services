@@ -237,7 +237,9 @@ async function ready() {
   const lastUpdated = new Date(version);
   /** @type {HTMLTimeElement} */
   const lastUpdatedEl = document.getElementById('last-updated-date');
-  lastUpdatedEl.textContent = lastUpdated.toLocaleString(undefined, {timeZoneName: 'short'});
+  lastUpdatedEl.textContent = lastUpdated.toLocaleString(undefined, {
+    timeZoneName: 'short',
+  });
   lastUpdatedEl.dateTime = lastUpdated.toISOString();
 
   const shortnames = [
