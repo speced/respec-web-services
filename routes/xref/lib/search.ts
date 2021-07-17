@@ -119,7 +119,7 @@ function filter(query: Query, store: Store, options: Options) {
   if (cachedValue) return cachedValue;
 
   let result: DataEntry[] = [];
-  for (const term of getTermVariations(query)()) {
+  for (const term of getTermVariations(query)) {
     const byTerm = filterByTerm(term, store);
     const bySpec = filterBySpec(byTerm, query);
     const byType = filterByType(bySpec, query);
@@ -143,14 +143,14 @@ function getTermVariations(query: Query) {
 
   if (shouldTreatAsConcept) {
     const term = inputTerm.toLowerCase();
-    return function* () {
+    return (function* () {
       yield term;
       yield* textVariations(term);
-    };
+    })();
   } else {
-    return function* () {
+    return (function* () {
       yield inputTerm;
-    };
+    })();
   }
 }
 
