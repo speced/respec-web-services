@@ -107,6 +107,9 @@ function normalizeQuery(query: Query, options: Options) {
   if (!Array.isArray(query.types) || !query.types.length) {
     query.types = options.types;
   }
+  if (query.term === '""') {
+    query.term = "";
+  }
   if (!query.id) {
     query.id = objectHash(query);
   }
