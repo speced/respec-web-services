@@ -91,7 +91,7 @@ export function searchOne(
 ) {
   normalizeQuery(query, options);
 
-  const filtered = filter(query, store, options);
+  const filtered = cache.getOr(query.id, () => filter(query, store, options));
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
   prefereredData = filterPreferLatestVersion(prefereredData);
@@ -113,17 +113,10 @@ function normalizeQuery(query: Query, options: Options) {
 }
 
 function filter(query: Query, store: Store, options: Options) {
-  const { id } = query;
-
-  const cachedValue = cache.get(id);
-  if (cachedValue) return cachedValue;
-
   const byTerm = filterByTerm(query, store);
   const bySpec = filterBySpec(byTerm, query);
   const byType = filterByType(bySpec, query);
   const result = filterByForContext(byType, query, options);
-
-  cache.set(id, result);
   return result;
 }
 
