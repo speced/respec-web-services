@@ -32,7 +32,7 @@ export class MemCache<ValueType> {
    */
   getOr(key: string, defaultFunction: () => ValueType, allowStale?: boolean) {
     const cachedValue = this.get(key, allowStale);
-    if (cachedValue) return cachedValue;
+    if (cachedValue === undefined) return cachedValue;
     const result = defaultFunction();
     this.set(key, result);
     return result;
