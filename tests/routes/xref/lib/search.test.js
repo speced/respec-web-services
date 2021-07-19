@@ -100,14 +100,14 @@ describe("xref - search", () => {
   });
 
   describe("filter@term", () => {
-    test("empty string", () => {
+    it("empty string", () => {
       const result = [{ uri: "#dom-referrerpolicy" }];
       expect(search({ term: "", for: "ReferrerPolicy" })).toEqual(result);
       expect(search({ term: '""', for: "ReferrerPolicy" })).toEqual(result);
       expect(search({ term: "''", for: "ReferrerPolicy" })).toEqual([]);
     });
 
-    test("textVariations", () => {
+    it("textVariations", () => {
       const types = ["dfn"];
       const result = [{ uri: "webappapis.html#event-handlers" }];
       expect(search({ term: "event handler" })).toEqual(result);
@@ -130,7 +130,7 @@ describe("xref - search", () => {
       ).toEqual([resultWaiAria, resultInfra]);
     });
 
-    test("preserves case based on query.types", () => {
+    it("preserves case based on query.types", () => {
       const baseline = [{ uri: "text.html#TermBaseline" }];
       const baselineInterface = [{ uri: "#baseline" }];
 
@@ -241,7 +241,7 @@ describe("xref - search", () => {
 
   describe("filter@for", () => {
     it("skips filter if for is not provided", () => {
-      expect(search({ term: "[[context]]" })).toHaveLength(0);
+      expect(search({ term: "[[context]]" })).toHaveSize(0);
 
       const result = [{ uri: "#concept-event" }];
       expect(search({ term: "event" })).toEqual(result);
