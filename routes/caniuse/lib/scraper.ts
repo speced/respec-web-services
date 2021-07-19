@@ -74,7 +74,9 @@ async function processFile(fileName: string) {
   for (const [browserName, browserData] of Object.entries(json.stats)) {
     const stats = Object.entries(browserData)
       .sort(([a], [b]) => semverCompare(a, b))
-      .map(([version, status]) => [version, formatStatus(status)])
+      .flatMap(([version, status]) =>
+        version.split("-").map(v => [v, formatStatus(status)]),
+      )
       .reverse() as BrowserVersionData[];
     output.all[browserName] = stats;
     output.summary[browserName] = groupStats(stats);

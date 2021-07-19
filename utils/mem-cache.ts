@@ -26,6 +26,18 @@ export class MemCache<ValueType> {
     return value;
   }
 
+  /**
+   * Get item from cache if exists, otherwise return the value of calling
+   * `defaultFunction` while adding the result to the cache.
+   */
+  getOr(key: string, defaultFunction: () => ValueType, allowStale?: boolean) {
+    const cachedValue = this.get(key, allowStale);
+    if (cachedValue !== undefined) return cachedValue;
+    const result = defaultFunction();
+    this.set(key, result);
+    return result;
+  }
+
   has(key: string, stale?: boolean) {
     return this.get(key, stale) !== undefined;
   }
