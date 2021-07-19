@@ -242,4 +242,32 @@ export default {
       for: ["AbortSignal"],
     },
   ],
+  "user agent": [
+    {
+      type: "dfn",
+      spec: "infra",
+      shortname: "infra",
+      status: "current",
+      uri: "#user-agent",
+      normative: true,
+    },
+    {
+      type: "dfn",
+      spec: "wai-aria-1.2",
+      shortname: "wai-aria",
+      status: "current",
+      uri: "#dfn-user-agent",
+      normative: false,
+    },
+  ],
+  "user agents": [
+    {
+      type: "dfn",
+      spec: "wai-aria-1.2",
+      shortname: "wai-aria",
+      status: "current",
+      uri: "#dfn-user-agent",
+      normative: false,
+    },
+  ],
 };
