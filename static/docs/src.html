@@ -32,6 +32,7 @@
           addWikiLinks,
           fixMarkupPostprocess,
           postProcessEnhance,
+          keepMonetization,
           cleanup,
         ],
         logos: [
@@ -55,8 +56,7 @@
               },
               {
                 value: "Single Page",
-                href:
-                  "https://github.com/w3c/respec-web-services/blob/main/static/docs/src.html",
+                href: "https://github.com/w3c/respec-web-services/blob/main/static/docs/src.html",
               },
             ],
           },
@@ -187,6 +187,11 @@
           const wikiLink = createWikiLink(includeName);
           section.querySelector("h2, h3, h4, h5, h6").append(wikiLink);
         }
+      }
+
+      function keepMonetization() {
+        const meta = document.querySelector(`meta[name~="monetization"]`);
+        meta?.classList.remove("removeOnSave");
       }
 
       function cleanup() {
