@@ -32,9 +32,11 @@
           addWikiLinks,
           fixMarkupPostprocess,
           postProcessEnhance,
-          keepMonetization,
           cleanup,
         ],
+        monetization: {
+          removeOnSave: false,
+        },
         logos: [
           {
             src: "/respec-logo.png",
@@ -187,11 +189,6 @@
           const wikiLink = createWikiLink(includeName);
           section.querySelector("h2, h3, h4, h5, h6").append(wikiLink);
         }
-      }
-
-      function keepMonetization() {
-        const meta = document.querySelector(`meta[name~="monetization"]`);
-        meta?.classList.remove("removeOnSave");
       }
 
       function cleanup() {
