@@ -100,7 +100,7 @@ function formatStatus(status: string) {
  * const N = ['n'];
  * assert.equal(
  *   groupStats([ ['1', Y], ['2', Y], ['3', Y], ['4', Y], ['5', N], ['6', N] ]),
- *   [ ['1', Y], ['2-4', Y], ['5-6', N] ]
+ *   [ ['1', Y], ['2–4', Y], ['5–6', N] ]
  * )
  * ```
  */
@@ -133,7 +133,7 @@ function groupStats(versions: BrowserVersionData[]): BrowserVersionData[] {
   const groupedOlderVersions: BrowserVersionData[] = groupedVersions
     .reverse() // sort newest-first again
     .map(({ start, end, key }) => {
-      const versionRange = end && start !== end ? `${start}-${end}` : start;
+      const versionRange = end && start !== end ? `${start}–${end}` : start;
       const supportKeys = key.split(",");
       return [versionRange, supportKeys];
     });
