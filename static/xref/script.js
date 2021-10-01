@@ -94,6 +94,7 @@ const exceptionExceptions = new Set([
   'EvalError',
   'RangeError',
   'ReferenceError',
+  'SyntaxError',
   'TypeError',
   'URIError',
 ]);
