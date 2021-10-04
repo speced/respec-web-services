@@ -64,7 +64,9 @@ export default async function update() {
   apiUrl.searchParams.set("apikey", env("W3C_API_KEY"));
   apiUrl.searchParams.set("embed", "true");
   apiUrl.searchParams.set("items", "500");
-  const json: APIResponse = await fetch(apiUrl).then(r => r.json());
+  const json = await fetch(apiUrl.href).then(
+    r => r.json() as Promise<APIResponse>,
+  );
 
   console.log("Processing results...");
   for (const group of json._embedded.groups) {

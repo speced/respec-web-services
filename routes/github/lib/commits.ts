@@ -145,9 +145,9 @@ async function getCommitsSince(
     }
   `;
 
-  const data = await requestData(query, { org, repo, since, toRef, cursor });
+  const variables = { org, repo, since, toRef, cursor };
+  const { repository } = await requestData<HistoryResponse>(query, variables);
 
-  const { repository }: HistoryResponse = data;
   const { nodes: commits, pageInfo } = repository.object.history;
   // skip the commit referencing "ref" (on last page)
   if (!pageInfo.hasNextPage) commits.pop();
