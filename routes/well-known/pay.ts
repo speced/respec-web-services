@@ -8,7 +8,7 @@ const PAYMENT_POINTERS = [
 
 export default async function route(_req: Request, res: Response) {
   const paymentPointer = random(PAYMENT_POINTERS);
-  const spsp = await fetch(paymentPointer, {
+  const spsp = await fetch(paymentPointer.href, {
     headers: { accept: "application/spsp4+json" },
   }).then(r => r.json());
   res.json(spsp);

@@ -51,7 +51,7 @@ export async function getIssues(owner: string, name: string, issues: number[]) {
   if (!issuesToFetch.length) return result;
 
   const query = createQuery(issuesToFetch);
-  const response: GraphQLResponse = await requestData(query, { owner, name });
+  const response = await requestData<GraphQLResponse>(query, { owner, name });
   if (!response.repository) {
     return null;
   }

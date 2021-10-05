@@ -95,7 +95,7 @@ async function fetchGroupInfo(
   const url = new URL(id.toString(), "https://api.w3.org/groups/");
   url.searchParams.set("apikey", API_KEY);
 
-  const res = await fetch(url);
+  const res = await fetch(url.href);
   if (!res.ok) {
     throw new HTTPError(res.status, res.statusText);
   }
@@ -107,7 +107,7 @@ async function fetchGroupInfo(
       { href: string }
     >;
   }
-  const json: APIResponse = await res.json();
+  const json = (await res.json()) as APIResponse;
 
   const { name, _links: links } = json;
 
@@ -132,8 +132,10 @@ async function getPatentPolicy(
   const url = new URL(activeCharterApiUrl);
   url.searchParams.set("apikey", API_KEY);
 
-  const res = await fetch(url);
-  const { ["patent-policy"]: patentPolicyURL } = await res.json();
+  const res = await fetch(url.href);
+  const { ["patent-policy"]: patentPolicyURL } = (await res.json()) as {
+    ["patent-policy"]?: string;
+  };
 
   if (!patentPolicyURL || typeof patentPolicyURL !== "string") {
     return null;
