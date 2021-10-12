@@ -18,9 +18,9 @@ const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
 setInterval(() => searchCache.invalidate(), ms("4h"));
 
 export default async function route(req: Request, res: Response) {
-  if (req.body.ref !== "refs/heads/master") {
+  if (req.body.ref !== "refs/heads/main") {
     res.status(400); // Bad request
-    res.locals.reason = `ref-not-master`;
+    res.locals.reason = `ref-not-main`;
     const msg = `Webref payload was for ${req.body.ref}, ignored webhook.`;
     return res.send(msg);
   }
