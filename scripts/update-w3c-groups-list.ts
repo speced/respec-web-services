@@ -7,6 +7,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { writeFile, mkdir } from "fs/promises";
 
+import "dotenv/config";
 import fetch from "node-fetch";
 
 import { env } from "../utils/misc.js";
@@ -116,8 +117,5 @@ const runAsScript = (() => {
 })();
 
 if (runAsScript) {
-  update().catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
+  await update();
 }
