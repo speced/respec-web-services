@@ -21,7 +21,7 @@ const mapGroupType = new Map([
   ["interest group", "ig"],
   ["working group", "wg"],
   // placeholder types (not matched by regular filters) follow:
-  ["_miscellaneous_", "misc"],
+  ["_miscellaneous_", "other"],
 ]);
 
 interface GroupResponse {
@@ -86,15 +86,16 @@ export default async function update() {
   }
 
   // Exceptional groups that don't follow norms like other group types.
-  const miscGroupFilters = [
+  const otherGroupFilters = [
     (group: GroupResponse) => group.shortname === "tag",
+    (group: GroupResponse) => group.shortname === "ab",
   ];
-  for (const filter of miscGroupFilters) {
+  for (const filter of otherGroupFilters) {
     const group = json._embedded.groups.find(filter);
     if (!group) continue;
     const { shortname, id, name, _links: links } = group;
     const url = links.homepage?.href;
-    data["misc"][shortname] = { id, name, URI: url };
+    data["other"][shortname] = { id, name, URI: url };
   }
 
   // Sort results for presentation.
