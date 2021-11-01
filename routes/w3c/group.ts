@@ -15,7 +15,7 @@ export interface GroupMeta {
   name: string;
   URI: string;
 }
-type GroupType = "wg" | "cg" | "ig" | "bg" | "misc";
+type GroupType = "wg" | "cg" | "ig" | "bg" | "other";
 export type Groups = Record<string, GroupMeta>;
 export type GroupsByType = Record<GroupType, Groups>;
 
