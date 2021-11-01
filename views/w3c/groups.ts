@@ -66,7 +66,7 @@ export default ({ groups }: { groups: GroupsByType }) => html`
         ${renderTable(groups.wg, "Working Groups")}
         ${renderTable(groups.bg, "Business Groups")}
         ${renderTable(groups.ig, "Interest Groups")}
-        ${renderTable(groups.other, "Miscellaneous Groups")}
+        ${renderTable(groups.other, "Other Groups")}
         ${renderTable(groups.cg, "Community Groups")}
       </div>
     </body>
