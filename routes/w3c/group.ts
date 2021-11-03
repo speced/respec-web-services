@@ -27,6 +27,7 @@ interface Group {
   shortname: string;
   type: GroupType;
   name: string;
+  wgURI: string;
   URI?: string;
   patentURI?: string;
   patentPolicy?: "PP2017" | "PP2020" | null;
@@ -123,6 +124,7 @@ async function fetchGroupInfo(
     URI: links.homepage?.href,
     patentURI: links["pp-status"]?.href,
     patentPolicy,
+    wgURI: `https://www.w3.org/groups/${type}/${shortname}`
   };
 }
 
