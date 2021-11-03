@@ -55,7 +55,6 @@ export default async function route(req: Request, res: Response) {
   if (type && !groups.hasOwnProperty(type)) {
     return res.status(404).send(`Invalid group type: "${type}".`);
   }
-
   try {
     const requestedType = type as GroupType;
     const groupInfo = await getGroupInfo(shortname, requestedType);
@@ -120,9 +119,9 @@ async function fetchGroupInfo(
     type,
     id,
     name,
-    URI: links.homepage?.href,
     patentURI: links["pp-status"]?.href,
     patentPolicy,
+    wgURI: `https://www.w3.org/groups/${type}/${shortname}`
   };
 }
 
