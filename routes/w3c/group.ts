@@ -120,6 +120,7 @@ async function fetchGroupInfo(
     type,
     id,
     name,
+    URI: links.homepage?.href,
     patentURI: links["pp-status"]?.href,
     patentPolicy,
     wgURI: `https://www.w3.org/groups/${type}/${shortname}`
