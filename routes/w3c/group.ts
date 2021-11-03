@@ -55,7 +55,7 @@ export default async function route(req: Request, res: Response) {
   if (type && !groups.hasOwnProperty(type)) {
     return res.status(404).send(`Invalid group type: "${type}".`);
   }
-  
+
   try {
     const requestedType = type as GroupType;
     const groupInfo = await getGroupInfo(shortname, requestedType);
