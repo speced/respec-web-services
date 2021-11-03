@@ -27,6 +27,7 @@ interface Group {
   shortname: string;
   type: GroupType;
   name: string;
+  wgURI: string;
   URI?: string;
   patentURI?: string;
   patentPolicy?: "PP2017" | "PP2020" | null;
