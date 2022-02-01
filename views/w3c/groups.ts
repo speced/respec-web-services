@@ -81,7 +81,7 @@ function renderTable(groups: Groups, caption: string) {
       </caption>
       <thead>
         <tr>
-          <th>short name (id)</th>
+          <th>Short name</th>
           <th>Group Name</th>
         </tr>
       </thead>
