@@ -64,10 +64,10 @@ export default ({ groups }: { groups: GroupsByType }) => html`
       </p>
       <div class="tables">
         ${renderTable(groups.wg, "Working Groups")}
-        ${renderTable(groups.bg, "Business Groups")}
-        ${renderTable(groups.ig, "Interest Groups")}
-        ${renderTable(groups.other, "Other Groups")}
         ${renderTable(groups.cg, "Community Groups")}
+        ${renderTable(groups.ig, "Interest Groups")}
+        ${renderTable(groups.bg, "Business Groups")}
+        ${renderTable(groups.other, "Other Groups")}
       </div>
     </body>
   </html>
@@ -81,8 +81,7 @@ function renderTable(groups: Groups, caption: string) {
       </caption>
       <thead>
         <tr>
-          <th><code>group</code></th>
-          <th>Group ID</th>
+          <th>short name (id)</th>
           <th>Group Name</th>
         </tr>
       </thead>
@@ -97,7 +96,6 @@ function renderGroup([shortname, { id, URI, name }]: [string, GroupMeta]) {
   return html`
     <tr>
       <td><code>${shortname}</code></td>
-      <td>${id}</td>
       <td>${URI && name ? html`<a href="${URI}">${name}</a>` : ""}</td>
     </tr>
   `;
