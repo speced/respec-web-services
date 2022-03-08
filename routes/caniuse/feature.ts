@@ -11,7 +11,6 @@ export default async function route(req: IRequest, res: Response) {
   const { feature } = req.params;
   const browsers = normalizeBrowsers(req.query.browsers);
 
-  // http://localhost:8000/caniuse/payment-request?browsers=chrome&browsers=firefox
 
   try {
     const data = await getData(feature);
