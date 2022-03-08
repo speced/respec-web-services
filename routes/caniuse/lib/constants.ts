@@ -16,6 +16,8 @@ export const BROWSERS = new Map([
   ['samsung', 'Samsung Internet'],
 ]);
 
+export const DEFAULT_BROWSERS = ["chrome", "firefox", "safari", "edge"];
+
 // Keys from https://github.com/Fyrd/caniuse/blob/master/CONTRIBUTING.md
 export const SUPPORT_TITLES = new Map([
   ['y', 'Supported.'],
@@ -29,7 +31,7 @@ export const SUPPORT_TITLES = new Map([
 
 export type SupportKeys = ("y" | "n" | "a" | string)[];
 // [ version, ['y', 'n'] ]
-export type BrowserVersionData = [string, SupportKeys];
+export type BrowserVersionData = [version: string, support: SupportKeys];
 
 export interface ScraperOutput {
   all: { [browserName: string]: BrowserVersionData[] };
