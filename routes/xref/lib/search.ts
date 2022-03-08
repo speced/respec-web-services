@@ -14,8 +14,8 @@ type Type =
   | "event"
   | "interface"
   | "method"
-  | "typedef"
-  | "permission";
+  | "permission"
+  | "typedef";
 
 export interface DataEntry {
   type: Type;
