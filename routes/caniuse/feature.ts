@@ -11,6 +11,7 @@ export default async function route(req: IRequest, res: Response) {
   const { feature } = req.params;
   const browsers = normalizeBrowsers(req.query.browsers);
 
+
   try {
     const data = await getData(feature);
     if (data === null) {
