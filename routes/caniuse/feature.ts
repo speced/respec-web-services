@@ -13,6 +13,10 @@ export default async function route(req: IRequest, res: Response) {
 
   try {
     const data = await getData(feature);
+    if (data === null) {
+      res.sendStatus(404);
+      return;
+    }
     const result = [];
     for (const browser of browsers) {
       result.push({ browser, ...getBrowserData(data?.all[browser]) });
