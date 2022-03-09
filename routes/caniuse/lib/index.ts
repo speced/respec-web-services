@@ -109,20 +109,20 @@ export async function getData(feature: string) {
   if (cache.has(feature)) {
     return cache.get(feature) as Data;
   }
+
   const file = path.format({
     dir: path.join(DATA_DIR, "caniuse"),
     name: `${feature}.json`,
   });
-
   try {
-    const str = await fs.readFile(file, "utf8");
-    const data: Data = JSON.parse(str);
-    cache.set(feature, data);
-    return data;
-  } catch (error) {
-    console.error(error);
-    return null;
+    await fs.stat(file);
+  } catch (err) {
+    throw new Error(`Feature "${feature}" not found.`);
   }
+  const str = await fs.readFile(file, "utf8");
+  const data: Data = JSON.parse(str);
+  cache.set(feature, data);
+  return data;
 }
 
 function formatAsHTML(
