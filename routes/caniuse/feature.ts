@@ -46,17 +46,15 @@ function getBrowserData(data?: Data["all"][string]) {
   if (!data || !data.length) {
     return { caniuse: "u" };
   }
-  // [version, suportKey[]][]
-  // find the first change in compatibility
+  // Find the first change in compatibility
   let [lastVersion, currentSupportKeys] = data[0];
   // We know the last good support version (which can be even unsupported)
-  // currentSupportKey "y"
   const [key] = currentSupportKeys;
   for (const [version, supportKeys] of data) {
     if (key !== supportKeys[0]) {
-      return { caniuse: key, version: lastVersion };
+      break;
     }
     lastVersion = version;
   }
-  return { caniuse: "u" };
+  return { caniuse: key, version: lastVersion };
 }
