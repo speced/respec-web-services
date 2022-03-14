@@ -26,6 +26,7 @@ interface Query {
 type IRequest = Request<any, any, any, Query>;
 
 export async function route(req: IRequest, res: Response) {
+  res.locals.deprecated = true;
   const options = {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",
