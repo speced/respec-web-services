@@ -3,20 +3,26 @@ export const BROWSERS = new Map([
   ["and_ff", "Firefox (Android)"],
   ["and_uc", "UC Browser (Android)"],
   ["android", "Android"],
-  ["bb", "Blackberry"],
   ["chrome", "Chrome"],
   ["edge", "Edge"],
   ["firefox", "Firefox"],
-  ["ie", "IE"],
   ["ios_saf", "Safari (iOS)"],
-  ["op_mini", "Opera Mini"],
   ["op_mob", "Opera Mobile"],
   ["opera", "Opera"],
   ["safari", "Safari"],
   ["samsung", "Samsung Internet"],
 ]);
 
-export const DEFAULT_BROWSERS = ["chrome", "firefox", "safari", "edge"];
+export const DEFAULT_BROWSERS = [
+  "and_chr",
+  "and_ff",
+  "chrome",
+  "edge",
+  "firefox",
+  "ios_saf",
+  "safari",
+  "samsung",
+];
 
 // Keys from https://github.com/Fyrd/caniuse/blob/master/CONTRIBUTING.md
 export const SUPPORT_TITLES = new Map([
