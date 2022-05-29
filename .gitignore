@@ -4,6 +4,7 @@
 data
 ecosystem.config.cjs
 node_modules
+pnpm-lock.yaml
 public/
 static/docs/index.html
 /build
