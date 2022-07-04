@@ -24,15 +24,25 @@ const mapGroupType = new Map([
   ["_miscellaneous_", "other"],
 ]);
 
-interface GroupResponse {
-  type: string;
-  shortname: string;
+interface GroupBase {
   id: number;
+  shortname: string;
   name: string;
+  discr: string;
+  is_closed: boolean;
   _links: {
     homepage?: { href: string };
   };
 }
+interface GroupResponseWithoutMembers extends GroupBase {
+  discr: "w3cgroup";
+  type: string;
+}
+interface GroupResponseWithMembers extends GroupBase {
+  discr: "tf";
+  members: GroupResponseWithoutMembers[];
+}
+type GroupResponse = GroupResponseWithoutMembers | GroupResponseWithMembers;
 
 interface APIResponse {
   _embedded: {
@@ -69,8 +79,11 @@ export default async function update() {
     r => r.json() as Promise<APIResponse>,
   );
 
-  console.log("Processing results...");
-  for (const group of json._embedded.groups) {
+  const groups = json._embedded.groups.flatMap(g =>
+    g.discr === "w3cgroup" ? g : g.discr === "tf" ? g.members : [],
+  );
+  console.log(`Processing ${groups.length} items...`);
+  for (const group of groups) {
     const type = mapGroupType.get(group.type);
     if (!type) continue;
 
@@ -91,7 +104,7 @@ export default async function update() {
     (group: GroupResponse) => group.shortname === "ab",
   ];
   for (const filter of otherGroupFilters) {
-    const group = json._embedded.groups.find(filter);
+    const group = groups.find(filter);
     if (!group) continue;
     const { shortname, id, name, _links: links } = group;
     const url = links.homepage?.href;
