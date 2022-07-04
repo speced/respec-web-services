@@ -35,7 +35,7 @@ interface GroupBase {
   };
 }
 interface GroupResponseWithoutMembers extends GroupBase {
-  discr: "w3cgroup";
+  discr: "w3cgroup" | "group";
   type: string;
 }
 interface GroupResponseWithMembers extends GroupBase {
@@ -79,9 +79,17 @@ export default async function update() {
     r => r.json() as Promise<APIResponse>,
   );
 
-  const groups = json._embedded.groups.flatMap(g =>
-    g.discr === "w3cgroup" ? g : g.discr === "tf" ? g.members : [],
-  );
+  const groups = json._embedded.groups.flatMap(g => {
+    switch (g.discr) {
+      case "w3cgroup":
+      case "group":
+        return g;
+      case "tf":
+        return g.members;
+      default:
+        return [];
+    }
+  });
   console.log(`Processing ${groups.length} items...`);
   for (const group of groups) {
     const type = mapGroupType.get(group.type);
