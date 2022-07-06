@@ -89,11 +89,16 @@ async function getGroupInfo(
 }
 
 async function fetchGroupInfo(
-  id: GroupMeta["id"],
+  id: GroupMeta["id"] | null,
   shortname: GroupMeta["name"],
   type: GroupType,
 ) {
-  const url = new URL(id.toString(), "https://api.w3.org/groups/");
+  const url = new URL("https://api.w3.org/");
+  if (id) {
+    url.pathname = `/groups/${id}`;
+  } else {
+    url.pathname = `/groups/${type}/${shortname}`;
+  }
   url.searchParams.set("apikey", API_KEY);
 
   const res = await fetch(url.href);
@@ -102,6 +107,7 @@ async function fetchGroupInfo(
   }
 
   interface APIResponse {
+    id: number;
     name: string;
     _links: Record<
       "homepage" | "pp-status" | "active-charter",
@@ -111,6 +117,9 @@ async function fetchGroupInfo(
   const json = (await res.json()) as APIResponse;
 
   const { name, _links: links } = json;
+  if (!id) {
+    id = json.id;
+  }
 
   const patentPolicy = links["active-charter"]?.href
     ? await getPatentPolicy(links["active-charter"].href)
@@ -124,7 +133,7 @@ async function fetchGroupInfo(
     URI: links.homepage?.href,
     patentURI: links["pp-status"]?.href,
     patentPolicy,
-    wgURI: `https://www.w3.org/groups/${type}/${shortname}`
+    wgURI: `https://www.w3.org/groups/${type}/${shortname}`,
   };
 }
 
@@ -163,6 +172,9 @@ function getGroupMeta(shortname: string, requestedType: GroupType) {
     case 1:
       return data[0];
     case 0: {
+      if (requestedType && shortname) {
+        return { type: requestedType, id: null };
+      }
       const msg = `No group with shortname: "${shortname}"${
         requestedType ? ` and type: "${requestedType}"` : ""
       }.`;
