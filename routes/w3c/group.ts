@@ -182,8 +182,8 @@ function getGroupMeta(shortname: string, requestedType: GroupType) {
     }
     default: {
       const msg = `Multiple groups with shortname: "${shortname}".`;
-      const suggestions = data.map(g => `"${g.type}"`).join(", ");
-      const hint = `Specify one of following group types: ${suggestions}.`;
+      const suggestions = data.map(g => `"${g.type}/${shortname}"`).join(", ");
+      const hint = `Please use either: ${suggestions}.`;
       throw new HTTPError(409, `${msg}\n${hint}`);
     }
   }
