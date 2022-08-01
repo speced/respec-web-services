@@ -16,7 +16,7 @@
     "helmet": "^5.1.1",
     "morgan": "^1.10.0",
     "nanoid": "^4.0.0",
-    "node-fetch": "^3.2.9",
+    "node-fetch": "^3.2.10",
     "serialize-error": "^11.0.0",
     "split2": "^4.1.0",
     "ucontent": "^2.0.0"
