@@ -153,8 +153,8 @@ function renderResults(entries, query) {
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
       ? howToCiteMarkup(term, entry)
-      : metadata.types.css.has(entry.type)
-      ? howToCiteCSS(term, entry)
+      : metadata.types.css.has(entry.type) || metadata.types.http.has(entry.type)
+      ? howToCiteAnchor(term, entry)
       : howToCiteTerm(term, entry);
     let row = `
       <tr>
@@ -194,7 +194,7 @@ function howToCiteMarkup(term, entry) {
   return `[^${term}^]`;
 }
 
-function howToCiteCSS(term, entry) {
+function howToCiteAnchor(term, entry) {
   const { type, for: forList } = entry;
   term = escapeHTML(term);
   if (!forList) {
@@ -315,13 +315,13 @@ async function ready() {
     advancedSearchToggle.checked = true;
     advancedSearchToggle.onchange();
   }
-
   metadata = {
     types: {
       idl: new Set(types.idl),
       concept: new Set(types.concept),
       markup: new Set(types.markup),
       css: new Set(types.css),
+      http: new Set(types.http),
     },
     specs,
     terms,
