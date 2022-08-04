@@ -28,12 +28,13 @@ export const CSS_TYPES_INPUT = new Set([
   "selector",
 ]);
 export const CSS_TYPES = new Set([...CSS_TYPES_INPUT].map(t => `css-${t}`));
-
+export const HTTP_TYPES = new Set(["http-header"]);
 export const SUPPORTED_TYPES = new Set([
   ...IDL_TYPES,
   ...CONCEPT_TYPES,
   ...MARKUP_TYPES,
   ...CSS_TYPES,
+  ...HTTP_TYPES,
 ]);
 
 export const QUERY_CACHE_DURATION = 3 * 24 * 60 * 60 * 1000; // 3 days

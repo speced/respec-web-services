@@ -5,6 +5,7 @@ import {
   CONCEPT_TYPES,
   CSS_TYPES,
   MARKUP_TYPES,
+  HTTP_TYPES,
 } from "./lib/constants.js";
 import { store } from "./lib/store-init.js";
 
@@ -61,6 +62,7 @@ function getData() {
       concept: [...CONCEPT_TYPES],
       markup: [...MARKUP_TYPES],
       css: [...CSS_TYPES],
+      http: [...HTTP_TYPES]
     },
     specs: store.specmap,
     terms,

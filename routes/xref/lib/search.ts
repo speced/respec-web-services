@@ -12,6 +12,7 @@ type Type =
   | "enum-value"
   | "enum"
   | "event"
+  | "http-header"
   | "interface"
   | "method"
   | "permission"
