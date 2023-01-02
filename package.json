@@ -52,7 +52,7 @@
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.14",
     "@types/morgan": "^1.9.3",
-    "@types/node": "^18.11.13",
+    "@types/node": "^18.11.18",
     "@types/split2": "^3.2.1",
     "jasmine": "^4.5.0",
     "simple-git-hooks": "^2.8.1",
