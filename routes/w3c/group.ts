@@ -63,7 +63,7 @@ export default async function route(req: Request, res: Response) {
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
   } catch (error) {
-    const { statusCode, message } = error;
+    const { statusCode = 500, message } = error;
     res.set("Content-Type", "text/plain");
     res.status(statusCode).send(message);
   }
@@ -101,11 +101,6 @@ async function fetchGroupInfo(
   }
   url.searchParams.set("apikey", API_KEY);
 
-  const res = await fetch(url.href);
-  if (!res.ok) {
-    throw new HTTPError(res.status, res.statusText);
-  }
-
   interface APIResponse {
     id: number;
     name: string;
@@ -114,7 +109,18 @@ async function fetchGroupInfo(
       { href: string }
     >;
   }
-  const json = (await res.json()) as APIResponse;
+  try {
+    const res = await fetch(url.href);
+    if (!res.ok) {
+      throw new HTTPError(res.status, res.statusText);
+    }
+    var json = (await res.json()) as APIResponse;
+  } catch (error) {
+    throw new HTTPError(
+      error.statusCode || 500,
+      error.message.replaceAll(API_KEY, "***"),
+    );
+  }
 
   const { name, _links: links } = json;
   if (!id) {
