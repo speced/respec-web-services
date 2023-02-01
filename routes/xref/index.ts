@@ -17,7 +17,7 @@ const DATA_DIR = env("DATA_DIR");
 const xref = express.Router({ mergeParams: true });
 
 xref.options("/", cors({ methods: ["POST"], maxAge: ms("1day") }));
-xref.post("/", express.json(), cors(), route);
+xref.post("/", express.json({ limit: '2mb' }), cors(), route);
 xref.get("/meta/:field?", cors(), metaRoute);
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
