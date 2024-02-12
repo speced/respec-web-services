@@ -146,6 +146,7 @@ function mapDefinition(
     uri: dfn.href.replace(spec.url, ""), // This is full URL to term here
     normative: !dfn.informative,
     for: dfn.for.length > 0 ? dfn.for : undefined,
+    htmlProse: dfn.htmlProse,
   };
 }
 

@@ -26,6 +26,7 @@ export interface DataEntry {
   uri: string;
   normative: boolean;
   for?: string[];
+  htmlProse?: string;
 }
 
 type SpecType = DataEntry["status"] | "draft" | "official";
@@ -58,7 +59,7 @@ const specStatusAlias = new Map([
 ]);
 
 export const defaultOptions: Options = {
-  fields: ["shortname", "spec", "type", "for", "normative", "uri"],
+  fields: ["shortname", "spec", "type", "for", "normative", "uri", "htmlProse"],
   spec_type: ["draft", "official"],
   types: [],
 };

@@ -24,7 +24,8 @@ describe("xref - utils", () => {
     });
     expect(utils.pickFields(object, ["foo", "nope", "bar"])).toEqual({
       foo: object.foo,
-      bar: object.foo,
+      bar: object.bar,
+      nope: undefined,
     });
     expect(utils.pickFields(object, ["bar"]).bar).toBe(object.bar);
   });
