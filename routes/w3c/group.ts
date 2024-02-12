@@ -20,7 +20,6 @@ export type Groups = Record<string, GroupMeta>;
 export type GroupsByType = Record<GroupType, Groups>;
 
 const groups: GroupsByType = JSON.parse(readFileSync(dataSource, "utf-8"));
-const API_KEY = env("W3C_API_KEY");
 
 interface Group {
   id: number;
@@ -99,7 +98,6 @@ async function fetchGroupInfo(
   } else {
     url.pathname = `/groups/${type}/${shortname}`;
   }
-  url.searchParams.set("apikey", API_KEY);
 
   interface APIResponse {
     id: number;
@@ -118,7 +116,7 @@ async function fetchGroupInfo(
   } catch (error) {
     throw new HTTPError(
       error.statusCode || 500,
-      error.message.replaceAll(API_KEY, "***"),
+      error.message
     );
   }
 
@@ -147,7 +145,6 @@ async function getPatentPolicy(
   activeCharterApiUrl: string,
 ): Promise<Required<Group["patentPolicy"]>> {
   const url = new URL(activeCharterApiUrl);
-  url.searchParams.set("apikey", API_KEY);
 
   const res = await fetch(url.href);
   const { ["patent-policy"]: patentPolicyURL } = (await res.json()) as {
