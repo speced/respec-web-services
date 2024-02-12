@@ -41,6 +41,8 @@ export default {
       shortname: "font-metrics-api",
       status: "current",
       uri: "#baseline",
+      normative: true,
+      htmlProse: "test html Prose",
     },
   ],
   baseline: [
