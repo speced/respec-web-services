@@ -60,9 +60,9 @@ describe("xref - search", () => {
             spec: "font-metrics-api-1",
             type: "interface",
             uri: "#baseline",
-	    normative: true,
-	    htmlProse: "test html Prose",
-	    for: undefined,
+            normative: true,
+            htmlProse: "test html Prose",
+            for: undefined,
           },
         ]);
       });
