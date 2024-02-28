@@ -197,12 +197,9 @@ async function getAllData(baseDir: string) {
   const data: SpecsJSON[] = urlFileContent.results;
 
   const specMap: Store["specmap"] = Object.create(null);
-  const specUrls = new Set<string>();
   const dfnSources: DfnsJSON[] = [];
 
   for (const entry of data) {
-    specUrls.add(entry.nightly.url);
-    if (entry.release?.url) specUrls.add(entry.release.url);
     if (entry.dfns) {
       const dfnsData = await readJSON(path.join(baseDir, entry.dfns));
       const dfns: InputDfn[] = dfnsData.dfns;
@@ -215,7 +212,7 @@ async function getAllData(baseDir: string) {
     }
 
     specMap[entry.shortname.toLowerCase()] = {
-      url: entry.nightly.url || entry.release?.url || entry.url,
+      url: entry.nightly?.url || entry.release?.url || entry.url,
       title: entry.title,
       shortname: entry.series.shortname.toLowerCase(),
     };
