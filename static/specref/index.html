@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Search Specref</title>
+    <link rel="stylesheet" href="style.css?v=75d77bcc" />
+    <script src="script.js?v=7da9a9ee" defer></script>
+  </head>
+  <body>
+    <header>
+      <p>
+        An Open-Source, Community-Maintained Database of Web Standards & Related
+        References.
+      </p>
+    </header>
+    <main>
+      <form action="https://www.specref.org/">
+        <div class="field">
+          <input
+            name="q"
+            type="search"
+            aria-label="Search"
+            autocomplete="off"
+            placeholder="Keywords, titles, authors, urls…"
+            required
+            autofocus
+          />
+          <button type="submit">Search</button>
+        </div>
+        <label class="options">
+          <input type="checkbox" name="includeAllVersions" /> Include all
+          versions.
+        </label>
+      </form>
+      <output></output>
+    </main>
+  </body>
+</html>

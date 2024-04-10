@@ -94,6 +94,7 @@ const exceptionExceptions = new Set([
   'EvalError',
   'RangeError',
   'ReferenceError',
+  'SyntaxError',
   'TypeError',
   'URIError',
 ]);
@@ -152,8 +153,8 @@ function renderResults(entries, query) {
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
       ? howToCiteMarkup(term, entry)
-      : metadata.types.css.has(entry.type)
-      ? howToCiteCSS(term, entry)
+      : metadata.types.css.has(entry.type) || metadata.types.http.has(entry.type)
+      ? howToCiteAnchor(term, entry)
       : howToCiteTerm(term, entry);
     let row = `
       <tr>
@@ -193,7 +194,7 @@ function howToCiteMarkup(term, entry) {
   return `[^${term}^]`;
 }
 
-function howToCiteCSS(term, entry) {
+function howToCiteAnchor(term, entry) {
   const { type, for: forList } = entry;
   term = escapeHTML(term);
   if (!forList) {
@@ -227,8 +228,21 @@ async function ready() {
     el.dataset.options = values.join('|');
   };
 
-  const metaURL = new URL(`${form.action}/meta?fields=types,specs,terms`).href;
-  const { specs, types, terms } = await fetch(metaURL).then(res => res.json());
+  const metaURL = new URL(
+    `${form.action}/meta?fields=types,specs,terms,version`,
+  ).href;
+  const { specs, types, terms, version } = await fetch(metaURL).then(res =>
+    res.json(),
+  );
+
+  const lastUpdated = new Date(version);
+  /** @type {HTMLTimeElement} */
+  const lastUpdatedEl = document.getElementById('last-updated-date');
+  lastUpdatedEl.textContent = lastUpdated.toLocaleString('default', {
+    dateStyle: 'long',
+    timeStyle: 'long',
+  });
+  lastUpdatedEl.dateTime = lastUpdated.toISOString();
 
   const shortnames = [
     ...new Set(
@@ -301,13 +315,13 @@ async function ready() {
     advancedSearchToggle.checked = true;
     advancedSearchToggle.onchange();
   }
-
   metadata = {
     types: {
       idl: new Set(types.idl),
       concept: new Set(types.concept),
       markup: new Set(types.markup),
       css: new Set(types.css),
+      http: new Set(types.http),
     },
     specs,
     terms,

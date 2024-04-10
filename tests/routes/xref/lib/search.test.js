@@ -60,6 +60,9 @@ describe("xref - search", () => {
             spec: "font-metrics-api-1",
             type: "interface",
             uri: "#baseline",
+            normative: true,
+            htmlProse: "test html Prose",
+            for: undefined,
           },
         ]);
       });
@@ -100,23 +103,37 @@ describe("xref - search", () => {
   });
 
   describe("filter@term", () => {
-    test("empty string", () => {
+    it("empty string", () => {
       const result = [{ uri: "#dom-referrerpolicy" }];
       expect(search({ term: "", for: "ReferrerPolicy" })).toEqual(result);
       expect(search({ term: '""', for: "ReferrerPolicy" })).toEqual(result);
       expect(search({ term: "''", for: "ReferrerPolicy" })).toEqual([]);
     });
 
-    test("textVariations", () => {
+    it("textVariations", () => {
+      const types = ["dfn"];
       const result = [{ uri: "webappapis.html#event-handlers" }];
       expect(search({ term: "event handler" })).toEqual(result);
       expect(search({ term: "event handlers" })).toEqual([]);
-      expect(search({ term: "event handlers", types: ["dfn"] })).toEqual(
-        result,
+      expect(search({ term: "event handlers", types })).toEqual(result);
+
+      const resultInfra = { uri: "#user-agent" };
+      const resultWaiAria = { uri: "#dfn-user-agent" };
+      expect(
+        search({ term: "user agents", specs: [["infra"]], types }),
+      ).toEqual([resultInfra]);
+      expect(search({ term: "user agent", specs: [["infra"]], types })).toEqual(
+        [resultInfra],
       );
+      expect(
+        search({ term: "user agents", specs: [["infra", "wai-aria"]], types }),
+      ).toEqual([resultWaiAria]);
+      expect(
+        search({ term: "user agent", specs: [["infra", "wai-aria"]], types }),
+      ).toEqual([resultWaiAria, resultInfra]);
     });
 
-    test("preserves case based on query.types", () => {
+    it("preserves case based on query.types", () => {
       const baseline = [{ uri: "text.html#TermBaseline" }];
       const baselineInterface = [{ uri: "#baseline" }];
 
@@ -227,7 +244,7 @@ describe("xref - search", () => {
 
   describe("filter@for", () => {
     it("skips filter if for is not provided", () => {
-      expect(search({ term: "[[context]]" })).toHaveLength(0);
+      expect(search({ term: "[[context]]" })).toHaveSize(0);
 
       const result = [{ uri: "#concept-event" }];
       expect(search({ term: "event" })).toEqual(result);

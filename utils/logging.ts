@@ -57,9 +57,13 @@ const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
   const searchParams = url.search
     ? decodeURIComponent(url.search).replace(/(\s+)/g, encodeURIComponent)
     : "";
-  const color = status < 300 ? "green" : status >= 400 ? "red" : "yellow";
+  let color =
+    status < 300 ? chalk.green : status >= 400 ? chalk.red : chalk.yellow;
+  if (res.locals.deprecated) {
+    color = color.underline;
+  }
   const request =
-    chalk[color](`${method!.padEnd(4)} ${status}`) +
+    color(`${method!.padEnd(4)} ${status}`) +
     ` ${chalk.blueBright(url.pathname)}${chalk.italic.gray(searchParams)}`;
 
   let formattedReferrer: string | undefined;

@@ -74,7 +74,9 @@ async function processFile(fileName: string) {
   for (const [browserName, browserData] of Object.entries(json.stats)) {
     const stats = Object.entries(browserData)
       .sort(([a], [b]) => semverCompare(a, b))
-      .map(([version, status]) => [version, formatStatus(status)])
+      .flatMap(([version, status]) =>
+        version.split("-").map(v => [v, formatStatus(status)]),
+      )
       .reverse() as BrowserVersionData[];
     output.all[browserName] = stats;
     output.summary[browserName] = groupStats(stats);
@@ -98,7 +100,7 @@ function formatStatus(status: string) {
  * const N = ['n'];
  * assert.equal(
  *   groupStats([ ['1', Y], ['2', Y], ['3', Y], ['4', Y], ['5', N], ['6', N] ]),
- *   [ ['1', Y], ['2-4', Y], ['5-6', N] ]
+ *   [ ['1', Y], ['2–4', Y], ['5–6', N] ]
  * )
  * ```
  */
@@ -108,7 +110,7 @@ function groupStats(versions: BrowserVersionData[]): BrowserVersionData[] {
 
   const groupedVersions: SlidingWindow[] = [];
 
-  const window: SlidingWindow = { start: null, end: null, key: null };
+  const window: SlidingWindow = { start: "", end: "", key: "" };
   for (const [version, supportKeys] of olderVersions.reverse()) {
     const key = supportKeys.join(",");
     if (!window.start) {
@@ -131,7 +133,7 @@ function groupStats(versions: BrowserVersionData[]): BrowserVersionData[] {
   const groupedOlderVersions: BrowserVersionData[] = groupedVersions
     .reverse() // sort newest-first again
     .map(({ start, end, key }) => {
-      const versionRange = end && start !== end ? `${start}-${end}` : start;
+      const versionRange = end && start !== end ? `${start}–${end}` : start;
       const supportKeys = key.split(",");
       return [versionRange, supportKeys];
     });

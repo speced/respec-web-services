@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { getToken, updateRateLimit } from "./tokens.js";
+import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
 
 const ENDPOINT = "https://api.github.com/graphql";
 
@@ -15,7 +15,8 @@ const getFullQuery = (query: string) => {
   return query.replace("{", `{${rateLimitQuery}`);
 };
 
-export async function requestData(query: string, variables?: object) {
+type Json = Record<string, any>;
+export async function requestData<T = Json>(query: string, variables?: object) {
   const body = { query: getFullQuery(query), variables };
   const token = getToken();
   const response = await fetch(ENDPOINT, {
@@ -26,12 +27,14 @@ export async function requestData(query: string, variables?: object) {
     },
     body: JSON.stringify(body),
   });
-  const json = await response.json();
+
+  type GraphqlResponse<T> = { data: T & { _rateLimit: RateLimit } };
+  const json = (await response.json()) as GraphqlResponse<T>;
 
   const { _rateLimit, ...data } = json.data;
 
   _rateLimit.resetAt = new Date(_rateLimit.resetAt);
   updateRateLimit(token, _rateLimit);
 
-  return data;
+  return data as unknown as T;
 }

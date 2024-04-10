@@ -2,8 +2,9 @@
 .env
 .vscode
 data
-ecosystem.config.js
+ecosystem.config.cjs
 node_modules
+pnpm-lock.yaml
 public/
 static/docs/index.html
 /build

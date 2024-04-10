@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "maxNodeModuleJsDepth": 1,
     "target": "ESNext",
     "removeComments": false,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "node",
     "noImplicitThis": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
     "module": "esnext",
     "outDir": "build",
     "sourceMap": true,
@@ -17,6 +20,7 @@
     "routes",
     "scripts",
     "utils",
+    "views",
     "@types"
   ]
 }

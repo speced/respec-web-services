@@ -18,12 +18,24 @@ export class MemCache<ValueType> {
 
   get(key: string, allowStale?: boolean) {
     if (!this.#map.has(key)) return undefined;
-    const { time, value } = this.#map.get(key);
+    const { time, value } = this.#map.get(key)!;
     if (this.isBusted(time) && !allowStale) {
       this.#map.delete(key);
       return;
     }
     return value;
+  }
+
+  /**
+   * Get item from cache if exists, otherwise return the value of calling
+   * `defaultFunction` while adding the result to the cache.
+   */
+  getOr(key: string, defaultFunction: () => ValueType, allowStale?: boolean) {
+    const cachedValue = this.get(key, allowStale);
+    if (cachedValue !== undefined) return cachedValue;
+    const result = defaultFunction();
+    this.set(key, result);
+    return result;
   }
 
   has(key: string, stale?: boolean) {
@@ -35,7 +47,7 @@ export class MemCache<ValueType> {
    */
   expires(key: string) {
     if (!this.#map.has(key)) return 0;
-    const remaining = this.#ttl - (Date.now() - this.#map.get(key).time);
+    const remaining = this.#ttl - (Date.now() - this.#map.get(key)!.time);
     return Math.max(0, remaining);
   }
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   The source for this document is at:
-  https://github.com/marcoscaceres/respec.org/edit/gh-pages/static/docs/src.html
+  https://github.com/w3c/respec-web-services/blob/main/static/docs/src.html
 -->
 <html>
   <head>
@@ -21,7 +21,6 @@
             url: "https://github.com/w3c/respec",
           },
         ],
-        license: "cc0",
         lint: {
           "no-http-props": false,
           "check-punctuation": true,
@@ -34,11 +33,14 @@
           postProcessEnhance,
           cleanup,
         ],
+        monetization: {
+          removeOnSave: false,
+        },
+        darkMode: true,
         logos: [
           {
             src: "/respec-logo.png",
             alt: "ReSpec logo",
-            width: 204,
             height: 120,
             url: "https://respec.org/",
           },
@@ -55,8 +57,7 @@
               },
               {
                 value: "Single Page",
-                href:
-                  "https://github.com/marcoscaceres/respec.org/tree/HEAD/static/docs",
+                href: "https://github.com/w3c/respec-web-services/blob/main/static/docs/src.html",
               },
             ],
           },
@@ -208,11 +209,9 @@
   <body>
     <section id="abstract">
       <p>
-        ReSpec is a JS library that makes it easier to write technical
-        specifications, or documents that tend to be technical in nature in
-        general. It was originally designed for the purpose of writing W3C
-        specifications, but has since grown to be able to support other outputs
-        as well.
+        ReSpec makes it easier to write technical documents. It was originally
+        designed for writing W3C specifications, but now supports many output
+        formats.
       </p>
     </section>
     <section data-max-toc="3" data-include-name="ReSpec-Editor's-Guide">
@@ -228,7 +227,6 @@
     <section data-max-toc="1" data-include="markdown"></section>
     <section>
       <h2>Configuration Options</h2>
-      <section data-include="a11y"></section>
       <section data-include="addSectionLinks"></section>
       <section data-include="authors"></section>
       <section data-include="caniuse"></section>
@@ -242,11 +240,13 @@
       <section data-include="license"></section>
       <section data-include-name="lint" data-max-toc="2">
         <section data-include="lint" data-include-replace="true"></section>
-        <section data-include="no-http-props"></section>
-        <section data-include="local-refs-exist"></section>
-        <section data-include="no-headingless-sections"></section>
-        <section data-include="no-unused-vars"></section>
+        <section data-include="a11y"></section>
         <section data-include="check-punctuation"></section>
+        <section data-include="local-refs-exist"></section>
+        <section data-include="no-captionless-tables"></section>
+        <section data-include="no-headingless-sections"></section>
+        <section data-include="no-http-props"></section>
+        <section data-include="no-unused-vars"></section>
         <section data-include="privsec-section"></section>
         <section data-include="wpt-tests-exist"></section>
       </section>
@@ -255,6 +255,7 @@
       <section data-include="maxTocLevel"></section>
       <section data-include="mdn"></section>
       <section data-include="modificationDate"></section>
+      <section data-include="monetization"></section>
       <section data-include="noTOC"></section>
       <section data-include="otherLinks"></section>
       <section data-include="pluralize"></section>
@@ -266,25 +267,25 @@
       <section data-include="subjectPrefix"></section>
       <section data-include="subtitle"></section>
       <section data-include="testSuiteURI"></section>
-      <section data-include="tocIntroductory"></section>
       <section data-include="xref"></section>
     </section>
     <section>
       <h2>W3C Specific Configuration Options</h2>
       <section data-include="additionalCopyrightHolders"></section>
-      <section data-include="addPatentNote"></section>
       <section data-include="alternateFormats"></section>
       <section data-include="canonicalURI"></section>
       <section data-include="charterDisclosureURI"></section>
       <section data-include="copyrightStart"></section>
       <section data-include="crEnd"></section>
+      <section data-include="darkMode"></section>
       <section data-include="doJsonLd"></section>
       <section data-include="errata"></section>
       <section data-include="group"></section>
       <section data-include="implementationReportURI"></section>
-      <section data-include="lcEnd"></section>
+      <section data-include="latestVersion"></section>
       <section data-include="level"></section>
       <section data-include="noRecTrack"></section>
+      <section data-include="prEnd"></section>
       <section data-include="prevED"></section>
       <section data-include="previousDiffURI"></section>
       <section data-include="previousMaturity"></section>
@@ -292,7 +293,6 @@
       <section data-include="prevRecShortname"></section>
       <section data-include="prevRecURI"></section>
       <section data-include="submissionCommentNumber"></section>
-      <section data-include="wgPatentPolicy"></section>
       <section data-include="wgPublicList"></section>
     </section>
     <section id="special-section-ids">
@@ -318,20 +318,27 @@
       <section data-include="appendix"></section>
       <section data-include="ednote"></section>
       <section data-include="example"></section>
+      <section data-include="exclude"></section>
+      <section data-include="data-export"></section>
       <section data-include="informative"></section>
-      <section data-include="introductory"></section>
       <section data-include="issue"></section>
       <section data-include="no-link-warnings"></section>
       <section data-include="nohighlight"></section>
-      <section data-include="nolink"></section>
+      <section data-include="nolinks"></section>
       <section data-include="note"></section>
       <section data-include="notoc-class"></section>
+      <section data-include="numbered"></section>
       <section data-include="override"></section>
+      <section data-include="permission"></section>
       <section data-include="practice"></section>
       <section data-include="practicedesc"></section>
       <section data-include="practicelab"></section>
       <section data-include="remove"></section>
       <section data-include="removeOnSave"></section>
+      <section>
+        <h3>W3C Specific</h3>
+        <section data-include="updateable-rec" id="updateable-rec-class"></section>
+      </section>
     </section>
     <section>
       <h2>HTML Attributes</h2>
@@ -339,7 +346,6 @@
       <section data-include="data-cite"></section>
       <section data-include="data-dfn-for"></section>
       <section data-include="data-dfn-type"></section>
-      <section data-include="data-export"></section>
       <section data-include="data-format"></section>
       <section data-include="data-include"></section>
       <section data-include="data-include-format"></section>
@@ -355,6 +361,7 @@
       <section data-include="data-oninclude"></section>
       <section data-include="data-sort"></section>
       <section data-include="data-tests"></section>
+      <section data-include="data-type"></section>
       <section data-include="dir"></section>
       <section data-include="lang"></section>
     </section>
@@ -363,8 +370,14 @@
       <section data-include="rs-changelog"></section>
     </section>
     <section>
+      <h2>Special properties</h2>
+      <section data-include="document.respec"></section>
+    </section>
+    <section>
       <h2>Deprecated Options</h2>
+      <section data-include="addPatentNote"></section>
       <section data-include="processVersion"></section>
+      <section data-include="tocIntroductory"></section>
       <section data-include="wg"></section>
       <section data-include="wgId"></section>
       <section data-include="wgPatentURI"></section>
@@ -375,6 +388,10 @@
     <section class="appendix" data-max-toc="1" data-include-name="Errors-FAQ">
       <h2>Common Errors</h2>
       <section data-include="Errors-FAQ" data-include-replace="true"></section>
+    </section>
+    <section class="appendix" data-max-toc="2">
+      <h2>Developers Guide</h2>
+      <section data-include="Developers-Guide" data-include-replace="true"></section>
     </section>
     <section>
       <h2>Editing this document</h2>
@@ -387,13 +404,13 @@
         <li>
           The
           <a
-            href="https://github.com/marcoscaceres/respec.org/edit/gh-pages/static/docs/src.html"
+            href="https://github.com/w3c/respec-web-services/edit/main/static/docs/src.html"
             >src.html</a
           >
           for this document provides the structure. The `src.html` is available
           in the
-          <a href="https://github.com/marcoscaceres/respec.org"
-            >respec.org repository</a
+          <a href="https://github.com/w3c/respec-web-services"
+            >respec-web-services repository</a
           >.
         </li>
         <li>
@@ -404,5 +421,6 @@
         </li>
       </ol>
     </section>
+    <section id="conformance" class="removeOnSave"></section>
   </body>
 </html>

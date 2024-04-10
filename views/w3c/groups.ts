@@ -1,4 +1,5 @@
 import { css, html } from "ucontent";
+import { GroupMeta, Groups, GroupsByType } from "../../routes/w3c/group.js";
 
 const style = css`
   h1,
@@ -44,7 +45,7 @@ const style = css`
   }
 `;
 
-export default ({ groups }) => html`
+export default ({ groups }: { groups: GroupsByType }) => html`
   <!DOCTYPE html>
   <html lang="en">
     <head>
@@ -63,16 +64,16 @@ export default ({ groups }) => html`
       </p>
       <div class="tables">
         ${renderTable(groups.wg, "Working Groups")}
-        ${renderTable(groups.bg, "Business Groups")}
-        ${renderTable(groups.ig, "Interest Groups")}
-        ${renderTable(groups.misc, "Miscellaneous Groups")}
         ${renderTable(groups.cg, "Community Groups")}
+        ${renderTable(groups.ig, "Interest Groups")}
+        ${renderTable(groups.bg, "Business Groups")}
+        ${renderTable(groups.other, "Other Groups")}
       </div>
     </body>
   </html>
 `;
 
-function renderTable(groups, caption) {
+function renderTable(groups: Groups, caption: string) {
   return html`
     <table>
       <caption>
@@ -80,8 +81,7 @@ function renderTable(groups, caption) {
       </caption>
       <thead>
         <tr>
-          <th><code>group</code></th>
-          <th>Group ID</th>
+          <th>Short name</th>
           <th>Group Name</th>
         </tr>
       </thead>
@@ -92,11 +92,10 @@ function renderTable(groups, caption) {
   `;
 }
 
-function renderGroup([shortname, { id, URI, name }]) {
+function renderGroup([shortname, { id, URI, name }]: [string, GroupMeta]) {
   return html`
     <tr>
       <td><code>${shortname}</code></td>
-      <td>${id}</td>
       <td>${URI && name ? html`<a href="${URI}">${name}</a>` : ""}</td>
     </tr>
   `;

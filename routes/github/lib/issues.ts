@@ -25,7 +25,10 @@ export interface Issue {
   labels: Label[];
 }
 
-const cache = new DiskCache<Issue>({ ttl: ms("12h"), path: "gh/issues" });
+const cache = new DiskCache<Issue | null>({
+  ttl: ms("6h"),
+  path: "gh/issues",
+});
 
 /**
  * @param owner Repository owner/organization
@@ -48,7 +51,7 @@ export async function getIssues(owner: string, name: string, issues: number[]) {
   if (!issuesToFetch.length) return result;
 
   const query = createQuery(issuesToFetch);
-  const response: GraphQLResponse = await requestData(query, { owner, name });
+  const response = await requestData<GraphQLResponse>(query, { owner, name });
   if (!response.repository) {
     return null;
   }
