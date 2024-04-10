@@ -19,7 +19,7 @@ export default function route(req: IRequest, res: Response) {
     errors: getErrorCount(results),
     queries: queries.length,
   });
-  res.json(results);
+  res.json({ results });
 }
 
 function getErrorCount(results: ReturnType<typeof search>) {
