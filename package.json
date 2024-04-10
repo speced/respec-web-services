@@ -31,6 +31,7 @@
     "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
     "update-data-sources": "node build/scripts/update-data-sources.js"
   },
+  "packageManager": "pnpm@8.15.6",
   "simple-git-hooks": {
     "post-merge": "npm ci && npm run build"
   },
