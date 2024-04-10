@@ -10,7 +10,7 @@ type IRequest = Request<Params, any, any, Query>;
 
 export default async function route(req: IRequest, res: Response) {
   const feature = req.params.feature;
-  const browsers = sanitizeBrowsersList(req.query.browsers?.split(/,/g) || []);
+  const browsers = sanitizeBrowsersList(req.query.browsers?.split(",") || []);
 
   const body = await createResponseBodyHTML(feature, browsers);
   if (body === null) {
