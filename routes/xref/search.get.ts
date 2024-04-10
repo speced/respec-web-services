@@ -17,8 +17,16 @@ export default async function route(req: IRequest, res: Response) {
   const { term, for: forContext } = req.query;
   const specs = splitQueryParam(req.query.specs);
   const types = splitQueryParam(req.query.type)?.flat(2) as Query["types"];
+  if (typeof term === "undefined") {
+    const msg = "Missing required query parameter: term";
+    res.status(400);
+    res.json({
+      message: { type: "error", text: msg },
+    });
+    return;
+  }
 
-  const query: Query = { term, specs, for: forContext, types, id: '' };
+  const query: Query = { term, specs, for: forContext, types, id: "" };
   const options: Partial<Options> = { fields: [], all: !types || !forContext };
 
   const result = searchOne(query, store, options);
