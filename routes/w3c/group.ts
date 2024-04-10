@@ -10,23 +10,23 @@ import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
 
-interface GroupMeta {
+export interface GroupMeta {
   id: number;
   name: string;
   URI: string;
 }
-type GroupType = "wg" | "cg" | "ig" | "bg" | "misc";
+type GroupType = "wg" | "cg" | "ig" | "bg" | "other";
+export type Groups = Record<string, GroupMeta>;
+export type GroupsByType = Record<GroupType, Groups>;
 
-const groups: Record<GroupType, Record<string, GroupMeta>> = JSON.parse(
-  readFileSync(dataSource, "utf-8"),
-);
-const API_KEY = env("W3C_API_KEY");
+const groups: GroupsByType = JSON.parse(readFileSync(dataSource, "utf-8"));
 
 interface Group {
   id: number;
   shortname: string;
   type: GroupType;
   name: string;
+  wgURI: string;
   URI?: string;
   patentURI?: string;
   patentPolicy?: "PP2017" | "PP2020" | null;
@@ -62,7 +62,7 @@ export default async function route(req: Request, res: Response) {
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
   } catch (error) {
-    const { statusCode, message } = error;
+    const { statusCode = 500, message } = error;
     res.set("Content-Type", "text/plain");
     res.status(statusCode).send(message);
   }
@@ -88,28 +88,42 @@ async function getGroupInfo(
 }
 
 async function fetchGroupInfo(
-  id: GroupMeta["id"],
+  id: GroupMeta["id"] | null,
   shortname: GroupMeta["name"],
   type: GroupType,
 ) {
-  const url = new URL(id.toString(), "https://api.w3.org/groups/");
-  url.searchParams.set("apikey", API_KEY);
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new HTTPError(res.status, res.statusText);
+  const url = new URL("https://api.w3.org/");
+  if (id) {
+    url.pathname = `/groups/${id}`;
+  } else {
+    url.pathname = `/groups/${type}/${shortname}`;
   }
 
   interface APIResponse {
+    id: number;
     name: string;
     _links: Record<
       "homepage" | "pp-status" | "active-charter",
       { href: string }
     >;
   }
-  const json: APIResponse = await res.json();
+  try {
+    const res = await fetch(url.href);
+    if (!res.ok) {
+      throw new HTTPError(res.status, res.statusText);
+    }
+    var json = (await res.json()) as APIResponse;
+  } catch (error) {
+    throw new HTTPError(
+      error.statusCode || 500,
+      error.message
+    );
+  }
 
   const { name, _links: links } = json;
+  if (!id) {
+    id = json.id;
+  }
 
   const patentPolicy = links["active-charter"]?.href
     ? await getPatentPolicy(links["active-charter"].href)
@@ -123,6 +137,7 @@ async function fetchGroupInfo(
     URI: links.homepage?.href,
     patentURI: links["pp-status"]?.href,
     patentPolicy,
+    wgURI: `https://www.w3.org/groups/${type}/${shortname}`,
   };
 }
 
@@ -130,10 +145,11 @@ async function getPatentPolicy(
   activeCharterApiUrl: string,
 ): Promise<Required<Group["patentPolicy"]>> {
   const url = new URL(activeCharterApiUrl);
-  url.searchParams.set("apikey", API_KEY);
 
-  const res = await fetch(url);
-  const { ["patent-policy"]: patentPolicyURL } = await res.json();
+  const res = await fetch(url.href);
+  const { ["patent-policy"]: patentPolicyURL } = (await res.json()) as {
+    ["patent-policy"]?: string;
+  };
 
   if (!patentPolicyURL || typeof patentPolicyURL !== "string") {
     return null;
@@ -159,6 +175,9 @@ function getGroupMeta(shortname: string, requestedType: GroupType) {
     case 1:
       return data[0];
     case 0: {
+      if (requestedType && shortname) {
+        return { type: requestedType, id: null };
+      }
       const msg = `No group with shortname: "${shortname}"${
         requestedType ? ` and type: "${requestedType}"` : ""
       }.`;
@@ -166,8 +185,8 @@ function getGroupMeta(shortname: string, requestedType: GroupType) {
     }
     default: {
       const msg = `Multiple groups with shortname: "${shortname}".`;
-      const suggestions = data.map(g => `"${g.type}"`).join(", ");
-      const hint = `Specify one of following group types: ${suggestions}.`;
+      const suggestions = data.map(g => `"${g.type}/${shortname}"`).join(", ");
+      const hint = `Please use either: ${suggestions}.`;
       throw new HTTPError(409, `${msg}\n${hint}`);
     }
   }

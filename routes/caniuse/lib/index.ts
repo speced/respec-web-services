@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 
 import { html } from "ucontent";
 
-import { BROWSERS, SUPPORT_TITLES } from "./constants.js";
+import { BROWSERS, DEFAULT_BROWSERS, SUPPORT_TITLES } from "./constants.js";
 import { env } from "../../../utils/misc.js";
 import { MemCache } from "../../../utils/mem-cache.js";
 import {
@@ -11,6 +11,8 @@ import {
   SupportKeys,
   ScraperOutput as Data,
 } from "./constants.js";
+
+export { Data };
 
 const DATA_DIR = env("DATA_DIR");
 
@@ -29,7 +31,7 @@ interface NormalizedOptions {
 }
 
 const defaultOptions = {
-  browsers: ["chrome", "firefox", "safari", "edge"],
+  browsers: DEFAULT_BROWSERS,
   versions: 4,
 };
 
@@ -103,7 +105,7 @@ function sanitizeBrowsersList(browsers?: string | string[]) {
   return filtered.length ? filtered : defaultOptions.browsers;
 }
 
-async function getData(feature: string) {
+export async function getData(feature: string) {
   if (cache.has(feature)) {
     return cache.get(feature) as Data;
   }

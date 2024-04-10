@@ -41,6 +41,8 @@ export default {
       shortname: "font-metrics-api",
       status: "current",
       uri: "#baseline",
+      normative: true,
+      htmlProse: "test html Prose",
     },
   ],
   baseline: [
@@ -240,6 +242,34 @@ export default {
       status: "snapshot",
       uri: "#dom-abortsignal-aborted",
       for: ["AbortSignal"],
+    },
+  ],
+  "user agent": [
+    {
+      type: "dfn",
+      spec: "infra",
+      shortname: "infra",
+      status: "current",
+      uri: "#user-agent",
+      normative: true,
+    },
+    {
+      type: "dfn",
+      spec: "wai-aria-1.2",
+      shortname: "wai-aria",
+      status: "current",
+      uri: "#dfn-user-agent",
+      normative: false,
+    },
+  ],
+  "user agents": [
+    {
+      type: "dfn",
+      spec: "wai-aria-1.2",
+      shortname: "wai-aria",
+      status: "current",
+      uri: "#dfn-user-agent",
+      normative: false,
     },
   ],
 };

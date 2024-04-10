@@ -32,18 +32,18 @@ export default async function sh(
 
   try {
     return await new Promise<string>((resolve, reject) => {
-      let stdout = [];
-      let stderr = [];
+      let stdout: string[] = [];
+      let stderr: string[] = [];
       const child = exec(command, {
         ...execOptions,
         env: { ...process.env, ...execOptions.env },
         encoding: "utf-8",
       });
-      child.stdout.pipe(split()).on("data", line => {
+      child.stdout!.pipe(split()).on("data", (line: string) => {
         if (shouldStream) log.out(line);
         stdout.push(line);
       });
-      child.stderr.pipe(split()).on("data", line => {
+      child.stderr!.pipe(split()).on("data", (line: string) => {
         if (shouldStream) log.err(line);
         stderr.push(line);
       });

@@ -12,8 +12,10 @@ type Type =
   | "enum-value"
   | "enum"
   | "event"
+  | "http-header"
   | "interface"
   | "method"
+  | "permission"
   | "typedef";
 
 export interface DataEntry {
@@ -24,6 +26,7 @@ export interface DataEntry {
   uri: string;
   normative: boolean;
   for?: string[];
+  htmlProse?: string;
 }
 
 type SpecType = DataEntry["status"] | "draft" | "official";
@@ -56,7 +59,7 @@ const specStatusAlias = new Map([
 ]);
 
 export const defaultOptions: Options = {
-  fields: ["shortname", "spec", "type", "for", "normative", "uri"],
+  fields: ["shortname", "spec", "type", "for", "normative", "uri", "htmlProse"],
   spec_type: ["draft", "official"],
   types: [],
 };
@@ -92,7 +95,7 @@ export function searchOne(
   const options = { ...defaultOptions, ...opts };
   normalizeQuery(query, options);
 
-  const filtered = filter(query, store, options);
+  const filtered = cache.getOr(query.id, () => filter(query, store, options));
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
   prefereredData = filterPreferLatestVersion(prefereredData);
@@ -108,45 +111,51 @@ function normalizeQuery(query: Query, options: Options) {
   if (!Array.isArray(query.types) || !query.types.length) {
     query.types = options.types;
   }
+  if (query.term === '""') {
+    query.term = "";
+  }
   if (!query.id) {
     query.id = objectHash(query);
   }
 }
 
 function filter(query: Query, store: Store, options: Options) {
-  const { id } = query;
-
-  const cachedValue = cache.get(id);
-  if (cachedValue) return cachedValue;
-
-  const byTerm = filterByTerm(query, store);
-  const bySpec = filterBySpec(byTerm, query);
-  const byType = filterByType(bySpec, query);
-  const result = filterByForContext(byType, query, options);
-
-  cache.set(id, result);
+  let result: DataEntry[] = [];
+  for (const term of getTermVariations(query)) {
+    const byTerm = filterByTerm(term, store);
+    const bySpec = filterBySpec(byTerm, query);
+    const byType = filterByType(bySpec, query);
+    const byForContext = filterByForContext(byType, query, options);
+    if (byForContext.length) {
+      result = byForContext;
+      break;
+    }
+  }
   return result;
 }
 
-function filterByTerm(query: Query, store: Store) {
+function getTermVariations(query: Query) {
   const { term: inputTerm, types = [] } = query;
 
   const isConcept = types.some(t => CONCEPT_TYPES.has(t));
   const isIDL = types.some(t => IDL_TYPES.has(t));
   const shouldTreatAsConcept = isConcept && !isIDL && !!types.length;
-  let term = shouldTreatAsConcept ? inputTerm.toLowerCase() : inputTerm;
-  if (inputTerm === '""') term = "";
 
-  let termData = store.byTerm[term] || [];
-  if (!termData.length && shouldTreatAsConcept) {
-    for (const altTerm of textVariations(term)) {
-      if (altTerm in store.byTerm) {
-        termData = store.byTerm[altTerm];
-        break;
-      }
-    }
+  if (shouldTreatAsConcept) {
+    const term = inputTerm.toLowerCase();
+    return (function* () {
+      yield term;
+      yield* textVariations(term);
+    })();
+  } else {
+    return (function* () {
+      yield inputTerm;
+    })();
   }
-  return termData;
+}
+
+function filterByTerm(term: Query["term"], store: Store) {
+  return store.byTerm[term] || [];
 }
 
 function filterBySpec(data: DataEntry[], query: Query) {

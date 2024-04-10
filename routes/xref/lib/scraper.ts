@@ -79,6 +79,10 @@ export default async function main(options: Partial<Options> = {}) {
     }
   }
 
+  for (const term of Object.keys(dataByTerm)) {
+    dataByTerm[term] = uniq(dataByTerm[term]);
+  }
+
   console.log("Writing processed data files...");
   await mkdir(OUT_DIR_BASE, { recursive: true });
   await Promise.all([
@@ -131,9 +135,7 @@ function mapDefinition(
   term: string,
   spec: { spec: string; shortname: string; url: string; status: Status },
 ) {
-  const normalizedType = CSS_TYPES_INPUT.has(dfn.type)
-    ? `css-${dfn.type}`
-    : dfn.type;
+  const normalizedType = normalizeType(dfn.type);
   return {
     term: normalizeTerm(term, normalizedType),
     isExported: dfn.access === "public",
@@ -144,6 +146,7 @@ function mapDefinition(
     uri: dfn.href.replace(spec.url, ""), // This is full URL to term here
     normative: !dfn.informative,
     for: dfn.for.length > 0 ? dfn.for : undefined,
+    htmlProse: dfn.htmlProse,
   };
 }
 
@@ -168,6 +171,12 @@ function updateDataBySpec(terms: ParsedDataEntry[], data: DataBySpec) {
   }
 }
 
+function normalizeType(type: string) {
+  if (CSS_TYPES_INPUT.has(type)) return `css-${type}`;
+  if (type === "abstract-op") return "dfn";
+  return type;
+}
+
 function normalizeTerm(term: string, type: string) {
   if (type === "enum-value") {
     return term.replace(/^"|"$/g, "");
@@ -188,12 +197,9 @@ async function getAllData(baseDir: string) {
   const data: SpecsJSON[] = urlFileContent.results;
 
   const specMap: Store["specmap"] = Object.create(null);
-  const specUrls = new Set<string>();
   const dfnSources: DfnsJSON[] = [];
 
   for (const entry of data) {
-    specUrls.add(entry.nightly.url);
-    if (entry.release?.url) specUrls.add(entry.release.url);
     if (entry.dfns) {
       const dfnsData = await readJSON(path.join(baseDir, entry.dfns));
       const dfns: InputDfn[] = dfnsData.dfns;
@@ -206,7 +212,7 @@ async function getAllData(baseDir: string) {
     }
 
     specMap[entry.shortname.toLowerCase()] = {
-      url: entry.nightly.url || entry.release?.url || entry.url,
+      url: entry.nightly?.url || entry.release?.url || entry.url,
       title: entry.title,
       shortname: entry.series.shortname.toLowerCase(),
     };

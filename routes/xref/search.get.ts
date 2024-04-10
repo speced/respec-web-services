@@ -18,7 +18,7 @@ export default async function route(req: IRequest, res: Response) {
   const specs = splitQueryParam(req.query.specs);
   const types = splitQueryParam(req.query.type)?.flat(2) as Query["types"];
 
-  const query: Query = { term, specs, for: forContext, types, id: undefined };
+  const query: Query = { term, specs, for: forContext, types, id: '' };
   const options: Partial<Options> = { fields: [], all: !types || !forContext };
 
   const result = searchOne(query, store, options);

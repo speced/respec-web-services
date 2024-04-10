@@ -27,14 +27,14 @@ export async function regenerateDocs() {
   url.searchParams.set("type", "respec");
   url.searchParams.set("url", "https://respec.org/docs/src.html");
 
-  const res = await fetch(url);
+  const res = await fetch(url.href);
 
   if (!res.ok) {
-    const { error = "" } = await res.json();
+    const { error = "" } = await res.json() as { "error"?: string };
     throw new HTTPError(res.status, error);
   }
 
-  const errorCount = parseInt(res.headers.get("x-errors-count")) || 0;
+  const errorCount = parseInt(res.headers.get("x-errors-count") || "0");
   if (errorCount > 0) {
     throw new Error(`There were ${errorCount} errors in processing.`);
   }

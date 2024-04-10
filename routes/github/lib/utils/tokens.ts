@@ -1,6 +1,6 @@
 import { env } from "../../../../utils/misc.js";
 
-interface RateLimit {
+export interface RateLimit {
   remaining: number;
   resetAt: Date;
   limit: number;

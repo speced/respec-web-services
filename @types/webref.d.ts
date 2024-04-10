@@ -18,6 +18,7 @@ declare module "webref" {
     informative: boolean;
     heading: Record<string, string>;
     definedIn: string;
+    htmlProse: string;
   }
 
   interface SpecVersion {

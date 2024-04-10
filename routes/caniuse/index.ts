@@ -7,10 +7,12 @@ import { env, seconds } from "../../utils/misc.js";
 
 import { createResponseBody } from "./lib/index.js";
 import updateRoute from "./update.js";
+import featureRoute from "./feature.js";
 
 const caniuse = Router({ mergeParams: true });
 
 caniuse.get("/", cors(), route);
+caniuse.get("/:feature", cors(), featureRoute);
 caniuse.post("/update", authGithubWebhook(env("CANIUSE_SECRET")), updateRoute);
 
 export default caniuse;
@@ -24,10 +26,11 @@ interface Query {
 type IRequest = Request<any, any, any, Query>;
 
 export async function route(req: IRequest, res: Response) {
+  res.locals.deprecated = true;
   const options = {
     feature: req.query.feature,
     browsers: req.query.browsers ? req.query.browsers.split(",") : "default",
-    versions: parseInt(req.query.versions, 10),
+    versions: parseInt(req.query.versions || "", 10),
     format: req.query.format,
   };
   if (!options.feature) {

@@ -2,6 +2,7 @@ export const IDL_TYPES = new Set([
   "_IDL_",
   "attribute",
   "callback",
+  "const",
   "dict-member",
   "dictionary",
   "enum-value",
@@ -15,7 +16,7 @@ export const IDL_TYPES = new Set([
 
 // XXX: `CONCEPT_TYPES` includes `element`: otherwise it'll break many specs.
 // https://github.com/sidvishnoi/respec-xref-route/issues/57
-export const CONCEPT_TYPES = new Set(["_CONCEPT_", "dfn", "event", "element"]);
+export const CONCEPT_TYPES = new Set(["_CONCEPT_", "dfn", "event", "element", "permission"]);
 export const MARKUP_TYPES = new Set(["element", "element-attr", "attr-value"]);
 export const CSS_TYPES_INPUT = new Set([
   "property",
@@ -27,12 +28,13 @@ export const CSS_TYPES_INPUT = new Set([
   "selector",
 ]);
 export const CSS_TYPES = new Set([...CSS_TYPES_INPUT].map(t => `css-${t}`));
-
+export const HTTP_TYPES = new Set(["http-header"]);
 export const SUPPORTED_TYPES = new Set([
   ...IDL_TYPES,
   ...CONCEPT_TYPES,
   ...MARKUP_TYPES,
   ...CSS_TYPES,
+  ...HTTP_TYPES,
 ]);
 
 export const QUERY_CACHE_DURATION = 3 * 24 * 60 * 60 * 1000; // 3 days
