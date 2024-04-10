@@ -25,6 +25,7 @@ interface Query {
 }
 type IRequest = Request<any, any, any, Query>;
 
+/** @deprecated */
 export async function route(req: IRequest, res: Response) {
   res.locals.deprecated = true;
   const options = {
