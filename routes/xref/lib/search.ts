@@ -90,8 +90,9 @@ export function search(
 export function searchOne(
   query: Query,
   store: Store,
-  options = defaultOptions,
+  opts: Partial<Options> = {},
 ) {
+  const options = { ...defaultOptions, ...opts };
   normalizeQuery(query, options);
 
   const filtered = cache.getOr(query.id, () => filter(query, store, options));
