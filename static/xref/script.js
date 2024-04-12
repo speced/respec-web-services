@@ -148,7 +148,7 @@ function renderResults(entries, query) {
   for (const entry of entries) {
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
-    const title = specInfo.title;
+    const title = escapeHTML(specInfo.title);
     const cite = metadata.types.idl.has(entry.type)
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
