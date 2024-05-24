@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   The source for this document is at:
-  https://github.com/w3c/respec-web-services/blob/main/static/docs/src.html
+  https://github.com/speced/respec-web-services/blob/main/static/docs/src.html
 -->
 <html>
   <head>
@@ -19,7 +19,7 @@
         editors: [
           {
             name: "ReSpec",
-            url: "https://github.com/w3c/respec",
+            url: "https://github.com/speced/respec",
           },
         ],
         lint: {
@@ -46,18 +46,18 @@
           },
         ],
         canonicalURI: "https://respec.org/docs/",
-        github: "w3c/respec",
+        github: "speced/respec",
         otherLinks: [
           {
             key: "Edit this documentation",
             data: [
               {
                 value: "GitHub Wiki",
-                href: "https://github.com/w3c/respec/wiki",
+                href: "https://github.com/speced/respec/wiki",
               },
               {
                 value: "Single Page",
-                href: "https://github.com/w3c/respec-web-services/blob/main/static/docs/src.html",
+                href: "https://github.com/speced/respec-web-services/blob/main/static/docs/src.html",
               },
             ],
           },
@@ -82,7 +82,8 @@
             includeName: include,
             includeFormat: "markdown",
             oninclude: "fixMarkupOnInclude",
-            include: `https://raw.githubusercontent.com/wiki/w3c/respec/${include}.md`,
+            // TODO: update URL on migration to speced org
+            include: `https://raw.githubusercontent.com/wiki/speced/respec/${include}.md`,
           });
           if (!section.hasAttribute("data-max-toc")) {
             section.dataset.maxToc = section.querySelector("section")
@@ -164,7 +165,8 @@
             );
             a.href = `#${id}`;
           } else {
-            a.href = `https://github.com/w3c/respec/wiki/${href}`;
+            // TODO: update URL on migration to speced org
+            a.href = `https://github.com/speced/respec/wiki/${href}`;
           }
         }
       }
@@ -172,7 +174,8 @@
       function addWikiLinks() {
         const createWikiLink = includeName => {
           const wikiLink = document.createElement("a");
-          wikiLink.href = `https://github.com/w3c/respec/wiki/${includeName}/_edit`;
+          // TODO: update URL on migration to speced org
+          wikiLink.href = `https://github.com/speced/respec/wiki/${includeName}/_edit`;
           const title = "Edit this section on Wiki";
           wikiLink.title = title;
           wikiLink.setAttribute("aria-label", title);
@@ -400,25 +403,25 @@
       <h2>Editing this document</h2>
       <p>
         This document is generated directly from the content of the
-        <a href="https://github.com/w3c/respec/wiki">ReSpec project wiki</a> on
+        <a href="https://github.com/speced/respec/wiki">ReSpec project wiki</a> on
         GitHub. Thus, it can be edited in two ways:
       </p>
       <ol>
         <li>
           The
           <a
-            href="https://github.com/w3c/respec-web-services/edit/main/static/docs/src.html"
+            href="https://github.com/speced/respec-web-services/edit/main/static/docs/src.html"
             >src.html</a
           >
           for this document provides the structure. The `src.html` is available
           in the
-          <a href="https://github.com/w3c/respec-web-services"
+          <a href="https://github.com/speced/respec-web-services"
             >respec-web-services repository</a
           >.
         </li>
         <li>
           The
-          <a href="https://github.com/w3c/respec/wiki">ReSpec project wiki</a>.
+          <a href="https://github.com/speced/respec/wiki">ReSpec project wiki</a>.
           In addition, hovering over a section heading provides a link to
           directly edit the relevant page in the wiki.
         </li>
