@@ -70,7 +70,7 @@ function drawChart(data) {
     action() {
       const { row } = chart.getSelection().slice(-1)[0];
       const sha = data.getValue(row, 1);
-      window.open(`https://github.com/w3c/respec/commit/${sha}`);
+      window.open(`https://github.com/speced/respec/commit/${sha}`);
     },
   });
 
