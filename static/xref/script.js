@@ -171,7 +171,9 @@ function renderResults(entries, query) {
 function howToCiteIDL(term, entry) {
   const { type, for: forList } = entry;
   if (forList) {
-    return forList.map(f => `{{${f}/${term ? term : '""'}}}`).join('<br>');
+    return forList.map(f => type === 'enum-value'
+      ? `{{${f}/${term ? '"' + term + '"' : '""'}}}`
+      : `{{${f}/${term ? term : '""'}}}`).join('<br>');
   }
   switch (type) {
     case 'exception':
