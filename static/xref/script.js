@@ -152,10 +152,11 @@ function renderResults(entries, query) {
     const cite = metadata.types.idl.has(entry.type)
       ? howToCiteIDL(term, entry)
       : metadata.types.markup.has(entry.type)
-      ? howToCiteMarkup(term, entry)
-      : metadata.types.css.has(entry.type) || metadata.types.http.has(entry.type)
-      ? howToCiteAnchor(term, entry)
-      : howToCiteTerm(term, entry);
+        ? howToCiteMarkup(term, entry)
+        : metadata.types.css.has(entry.type) ||
+            metadata.types.http.has(entry.type)
+          ? howToCiteAnchor(term, entry)
+          : howToCiteTerm(term, entry);
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
@@ -171,7 +172,12 @@ function renderResults(entries, query) {
 function howToCiteIDL(term, entry) {
   const { type, for: forList } = entry;
   if (forList) {
-    return forList.map(f => `{{${f}/${term ? type === "enum-value" ? `"${term}"` : term : '""'}}}`).join('<br>');
+    return forList
+      .map(
+        f =>
+          `{{${f}/${term ? (type === 'enum-value' ? `"${term}"` : term) : '""'}}}`,
+      )
+      .join('<br>');
   }
   switch (type) {
     case 'exception':
