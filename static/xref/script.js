@@ -173,10 +173,10 @@ function howToCiteIDL(term, entry) {
   const { type, for: forList } = entry;
   if (forList) {
     return forList
-      .map(
-        f =>
-          `{{${f}/${term ? (type === 'enum-value' ? `"${term}"` : term) : '""'}}}`,
-      )
+      .map(f => {
+        const termPart = type === 'enum-value' ? `"${term}"` : term;
+        return `{{${f}/${term ? termPart : '""'}}}`;
+      })
       .join('<br>');
   }
   switch (type) {
