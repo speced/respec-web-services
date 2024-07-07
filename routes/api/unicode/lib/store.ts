@@ -2,10 +2,11 @@ import path from "path";
 import { readFileSync } from "fs";
 
 import { env } from "../../../../utils/misc.js";
+import { INPUT_DATA_SOURCE } from "./scraper.js";
 
 export class Store {
   version = -1;
-  private codepointToName: Map<string, string> = new Map();
+  private codepointToName: Map<string, { name: string }> = new Map();
 
   constructor() {
     this.fill();
@@ -13,15 +14,16 @@ export class Store {
 
   /** Fill the store with its contents from the filesystem. */
   fill() {
-    this.codepointToName = new Map(
-      Object.entries(readJson("codepoint-to-name.json")),
-    );
+    this.codepointToName = new Map(readJson("codepoint-to-name.json"));
     this.version = Date.now();
   }
 
+  getNameByHexCodePoint(hex: string) {
+    return this.codepointToName.get(hex) ?? null;
+  }
 
-  getNameByCodepoint(codepoint: string) {
-    return this.codepointToName.get(String.raw`\u` + codepoint) ?? null;
+  get dataSource() {
+    return INPUT_DATA_SOURCE;
   }
 }
 
