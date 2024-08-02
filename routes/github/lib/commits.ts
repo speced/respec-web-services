@@ -47,8 +47,9 @@ export async function* getCommits(
   repo: string,
   fromRef: string,
   toRef = "HEAD",
+  path?: string
 ) {
-  const cacheKey = `${org}/${repo}@${fromRef}..${toRef}`;
+  const cacheKey = path ? `${org}/${repo}/${path}@${fromRef}..${toRef}` : `${org}/${repo}@${fromRef}..${toRef}`;
   const cached = await cache.get(cacheKey);
   const { since, commits } = cached || {
     since: await getCommitDate(org, repo, fromRef),
@@ -61,7 +62,7 @@ export async function* getCommits(
   const newCacheEntry = { since: "", commits };
   let cursor: string | undefined;
   do {
-    const data = await getCommitsSince(org, repo, since, toRef, cursor);
+    const data = await getCommitsSince(org, repo, since, toRef, cursor, path);
     yield* data.commits;
     cursor = data.cursor;
 
@@ -116,6 +117,7 @@ async function getCommitsSince(
   since: string,
   toRef: string,
   cursor?: string,
+  path?: string,
 ) {
   const query = `
     query(
@@ -124,11 +126,12 @@ async function getCommitsSince(
       $since: GitTimestamp!
       $toRef: String!
       $cursor: String
+      $path: String
     ) {
       repository(owner: $org, name: $repo) {
         object(expression: $toRef) {
           ... on Commit {
-            history(since: $since, after: $cursor) {
+            history(since: $since, after: $cursor, path: $path) {
               nodes {
                 messageHeadline
                 abbreviatedOid
@@ -145,7 +148,7 @@ async function getCommitsSince(
     }
   `;
 
-  const variables = { org, repo, since, toRef, cursor };
+  const variables = { org, repo, since, toRef, cursor, path };
   const { repository } = await requestData<HistoryResponse>(query, variables);
 
   const { nodes: commits, pageInfo } = repository.object.history;
