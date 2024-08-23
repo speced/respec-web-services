@@ -18,7 +18,7 @@ export default async function route(req: Request, res: Response) {
     res.status(400); // Bad request
     res.locals.reason = `action-not-released`;
     const msg = `Webhook payload was for ${JSON.stringify(action)}, ignored.`;
-    return res.send(msg);
+    return res.type("text/plain").send(msg);
   }
 
   try {
