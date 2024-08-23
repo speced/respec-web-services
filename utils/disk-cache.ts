@@ -104,6 +104,12 @@ export class DiskCache<ValueType> {
   }
 
   private keyToFilePath(key: string) {
-    return path.join(env("DATA_DIR"), this.#path, `${key}.json`);
+    const baseDir = path.join(env("DATA_DIR"), this.#path);
+    const result = path.resolve(path.join(baseDir, `${key}.json`));
+    // avoid path traversal attack
+    if (!result.startsWith(baseDir)) {
+      throw new Error(`Invalid path: ${result}`);
+    }
+    return result;
   }
 }
