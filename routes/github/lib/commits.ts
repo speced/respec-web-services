@@ -48,7 +48,7 @@ export async function* getCommits(
   fromRef: string,
   toRef = "HEAD",
 ) {
-  const cacheKey = `${org}/${repo}@${fromRef}...${toRef}`;
+  const cacheKey = `${org}/${repo}@${fromRef}..${toRef}`;
   const cached = await cache.get(cacheKey);
   const { since, commits } = cached || {
     since: await getCommitDate(org, repo, fromRef),
