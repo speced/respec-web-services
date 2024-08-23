@@ -10,10 +10,15 @@ export const PKG_DIR = path.join(env("DATA_DIR"), "respec", "package");
 
 export default async function route(req: Request, res: Response) {
   res.type("text/plain");
+  if (typeof req.body.action !== "string") {
+    return res.status(400).send("Missing 'action' in body");
+  }
   if (req.body.action !== "released") {
     res.status(400); // Bad request
     res.locals.reason = `action-not-released`;
-    const msg = `Webhook payload was for ${req.body.action}, ignored.`;
+    const msg = `Webhook payload was for ${JSON.stringify(
+      req.body.action,
+    )}, ignored.`;
     return res.send(msg);
   }
 
