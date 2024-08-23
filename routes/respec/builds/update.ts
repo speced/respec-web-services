@@ -9,6 +9,7 @@ import sh from "../../../utils/sh.js";
 export const PKG_DIR = path.join(env("DATA_DIR"), "respec", "package");
 
 export default async function route(req: Request, res: Response) {
+  res.type("text/plain");
   if (req.body.action !== "released") {
     res.status(400); // Bad request
     res.locals.reason = `action-not-released`;
