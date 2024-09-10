@@ -3,6 +3,7 @@ import { mkdir } from "fs/promises";
 import { env } from "../utils/misc.js";
 import caniuse from "../routes/caniuse/lib/scraper.js";
 import xref from "../routes/xref/lib/scraper.js";
+import { pullRelease } from "../routes/respec/builds/update.js";
 import w3cGroupsList from "./update-w3c-groups-list.js";
 
 // ensure the data directory exists
@@ -18,4 +19,8 @@ console.groupEnd();
 
 console.group("W3C Groups List");
 await w3cGroupsList();
+console.groupEnd();
+
+console.group("Pull respec release");
+await pullRelease();
 console.groupEnd();
