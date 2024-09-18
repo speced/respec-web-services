@@ -17,6 +17,12 @@ router.put(
 );
 router.use(
   "/builds",
+  (_req, res, next) => {
+    res.removeHeader("content-security-policy");
+    res.removeHeader("cross-origin-opener-policy");
+    res.removeHeader("cross-origin-resource-policy");
+    next();
+  },
   express.static(path.join(PKG_DIR, "builds"), { maxAge: ms("10m") }),
 );
 router.post(
