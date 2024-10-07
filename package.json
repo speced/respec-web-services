@@ -47,7 +47,7 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.16.1",
     "@types/split2": "^4.2.3",
-    "jasmine": "^5.2.0",
+    "jasmine": "^5.3.1",
     "simple-git-hooks": "^2.11.1",
     "typescript": "^5.5.4"
   }
