@@ -15,7 +15,7 @@
     "express": "^4.19.2",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
-    "nanoid": "^5.0.7",
+    "nanoid": "^5.0.8",
     "node-fetch": "^3.3.2",
     "serialize-error": "^11.0.3",
     "split2": "^4.2.0",
