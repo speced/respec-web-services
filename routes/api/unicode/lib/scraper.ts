@@ -25,7 +25,7 @@ export default async function main(options: Partial<Options> = {}) {
   options = { ...defaultOptions, ...options } as Options;
   const hasUpdated = await updateInputSource();
   if (!hasUpdated && !options.forceUpdate) {
-    console.log("Nothing to update");
+    console.log("Nothing to update from Unicode.");
     return false;
   }
 
