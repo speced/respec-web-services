@@ -23,7 +23,7 @@ export default async function route(_req: Request, res: Response) {
 }
 
 export async function regenerateDocs() {
-  const url = new URL("https://labs.w3.org/spec-generator/");
+  const url = new URL("https://www.w3.org/publications/spec-generator/");
   url.searchParams.set("type", "respec");
   url.searchParams.set("url", "https://respec.org/docs/src.html");
 
