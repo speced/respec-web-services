@@ -31,7 +31,7 @@
     "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
     "update-data-sources": "node build/scripts/update-data-sources.js"
   },
-  "packageManager": "pnpm@9.1.2",
+  "packageManager": "pnpm@9.8.0",
   "simple-git-hooks": {
     "post-merge": "pnpm i && pnpm build"
   },
@@ -45,10 +45,10 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
-    "@types/node": "^20.14.0",
+    "@types/node": "^20.16.1",
     "@types/split2": "^4.2.3",
-    "jasmine": "^5.1.0",
+    "jasmine": "^5.2.0",
     "simple-git-hooks": "^2.11.1",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.4"
   }
 }

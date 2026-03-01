@@ -4,7 +4,7 @@ import { getCommits } from "./lib/commits.js";
 
 export default async function route(req: Request, res: Response) {
   const { org, repo } = req.params;
-  const { from, to } = req.query;
+  const { from, to , path } = req.query;
   if (!from || typeof from !== "string") {
     res.set("Content-Type", "text/plain");
     return res.status(400).send("query parameter 'from' is required");
@@ -14,12 +14,17 @@ export default async function route(req: Request, res: Response) {
     const msg = "optional query parameter 'to' must be a single numeric string";
     return res.status(400).send(msg);
   }
+  if (typeof path !== "undefined" && typeof path !== "string") {
+    res.set("Content-Type", "text/plain");
+    const msg = "optional query parameter 'path' must be a string";
+    return res.status(400).send(msg);
+  }
 
   res.set("Cache-Control", `max-age=${seconds("30m")}`);
 
   try {
     const commits: { hash: string; message: string }[] = [];
-    for await (const commit of getCommits(org, repo, from, to)) {
+    for await (const commit of getCommits(org, repo, from, to, path)) {
       commits.push({
         hash: commit.abbreviatedOid,
         message: commit.messageHeadline,
