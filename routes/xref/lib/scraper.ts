@@ -25,6 +25,7 @@ const OUT_DIR_BASE = path.join(DATA_DIR, "xref");
 const OUTFILE_BY_TERM = path.resolve(OUT_DIR_BASE, "./xref.json");
 const OUTFILE_BY_SPEC = path.resolve(OUT_DIR_BASE, "./specs.json");
 const OUTFILE_SPECMAP = path.resolve(OUT_DIR_BASE, "./specmap.json");
+const OUTFILE_HEADINGS = path.resolve(OUT_DIR_BASE, "./headings.json");
 
 type Status = "current" | "snapshot";
 const dirToStatus = [
@@ -39,6 +40,18 @@ interface DataByTerm {
 }
 interface DataBySpec {
   [shortname: string]: Omit<ParsedDataEntry, "shortname" | "isExported">[];
+}
+
+export interface HeadingEntry {
+  id: string;
+  href: string;
+  title: string;
+  number?: string;
+  level: number;
+}
+
+export interface HeadingsBySpec {
+  [shortname: string]: HeadingEntry[];
 }
 
 const defaultOptions = { forceUpdate: false };
@@ -83,12 +96,18 @@ export default async function main(options: Partial<Options> = {}) {
     dataByTerm[term] = uniq(dataByTerm[term]);
   }
 
+  // Read headings data from webref (ed/ only, same as xref default)
+  const headingsBySpec = await readAllHeadings(
+    path.join(INPUT_DIR_BASE, "ed", "headings"),
+  );
+
   console.log("Writing processed data files...");
   await mkdir(OUT_DIR_BASE, { recursive: true });
   await Promise.all([
     writeFile(OUTFILE_BY_TERM, JSON.stringify(dataByTerm, null, 2)),
     writeFile(OUTFILE_BY_SPEC, JSON.stringify(dataBySpec, null, 2)),
     writeFile(OUTFILE_SPECMAP, JSON.stringify(specificationsMap, null, 2)),
+    writeFile(OUTFILE_HEADINGS, JSON.stringify(headingsBySpec, null, 2)),
   ]);
   return true;
 }
@@ -224,4 +243,45 @@ async function getAllData(baseDir: string) {
 async function readJSON(filePath: string) {
   const text = await readFile(filePath, "utf-8");
   return JSON.parse(text);
+}
+
+/**
+ * Read all headings data from webref's ed/headings/ directory.
+ * Returns { shortname: HeadingEntry[] }. Indexed by id in the Store.
+ */
+async function readAllHeadings(
+  headingsDir: string,
+): Promise<HeadingsBySpec> {
+  const result: HeadingsBySpec = Object.create(null);
+  if (!existsSync(headingsDir)) {
+    console.warn(`Headings directory not found: ${headingsDir}`);
+    return result;
+  }
+
+  const { readdir } = await import("fs/promises");
+  const files = await readdir(headingsDir);
+  const jsonFiles = files.filter(f => f.endsWith(".json"));
+
+  console.log(`Processing ${jsonFiles.length} heading files...`);
+  for (const file of jsonFiles) {
+    try {
+      const data = await readJSON(path.join(headingsDir, file));
+      const shortname = data.spec?.shortname?.toLowerCase()
+        || file.replace(/\.json$/, "").toLowerCase();
+      const headings: HeadingEntry[] = (data.headings || []).map(
+        (h: { id: string; href: string; title: string; number?: string; level: number }) => ({
+          id: h.id,
+          href: h.href,
+          title: h.title,
+          number: h.number,
+          level: h.level,
+        }),
+      );
+      result[shortname] = headings;
+    } catch (error) {
+      console.error(`Error reading headings from ${file}:`, error);
+    }
+  }
+
+  return result;
 }

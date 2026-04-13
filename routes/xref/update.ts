@@ -59,5 +59,7 @@ function hasRelevantUpdate(commits: Commit[]) {
   const changedFiles = commits
     .map(commit => [commit.added, commit.removed, commit.modified])
     .flat(2);
-  return changedFiles.some(file => file?.startsWith("ed/dfns/"));
+  return changedFiles.some(
+    file => file?.startsWith("ed/dfns/") || file?.startsWith("ed/headings/"),
+  );
 }
