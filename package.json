@@ -10,7 +10,7 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "compression": "^1.8.1",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^5.2.1",
     "helmet": "^8.0.0",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",
-    "@types/cors": "^2.8.17",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.9.0",
