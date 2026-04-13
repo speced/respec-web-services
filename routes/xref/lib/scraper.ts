@@ -247,7 +247,7 @@ async function readJSON(filePath: string) {
 
 /**
  * Read all headings data from webref's ed/headings/ directory.
- * Builds a map of { shortname: { id: HeadingEntry } } for fast lookup.
+ * Returns { shortname: HeadingEntry[] }. Indexed by id in the Store.
  */
 async function readAllHeadings(
   headingsDir: string,

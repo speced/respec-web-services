@@ -23,7 +23,11 @@ type IRequest = Request<never, any, RequestBody>;
  * Response: { result: [{ spec: "fetch", id: "cookie-header", ... }] }
  */
 export default function route(req: IRequest, res: Response) {
-  const { queries = [] } = req.body;
+  const { queries } = req.body;
+  if (!Array.isArray(queries)) {
+    res.status(400).json({ error: "queries must be an array" });
+    return;
+  }
   const result = queries.map(({ spec, id }) => {
     const heading = store.getHeading(spec, id);
     if (!heading) {
