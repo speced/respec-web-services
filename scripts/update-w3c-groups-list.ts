@@ -75,13 +75,14 @@ export default async function update() {
       case "group":
         return g;
       case "tf":
-        return g.members;
+        return g.members || [];
       default:
         return [];
     }
   });
   console.log(`Processing ${groups.length} items...`);
   for (const group of groups) {
+    if (!group) continue;
     const type = mapGroupType.get(group.type);
     if (!type) continue;
 

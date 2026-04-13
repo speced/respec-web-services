@@ -39,7 +39,10 @@ const LEGACY_SHORTNAMES = new Map([
   ["i18n", "i18n-core"], // more than 10 instances
 ]);
 
-export default async function route(req: Request, res: Response) {
+export default async function route(
+  req: Request<{ shortname?: string; type?: string }>,
+  res: Response,
+) {
   const { shortname, type } = req.params;
   if (!shortname) {
     if (req.headers.accept?.includes("text/html")) {

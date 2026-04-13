@@ -12,7 +12,10 @@ const cache = new DiskCache<null | Contributors>({
   path: "github/contributors",
 });
 
-export default async function route(req: Request, res: Response) {
+export default async function route(
+  req: Request<{ org: string; repo: string }>,
+  res: Response,
+) {
   const { org, repo } = req.params;
   const cacheKey = `${org}/${repo}`;
 
