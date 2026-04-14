@@ -60,7 +60,7 @@ export default async function route(
   }
 
   try {
-    const requestedType: GroupType | undefined = type as GroupType | undefined;
+    const requestedType = type as GroupType | undefined;
     const groupInfo = await getGroupInfo(shortname, requestedType);
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
