@@ -73,7 +73,7 @@ export default async function route(
 
 async function getGroupInfo(
   shortname: GroupMeta["name"],
-  requestedType: GroupType | undefined,
+  requestedType?: GroupType,
 ) {
   const cacheKey = `${shortname}/${requestedType || ""}`;
   if (cache.expires(cacheKey) > 1000) {
@@ -163,7 +163,7 @@ async function getPatentPolicy(
   }
 }
 
-function getGroupMeta(shortname: string, requestedType: GroupType | undefined) {
+function getGroupMeta(shortname: string, requestedType?: GroupType) {
   const types = requestedType
     ? [requestedType]
     : (Object.keys(groups) as GroupType[]);
