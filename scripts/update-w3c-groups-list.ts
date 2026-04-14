@@ -82,7 +82,6 @@ export default async function update() {
   });
   console.log(`Processing ${groups.length} items...`);
   for (const group of groups) {
-    if (!group) continue;
     const type = mapGroupType.get(group.type);
     if (!type) continue;
 
