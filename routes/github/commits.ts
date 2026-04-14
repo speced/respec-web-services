@@ -3,7 +3,7 @@ import { seconds } from "../../utils/misc.js";
 import { getCommits } from "./lib/commits.js";
 
 type Params = { org: string; repo: string };
-type Query = { from?: string; to?: string; path?: string };
+type Query = { from: string; to?: string; path?: string };
 type IRequest = Request<Params, any, any, Query>;
 
 export default async function route(req: IRequest, res: Response) {
