@@ -28,6 +28,14 @@ export default function route(req: IRequest, res: Response) {
     res.status(400).json({ error: "queries must be an array" });
     return;
   }
+  for (const item of queries) {
+    if (typeof item?.spec !== "string" || typeof item?.id !== "string") {
+      res
+        .status(400)
+        .json({ error: "each query must have string fields: spec, id" });
+      return;
+    }
+  }
   const result = queries.map(({ spec, id }) => {
     const heading = store.getHeading(spec, id);
     if (!heading) {

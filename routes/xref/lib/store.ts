@@ -24,7 +24,7 @@ export class Store {
   /** Headings indexed by spec shortname, then by fragment id. */
   headings: HeadingsIndex = {};
   /** Reverse lookup: shortname → spec title. */
-  private specTitleByShortname: { [shortname: string]: string } = {};
+  private specTitleByShortname: Map<string, string> = new Map();
 
   constructor() {
     this.fill();
@@ -55,7 +55,7 @@ export class Store {
 
     return {
       ...heading,
-      specTitle: this.specTitleByShortname[normalizedSpec] || spec,
+      specTitle: this.specTitleByShortname.get(normalizedSpec) || spec,
     };
   }
 }
@@ -91,12 +91,10 @@ function indexHeadings(raw: HeadingsBySpec): HeadingsIndex {
 }
 
 /** Build a shortname → title map from the specmap for O(1) title lookup. */
-function buildSpecTitleMap(
-  specmap: Store["specmap"],
-): { [shortname: string]: string } {
-  const result: { [shortname: string]: string } = Object.create(null);
+function buildSpecTitleMap(specmap: Store["specmap"]): Map<string, string> {
+  const result = new Map<string, string>();
   for (const entry of Object.values(specmap)) {
-    result[entry.shortname] = entry.title;
+    result.set(entry.shortname, entry.title);
   }
   return result;
 }

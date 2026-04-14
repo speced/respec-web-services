@@ -5,7 +5,7 @@
 
 import path from "path";
 import { existsSync } from "fs";
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "fs/promises";
 
 import { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
 
@@ -52,6 +52,11 @@ export interface HeadingEntry {
 
 export interface HeadingsBySpec {
   [shortname: string]: HeadingEntry[];
+}
+
+interface HeadingsJSON {
+  spec?: { shortname?: string };
+  headings?: HeadingEntry[];
 }
 
 const defaultOptions = { forceUpdate: false };
@@ -212,7 +217,7 @@ function normalizeTerm(term: string, type: string) {
 async function getAllData(baseDir: string) {
   const SPECS_JSON = path.resolve(baseDir, "./index.json");
   console.log(`Getting data from ${SPECS_JSON}`);
-  const urlFileContent = await readJSON(SPECS_JSON);
+  const urlFileContent = await readJSON<{ results: SpecsJSON[] }>(SPECS_JSON);
   const data: SpecsJSON[] = urlFileContent.results;
 
   const specMap: Store["specmap"] = Object.create(null);
@@ -220,7 +225,7 @@ async function getAllData(baseDir: string) {
 
   for (const entry of data) {
     if (entry.dfns) {
-      const dfnsData = await readJSON(path.join(baseDir, entry.dfns));
+      const dfnsData = await readJSON<{ dfns: InputDfn[] }>(path.join(baseDir, entry.dfns));
       const dfns: InputDfn[] = dfnsData.dfns;
       dfnSources.push({
         series: entry.series.shortname,
@@ -240,9 +245,9 @@ async function getAllData(baseDir: string) {
   return { specMap, dfnSources };
 }
 
-async function readJSON(filePath: string) {
+async function readJSON<T = unknown>(filePath: string): Promise<T> {
   const text = await readFile(filePath, "utf-8");
-  return JSON.parse(text);
+  return JSON.parse(text) as T;
 }
 
 /**
@@ -258,25 +263,22 @@ async function readAllHeadings(
     return result;
   }
 
-  const { readdir } = await import("fs/promises");
   const files = await readdir(headingsDir);
   const jsonFiles = files.filter(f => f.endsWith(".json"));
 
   console.log(`Processing ${jsonFiles.length} heading files...`);
   for (const file of jsonFiles) {
     try {
-      const data = await readJSON(path.join(headingsDir, file));
+      const data = await readJSON<HeadingsJSON>(path.join(headingsDir, file));
       const shortname = data.spec?.shortname?.toLowerCase()
         || file.replace(/\.json$/, "").toLowerCase();
-      const headings: HeadingEntry[] = (data.headings || []).map(
-        (h: { id: string; href: string; title: string; number?: string; level: number }) => ({
-          id: h.id,
-          href: h.href,
-          title: h.title,
-          number: h.number,
-          level: h.level,
-        }),
-      );
+      const headings: HeadingEntry[] = (data.headings || []).map(h => ({
+        id: h.id,
+        href: h.href,
+        title: h.title,
+        number: h.number,
+        level: h.level,
+      }));
       result[shortname] = headings;
     } catch (error) {
       console.error(`Error reading headings from ${file}:`, error);
