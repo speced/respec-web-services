@@ -60,7 +60,7 @@ export default async function route(
   }
 
   try {
-    const requestedType = type as GroupType;
+    const requestedType: GroupType | undefined = type as GroupType | undefined;
     const groupInfo = await getGroupInfo(shortname, requestedType);
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
@@ -73,7 +73,7 @@ export default async function route(
 
 async function getGroupInfo(
   shortname: GroupMeta["name"],
-  requestedType: GroupType,
+  requestedType: GroupType | undefined,
 ) {
   const cacheKey = `${shortname}/${requestedType || ""}`;
   if (cache.expires(cacheKey) > 1000) {
@@ -163,7 +163,7 @@ async function getPatentPolicy(
   }
 }
 
-function getGroupMeta(shortname: string, requestedType: GroupType) {
+function getGroupMeta(shortname: string, requestedType: GroupType | undefined) {
   const types = requestedType
     ? [requestedType]
     : (Object.keys(groups) as GroupType[]);
