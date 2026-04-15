@@ -13,7 +13,7 @@ const cache = new DiskCache<null | Contributors>({
 });
 
 export default async function route(req: Request, res: Response) {
-  const { org, repo } = req.params;
+  const { org, repo } = req.params as Record<string, string>;
   const cacheKey = `${org}/${repo}`;
 
   res.set("Cache-Control", `max-age=${seconds("24h")}`);

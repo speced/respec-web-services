@@ -1,6 +1,3 @@
-import path from "path";
-import { fileURLToPath } from "url";
-
 /**
  * Ensure env variable exists and get its value.
  * @param name name of env variable
@@ -57,14 +54,4 @@ export class HTTPError extends Error {
   constructor(public statusCode: number, message: string, public url?: string) {
     super(message);
   }
-}
-
-// __dirname
-export function legacyDirname(meta: ImportMeta) {
-  return path.dirname(fileURLToPath(meta.url));
-}
-
-// __filename
-export function legacyFilename(meta: ImportMeta) {
-  return fileURLToPath(meta.url);
 }

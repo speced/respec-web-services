@@ -1,4 +1,3 @@
-import fetch, { Response } from "node-fetch";
 import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
 
 export async function* requestData(endpoint: string, pages = 30) {
@@ -38,7 +37,7 @@ function nextPage(link: string) {
   return m ? m[1] : null;
 }
 
-function getRateLimit(headers: Response["headers"]): RateLimit {
+function getRateLimit(headers: Headers): RateLimit {
   return {
     remaining: parseInt(headers.get("x-ratelimit-remaining") as string, 10),
     resetAt: new Date(parseInt(headers.get("x-ratelimit-reset") as string, 10)),

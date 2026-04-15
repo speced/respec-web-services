@@ -1,7 +1,6 @@
 import path from "path";
 import { readFileSync } from "fs";
 
-import fetch from "node-fetch";
 import { Request, Response } from "express";
 
 import { MemCache } from "../../utils/mem-cache.js";
@@ -40,7 +39,7 @@ const LEGACY_SHORTNAMES = new Map([
 ]);
 
 export default async function route(req: Request, res: Response) {
-  const { shortname, type } = req.params;
+  const { shortname, type } = req.params as Record<string, string>;
   if (!shortname) {
     if (req.headers.accept?.includes("text/html")) {
       return res.render("w3c/groups.js", { groups });

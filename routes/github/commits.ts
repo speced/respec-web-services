@@ -3,7 +3,7 @@ import { seconds } from "../../utils/misc.js";
 import { getCommits } from "./lib/commits.js";
 
 export default async function route(req: Request, res: Response) {
-  const { org, repo } = req.params;
+  const { org, repo } = req.params as Record<string, string>;
   const { from, to , path } = req.query;
   if (!from || typeof from !== "string") {
     res.set("Content-Type", "text/plain");
@@ -24,7 +24,7 @@ export default async function route(req: Request, res: Response) {
 
   try {
     const commits: { hash: string; message: string }[] = [];
-    for await (const commit of getCommits(org, repo, from, to, path)) {
+    for await (const commit of getCommits(org, repo, from, to, path as string | undefined)) {
       commits.push({
         hash: commit.abbreviatedOid,
         message: commit.messageHeadline,
