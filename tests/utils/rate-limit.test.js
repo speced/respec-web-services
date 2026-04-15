@@ -61,7 +61,7 @@ describe("utils/rate-limit", () => {
     const middleware = rateLimit({ windowMs: 60_000, max: 2 });
     const req = makeReq();
     let nextCalled = 0;
-    const nowSpy = spyOn(Date, "now").and.returnValues(1_000, 30_000, 31_000);
+    spyOn(Date, "now").and.returnValues(1_000, 30_000, 31_000);
 
     middleware(req, makeRes(), () => nextCalled++);
     middleware(req, makeRes(), () => nextCalled++);
@@ -72,8 +72,6 @@ describe("utils/rate-limit", () => {
     expect(blockedRes._status).toBe(429);
     expect(blockedRes.headers["Retry-After"]).toBe("30");
     expect(nextCalled).toBe(2);
-
-    nowSpy.and.callThrough();
   });
 
   it("tracks IPs independently", () => {
