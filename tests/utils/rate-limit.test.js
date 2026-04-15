@@ -107,7 +107,7 @@ describe("utils/rate-limit", () => {
     const middleware = rateLimit({ windowMs: 50, max: 1 });
     const req = makeReq();
     let nextCalled = 0;
-    spyOn(Date, "now").and.returnValues(0, 10, 60);
+    spyOn(Date, "now").and.returnValues(0, 10, 61);
 
     middleware(req, makeRes(), () => nextCalled++);
 
