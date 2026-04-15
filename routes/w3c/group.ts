@@ -39,7 +39,10 @@ const LEGACY_SHORTNAMES = new Map([
   ["i18n", "i18n-core"], // more than 10 instances
 ]);
 
-export default async function route(req: Request, res: Response) {
+type Params = { shortname?: string; type?: string };
+type IRequest = Request<Params>;
+
+export default async function route(req: IRequest, res: Response) {
   const { shortname, type } = req.params;
   if (!shortname) {
     if (req.headers.accept?.includes("text/html")) {
@@ -57,7 +60,7 @@ export default async function route(req: Request, res: Response) {
   }
 
   try {
-    const requestedType = type as GroupType;
+    const requestedType = type as GroupType | undefined;
     const groupInfo = await getGroupInfo(shortname, requestedType);
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
@@ -70,7 +73,7 @@ export default async function route(req: Request, res: Response) {
 
 async function getGroupInfo(
   shortname: GroupMeta["name"],
-  requestedType: GroupType,
+  requestedType?: GroupType,
 ) {
   const cacheKey = `${shortname}/${requestedType || ""}`;
   if (cache.expires(cacheKey) > 1000) {
@@ -160,7 +163,7 @@ async function getPatentPolicy(
   }
 }
 
-function getGroupMeta(shortname: string, requestedType: GroupType) {
+function getGroupMeta(shortname: string, requestedType?: GroupType) {
   const types = requestedType
     ? [requestedType]
     : (Object.keys(groups) as GroupType[]);
