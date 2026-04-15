@@ -120,8 +120,6 @@ export default async function update() {
   await writeFile(OUTPUT_FILE, JSON.stringify(data, null, 2), "utf-8");
 }
 
-const runAsScript = import.meta.filename === process.argv[1];
-
-if (runAsScript) {
+if (import.meta.main) {
   await update();
 }
