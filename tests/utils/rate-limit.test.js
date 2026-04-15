@@ -1,6 +1,12 @@
 import { rateLimit } from "../../build/utils/rate-limit.js";
 
 describe("utils/rate-limit", () => {
+  afterEach(() => {
+    if (jasmine.isSpy(Date.now)) {
+      Date.now.and.callThrough();
+    }
+  });
+
   function makeReq(ip = "1.2.3.4") {
     return { ip };
   }
