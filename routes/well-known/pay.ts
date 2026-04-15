@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import fetch from "node-fetch";
 
 const PAYMENT_POINTERS = [
   // "$ilp.uphold.com/DwJmxPHHi8K3", // Marcos

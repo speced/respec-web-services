@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 import split2 from "split2";
 import { serializeError, deserializeError } from "serialize-error";
 
-import { legacyFilename, env } from "./misc.js";
+import { env } from "./misc.js";
 
 type Message = { id: string };
 
@@ -151,7 +151,7 @@ export class BackgroundTaskQueue<M extends TaskModule> {
   constructor(jobDescriptionModulePath: string, queueName: string) {
     this.modulePath = jobDescriptionModulePath;
     this.name = queueName;
-    const __filename = legacyFilename(import.meta);
+    const __filename = import.meta.filename;
     this.worker = new Worker(__filename, { stderr: true, stdout: true });
   }
 

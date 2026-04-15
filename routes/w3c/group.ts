@@ -1,7 +1,6 @@
 import path from "path";
 import { readFileSync } from "fs";
 
-import fetch from "node-fetch";
 import { Request, Response } from "express";
 
 import { MemCache } from "../../utils/mem-cache.js";
@@ -56,6 +55,7 @@ export default async function route(req: IRequest, res: Response) {
   }
 
   if (type && !groups.hasOwnProperty(type)) {
+    res.set("Content-Type", "text/plain");
     return res.status(404).send(`Invalid group type: "${type}".`);
   }
 
