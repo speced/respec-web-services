@@ -12,8 +12,11 @@ const cache = new DiskCache<null | Contributors>({
   path: "github/contributors",
 });
 
-export default async function route(req: Request, res: Response) {
-  const { org, repo } = req.params as Record<string, string>;
+type Params = { org: string; repo: string };
+type IRequest = Request<Params>;
+
+export default async function route(req: IRequest, res: Response) {
+  const { org, repo } = req.params;
   const cacheKey = `${org}/${repo}`;
 
   res.set("Cache-Control", `max-age=${seconds("24h")}`);
