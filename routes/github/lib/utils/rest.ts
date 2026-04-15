@@ -1,6 +1,11 @@
 import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
 
+const GITHUB_API_PREFIX = "https://api.github.com/";
+
 export async function* requestData(endpoint: string, pages = 30) {
+  if (!endpoint.startsWith(GITHUB_API_PREFIX)) {
+    throw new Error(`requestData: endpoint must start with ${GITHUB_API_PREFIX}`);
+  }
   let url: string | null = endpoint;
   do {
     const token = getToken();
@@ -19,7 +24,11 @@ export async function* requestData(endpoint: string, pages = 30) {
     const result = await response.json();
     yield { url, result };
 
-    url = nextPage(response.headers.get("link") || "");
+    const next = nextPage(response.headers.get("link") || "");
+    if (next !== null && !next.startsWith(GITHUB_API_PREFIX)) {
+      throw new Error(`requestData: pagination URL must start with ${GITHUB_API_PREFIX}`);
+    }
+    url = next;
     updateRateLimit(token, getRateLimit(response.headers));
   } while (url !== null && --pages > 0);
 

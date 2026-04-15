@@ -52,6 +52,7 @@ export default async function route(req: Request, res: Response) {
   }
 
   if (type && !groups.hasOwnProperty(type)) {
+    res.set("Content-Type", "text/plain");
     return res.status(404).send(`Invalid group type: "${type}".`);
   }
 

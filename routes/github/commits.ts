@@ -32,6 +32,7 @@ export default async function route(req: Request, res: Response) {
     }
     res.json(commits);
   } catch (error) {
+    res.set("Content-Type", "text/plain");
     res.status(404).send(error.message);
   }
 }
