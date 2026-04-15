@@ -39,7 +39,7 @@ function getQueryFn(rawQuery) {
     return (${query || true});
   `;
   console.debug(body);
-  return new Function('entry', body); // intentional: developer filter tool, browser-only context
+  return new Function('entry', body);
 }
 
 /**
