@@ -57,6 +57,25 @@ describe("utils/rate-limit", () => {
     expect(nextCalled).toBe(2);
   });
 
+  it("sets Retry-After to seconds until next request is allowed", () => {
+    const middleware = rateLimit({ windowMs: 60_000, max: 2 });
+    const req = makeReq();
+    let nextCalled = 0;
+    const nowSpy = spyOn(Date, "now").and.returnValues(1_000, 30_000, 31_000);
+
+    middleware(req, makeRes(), () => nextCalled++);
+    middleware(req, makeRes(), () => nextCalled++);
+
+    const blockedRes = makeRes();
+    middleware(req, blockedRes, () => nextCalled++);
+
+    expect(blockedRes._status).toBe(429);
+    expect(blockedRes.headers["Retry-After"]).toBe("30");
+    expect(nextCalled).toBe(2);
+
+    nowSpy.and.callThrough();
+  });
+
   it("tracks IPs independently", () => {
     const middleware = rateLimit({ windowMs: 60_000, max: 1 });
     let nextCalled = 0;
