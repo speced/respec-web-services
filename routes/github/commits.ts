@@ -2,9 +2,13 @@ import { Request, Response } from "express";
 import { seconds } from "../../utils/misc.js";
 import { getCommits } from "./lib/commits.js";
 
-export default async function route(req: Request, res: Response) {
-  const { org, repo } = req.params as Record<string, string>;
-  const { from, to , path } = req.query;
+type Params = { org: string; repo: string };
+type Query = { from?: string; to?: string; path?: string };
+type IRequest = Request<Params, any, any, Query>;
+
+export default async function route(req: IRequest, res: Response) {
+  const { org, repo } = req.params;
+  const { from, to, path } = req.query;
   if (!from || typeof from !== "string") {
     res.set("Content-Type", "text/plain");
     return res.status(400).send("query parameter 'from' is required");
@@ -24,7 +28,7 @@ export default async function route(req: Request, res: Response) {
 
   try {
     const commits: { hash: string; message: string }[] = [];
-    for await (const commit of getCommits(org, repo, from, to, path as string | undefined)) {
+    for await (const commit of getCommits(org, repo, from, to, path)) {
       commits.push({
         hash: commit.abbreviatedOid,
         message: commit.messageHeadline,
