@@ -39,7 +39,7 @@ function getQueryFn(rawQuery) {
     return (${query || true});
   `;
   console.debug(body);
-  return new Function('entry', body);
+  return new Function('entry', body); // CodeQL[js/code-injection]: intentional developer filter tool, runs in browser only
 }
 
 /**
