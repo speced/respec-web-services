@@ -97,4 +97,30 @@ describe("utils/rate-limit", () => {
     middleware(req, makeRes(), () => nextCalled++);
     expect(nextCalled).toBe(2);
   });
+
+  describe("invalid options", () => {
+    it("throws for windowMs = 0", () => {
+      expect(() => rateLimit({ windowMs: 0, max: 10 })).toThrowError(RangeError);
+    });
+
+    it("throws for negative windowMs", () => {
+      expect(() => rateLimit({ windowMs: -1000, max: 10 })).toThrowError(RangeError);
+    });
+
+    it("throws for non-finite windowMs", () => {
+      expect(() => rateLimit({ windowMs: Infinity, max: 10 })).toThrowError(RangeError);
+    });
+
+    it("throws for max = 0", () => {
+      expect(() => rateLimit({ windowMs: 60_000, max: 0 })).toThrowError(RangeError);
+    });
+
+    it("throws for negative max", () => {
+      expect(() => rateLimit({ windowMs: 60_000, max: -1 })).toThrowError(RangeError);
+    });
+
+    it("throws for non-integer max", () => {
+      expect(() => rateLimit({ windowMs: 60_000, max: 1.5 })).toThrowError(RangeError);
+    });
+  });
 });

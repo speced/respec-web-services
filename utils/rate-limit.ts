@@ -11,6 +11,12 @@ interface RateLimitOptions {
  * exceed `max` within the rolling `windowMs` period with HTTP 429.
  */
 export function rateLimit({ windowMs, max }: RateLimitOptions) {
+  if (!Number.isFinite(windowMs) || windowMs <= 0) {
+    throw new RangeError(`rateLimit: windowMs must be a positive finite number, got ${windowMs}`);
+  }
+  if (!Number.isInteger(max) || max <= 0) {
+    throw new RangeError(`rateLimit: max must be a positive integer, got ${max}`);
+  }
   const log = new Map<string, number[]>();
 
   // Periodically evict fully-expired entries to bound memory growth.
