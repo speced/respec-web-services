@@ -10,7 +10,7 @@ import buildUpdateRoute, { PKG_DIR } from "./builds/update.js";
 
 const router = express.Router({ mergeParams: true });
 
-const sizeRateLimit = rateLimit({ windowMs: ms("1m"), max: 60 });
+const sizeRateLimit = rateLimit({ windowMs: ms("1m"), max: 10 });
 
 router.get("/size", sizeRateLimit, sizeRoute.get);
 router.put(

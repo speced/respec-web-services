@@ -103,10 +103,11 @@ describe("utils/rate-limit", () => {
     expect(blockedRes._status).toBe(429);
   });
 
-  it("allows requests again after the window expires", async () => {
+  it("allows requests again after the window expires", () => {
     const middleware = rateLimit({ windowMs: 50, max: 1 });
     const req = makeReq();
     let nextCalled = 0;
+    spyOn(Date, "now").and.returnValues(0, 10, 60);
 
     middleware(req, makeRes(), () => nextCalled++);
 
@@ -114,8 +115,6 @@ describe("utils/rate-limit", () => {
     middleware(req, blockedRes, () => nextCalled++);
     expect(blockedRes._status).toBe(429);
     expect(nextCalled).toBe(1);
-
-    await new Promise(resolve => setTimeout(resolve, 60));
 
     middleware(req, makeRes(), () => nextCalled++);
     expect(nextCalled).toBe(2);

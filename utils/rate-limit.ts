@@ -38,7 +38,7 @@ export function rateLimit({ windowMs, max }: RateLimitOptions) {
     const timestamps = (log.get(key) ?? []).filter(t => t > cutoff);
     if (timestamps.length >= max) {
       const oldestTimestamp = timestamps[0];
-      const retryAfterMs = Math.max(0, oldestTimestamp + windowMs - now);
+      const retryAfterMs = Math.max(0, oldestTimestamp - cutoff);
       res.set("Retry-After", String(Math.max(1, Math.ceil(retryAfterMs / 1000))));
       res.set("Content-Type", "text/plain");
       return res.status(429).send("Too Many Requests");
