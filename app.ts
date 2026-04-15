@@ -38,7 +38,6 @@ app.use(
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
         // Allow embedding in iframes from any origin (ReSpec pill UI).
-        // CSP frame-ancestors supersedes X-Frame-Options in modern browsers.
         "frame-ancestors": ["*"],
       },
     },
