@@ -34,8 +34,14 @@ registerViewEngine(app);
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
 app.use(
   helmet({
-    // Allow for UI inclusion as iframe in ReSpec pill.
-    frameguard: false,
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        // Allow embedding in iframes from any origin (ReSpec pill UI).
+        // CSP frame-ancestors supersedes X-Frame-Options in modern browsers.
+        "frame-ancestors": ["*"],
+      },
+    },
   }),
 );
 
