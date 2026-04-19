@@ -28,8 +28,8 @@ xref
   .post("/search", express.json({ limit: "2mb" }), cors(), searchRoutePost);
 xref.get("/meta{/:field}", cors(), metaRoute);
 xref
-  .options("/headings", cors({ methods: ["POST"], maxAge: ms("1day") }))
-  .post("/headings", express.json({ limit: "1mb" }), cors(), headingsRoutePost);
+  .options("/search/headings", cors({ methods: ["POST"], maxAge: ms("1day") }))
+  .post("/search/headings", express.json({ limit: "1mb" }), cors(), headingsRoutePost);
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 
