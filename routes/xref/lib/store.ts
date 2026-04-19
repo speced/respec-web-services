@@ -70,11 +70,11 @@ function readJson(filename: string) {
 
 /** Read an optional JSON data file. Returns {} if missing. */
 function readJsonOptional(filename: string) {
-  const DATA_DIR = env("DATA_DIR");
-  const dataFile = path.resolve(DATA_DIR, `./xref/${filename}`);
-  if (!existsSync(dataFile)) return {};
-  const text = readFileSync(dataFile, "utf8");
-  return JSON.parse(text);
+  try {
+    return readJson(filename);
+  } catch {
+    return {}
+  }
 }
 
 /** Index headings arrays by id for O(1) lookup per spec. */
