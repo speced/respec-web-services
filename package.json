@@ -19,7 +19,7 @@
     "helmet": "^8.0.0",
     "morgan": "^1.10.1",
     "nanoid": "^5.0.8",
-    "serialize-error": "^11.0.3",
+    "serialize-error": "^13.0.1",
     "split2": "^4.2.0",
     "ucontent": "^2.0.0"
   },
