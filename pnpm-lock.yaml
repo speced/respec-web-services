@@ -30,8 +30,8 @@ importers:
         specifier: ^1.10.1
         version: 1.10.1
       nanoid:
-        specifier: ^5.0.8
-        version: 5.0.8
+        specifier: ^5.1.9
+        version: 5.1.9
       serialize-error:
         specifier: ^11.0.3
         version: 11.0.3
@@ -397,8 +397,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  nanoid@5.0.8:
-    resolution: {integrity: sha512-TcJPw+9RV9dibz1hHUzlLVy8N4X9TnwirAjrU08Juo6BNKggzVfP2ZJ/3ZUSq15Xl5i85i+Z89XBO90pB2PghQ==}
+  nanoid@5.1.9:
+    resolution: {integrity: sha512-ZUvP7KeBLe3OZ1ypw6dI/TzYJuvHP77IM4Ry73waSQTLn8/g8rpdjfyVAh7t1/+FjBtG4lCP42MEbDxOsRpBMw==}
     engines: {node: ^18 || >=20}
     hasBin: true
 
@@ -947,7 +947,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  nanoid@5.0.8: {}
+  nanoid@5.1.9: {}
 
   negotiator@0.6.4: {}
 

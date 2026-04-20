@@ -18,7 +18,7 @@
     "express": "^5.2.1",
     "helmet": "^8.0.0",
     "morgan": "^1.10.1",
-    "nanoid": "^5.0.8",
+    "nanoid": "^5.1.9",
     "serialize-error": "^11.0.3",
     "split2": "^4.2.0",
     "ucontent": "^2.0.0"
