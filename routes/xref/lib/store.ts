@@ -1,14 +1,9 @@
 import path from "path";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync } from "fs";
 
 import { env } from "../../../utils/misc.js";
 import { DataEntry } from "./search.js";
 import { HeadingEntry, HeadingsBySpec } from "./scraper.js";
-
-/** Headings indexed by id for O(1) lookup. */
-type HeadingsIndex = {
-  [shortname: string]: { [id: string]: HeadingEntry };
-};
 
 export class Store {
   version = -1;
@@ -21,8 +16,8 @@ export class Store {
       title: string;
     };
   } = {};
-  /** Headings indexed by spec shortname, then by fragment id. */
-  headings: HeadingsIndex = {};
+  /** Headings pre-indexed by spec shortname, then by fragment id. */
+  headings: HeadingsBySpec = {};
   /** Reverse lookup: shortname → spec title. */
   private specTitleByShortname: Map<string, string> = new Map();
 
@@ -35,8 +30,7 @@ export class Store {
     this.byTerm = readJson("xref.json");
     this.bySpec = readJson("specs.json");
     this.specmap = readJson("specmap.json");
-    const rawHeadings: HeadingsBySpec = readJsonOptional("headings.json");
-    this.headings = indexHeadings(rawHeadings);
+    this.headings = readJsonOptional("headings.json");
     this.specTitleByShortname = buildSpecTitleMap(this.specmap);
     this.version = Date.now();
   }
@@ -79,19 +73,6 @@ function readJsonOptional(filename: string) {
     }
     throw err;
   }
-}
-
-/** Index headings arrays by id for O(1) lookup per spec. */
-function indexHeadings(raw: HeadingsBySpec): HeadingsIndex {
-  const indexed: HeadingsIndex = Object.create(null);
-  for (const [shortname, headings] of Object.entries(raw)) {
-    const byId: { [id: string]: HeadingEntry } = Object.create(null);
-    for (const h of headings) {
-      byId[h.id] = h;
-    }
-    indexed[shortname] = byId;
-  }
-  return indexed;
 }
 
 /** Build a shortname → title map from the specmap for O(1) title lookup. */

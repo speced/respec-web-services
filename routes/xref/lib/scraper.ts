@@ -51,7 +51,7 @@ export interface HeadingEntry {
 }
 
 export interface HeadingsBySpec {
-  [shortname: string]: HeadingEntry[];
+  [shortname: string]: { [id: string]: HeadingEntry };
 }
 
 interface HeadingsJSON {
@@ -251,7 +251,7 @@ async function readJSON<T = unknown>(filePath: string): Promise<T> {
 
 /**
  * Read all headings data from webref's ed/headings/ directory.
- * Returns { shortname: HeadingEntry[] }. Indexed by id in the Store.
+ * Returns { shortname: { id: HeadingEntry } } — pre-indexed for O(1) lookup.
  */
 async function readAllHeadings(
   headingsDir: string,
@@ -271,14 +271,17 @@ async function readAllHeadings(
       const data = await readJSON<HeadingsJSON>(path.join(headingsDir, file));
       // Shortname derived from filename (webref doesn't include it in the JSON)
       const shortname = file.replace(/\.json$/, "").toLowerCase();
-      const headings: HeadingEntry[] = (data.headings || []).map(h => ({
-        id: h.id,
-        href: h.href,
-        title: h.title,
-        number: h.number,
-        level: h.level,
-      }));
-      result[shortname] = headings;
+      const byId: { [id: string]: HeadingEntry } = Object.create(null);
+      for (const h of data.headings || []) {
+        byId[h.id] = {
+          id: h.id,
+          href: h.href,
+          title: h.title,
+          number: h.number,
+          level: h.level,
+        };
+      }
+      result[shortname] = byId;
     } catch (error) {
       console.error(`Error reading headings from ${file}:`, error);
     }
