@@ -15,7 +15,6 @@ const sizeRateLimit = rateLimit({ windowMs: ms("1m"), max: 10 });
 router.get("/size", sizeRateLimit, sizeRoute.get);
 router.put(
   "/size",
-  sizeRateLimit,
   express.urlencoded({ extended: false, parameterLimit: 4, limit: "128b" }),
   sizeRoute.put,
 );

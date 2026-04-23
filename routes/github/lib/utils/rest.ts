@@ -1,11 +1,19 @@
 import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
 
-const GITHUB_API_PREFIX = "https://api.github.com/";
+const GITHUB_API_ORIGIN = "https://api.github.com";
+
+function assertGitHubAPIUrl(url: string) {
+  try {
+    if (new URL(url).origin !== GITHUB_API_ORIGIN) throw 0;
+  } catch {
+    throw new Error(
+      `requestData: endpoint must be a ${GITHUB_API_ORIGIN}/ URL`,
+    );
+  }
+}
 
 export async function* requestData(endpoint: string, pages = 30) {
-  if (!endpoint.startsWith(GITHUB_API_PREFIX)) {
-    throw new Error(`requestData: endpoint must start with ${GITHUB_API_PREFIX}`);
-  }
+  assertGitHubAPIUrl(endpoint);
   let url: string | null = endpoint;
   do {
     const token = getToken();
@@ -25,9 +33,7 @@ export async function* requestData(endpoint: string, pages = 30) {
     yield { url, result };
 
     const next = nextPage(response.headers.get("link") || "");
-    if (next !== null && !next.startsWith(GITHUB_API_PREFIX)) {
-      throw new Error(`requestData: pagination URL must start with ${GITHUB_API_PREFIX}`);
-    }
+    if (next !== null) assertGitHubAPIUrl(next);
     url = next;
     updateRateLimit(token, getRateLimit(response.headers));
   } while (url !== null && --pages > 0);

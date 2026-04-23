@@ -41,8 +41,8 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        // Allow embedding in iframes from any origin (ReSpec pill UI).
-        "frame-ancestors": ["*"],
+        // Allow embedding in iframes from respec.org (ReSpec pill UI).
+        "frame-ancestors": ["'self'", "https://respec.org"],
       },
     },
   }),
