@@ -72,8 +72,12 @@ function readJson(filename: string) {
 function readJsonOptional(filename: string) {
   try {
     return readJson(filename);
-  } catch {
-    return {}
+  } catch (err: any) {
+    if (err?.code === "ENOENT") {
+      console.warn(`Optional data file not found: ${filename}`);
+      return {};
+    }
+    throw err;
   }
 }
 
@@ -93,8 +97,11 @@ function indexHeadings(raw: HeadingsBySpec): HeadingsIndex {
 /** Build a shortname → title map from the specmap for O(1) title lookup. */
 function buildSpecTitleMap(specmap: Store["specmap"]): Map<string, string> {
   const result = new Map<string, string>();
-  for (const entry of Object.values(specmap)) {
-    result.set(entry.shortname, entry.title);
+  // specmap is { current: { [specid]: entry }, snapshot: { [specid]: entry } }
+  for (const group of Object.values(specmap)) {
+    for (const entry of Object.values(group as Record<string, { shortname: string; title: string }>)) {
+      result.set(entry.shortname, entry.title);
+    }
   }
   return result;
 }

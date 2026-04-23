@@ -55,7 +55,6 @@ export interface HeadingsBySpec {
 }
 
 interface HeadingsJSON {
-  spec?: { shortname?: string };
   headings?: HeadingEntry[];
 }
 
@@ -270,8 +269,8 @@ async function readAllHeadings(
   for (const file of jsonFiles) {
     try {
       const data = await readJSON<HeadingsJSON>(path.join(headingsDir, file));
-      const shortname = data.spec?.shortname?.toLowerCase()
-        || file.replace(/\.json$/, "").toLowerCase();
+      // Shortname derived from filename (webref doesn't include it in the JSON)
+      const shortname = file.replace(/\.json$/, "").toLowerCase();
       const headings: HeadingEntry[] = (data.headings || []).map(h => ({
         id: h.id,
         href: h.href,
