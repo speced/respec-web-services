@@ -32,10 +32,15 @@ registerViewEngine(app);
 
 // Security
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
+// ReSpec pill UI is embedded via iframe on any spec-hosting site,
+// so we must not send frame-ancestors or X-Frame-Options.
+const cspDirectives = helmet.contentSecurityPolicy.getDefaultDirectives();
+delete cspDirectives["frame-ancestors"];
+
 app.use(
   helmet({
-    // ReSpec pill UI is embedded via iframe on any spec-hosting site.
     frameguard: false,
+    contentSecurityPolicy: { directives: cspDirectives },
   }),
 );
 
