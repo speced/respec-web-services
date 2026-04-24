@@ -47,7 +47,7 @@ export default function route(req: IRequest, res: Response) {
     }
   }
   const result = queries.map(({ spec, id }) => {
-    const heading = store.getHeading(spec, id);
+    const heading = store.getHeading(spec.trim(), id.trim());
     if (!heading) {
       return { spec, id, error: "not found" };
     }

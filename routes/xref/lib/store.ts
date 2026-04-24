@@ -10,10 +10,12 @@ export class Store {
   bySpec: { [shortname: string]: DataEntry[] } = {};
   byTerm: { [term: string]: DataEntry[] } = {};
   specmap: {
-    [specid: string]: {
-      url: string;
-      shortname: string;
-      title: string;
+    [group: string]: {
+      [specid: string]: {
+        url: string;
+        shortname: string;
+        title: string;
+      };
     };
   } = {};
   /** Headings pre-indexed by spec shortname, then by fragment id. */
@@ -41,7 +43,24 @@ export class Store {
     id: string,
   ): (HeadingEntry & { specTitle: string }) | null {
     const normalizedSpec = spec.toLowerCase();
-    const specHeadings = this.headings[normalizedSpec];
+    let specHeadings = this.headings[normalizedSpec];
+    // Fallback: try stripping version suffix (e.g., cssom-view → cssom-view-1)
+    // or adding it via specmap lookup
+    if (!specHeadings) {
+      const stripped = normalizedSpec.replace(/-\d+$/, "");
+      if (stripped !== normalizedSpec) {
+        specHeadings = this.headings[stripped];
+      }
+      if (!specHeadings) {
+        // Try resolving series shortname to versioned via specmap
+        for (const [specId, entry] of this.specmapEntries()) {
+          if (entry.shortname === normalizedSpec || entry.shortname === stripped) {
+            specHeadings = this.headings[specId];
+            if (specHeadings) break;
+          }
+        }
+      }
+    }
     if (!specHeadings) return null;
 
     const heading = specHeadings[id];
@@ -49,8 +68,20 @@ export class Store {
 
     return {
       ...heading,
-      specTitle: this.specTitleByShortname.get(normalizedSpec) || spec,
+      specTitle: this.specTitleByShortname.get(normalizedSpec)
+        || this.specTitleByShortname.get(normalizedSpec.replace(/-\d+$/, ""))
+        || spec,
     };
+  }
+
+  private *specmapEntries() {
+    for (const group of Object.values(this.specmap)) {
+      for (const [specId, entry] of Object.entries(
+        group as unknown as Record<string, { url: string; shortname: string; title: string }>
+      )) {
+        yield [specId, entry] as const;
+      }
+    }
   }
 }
 
@@ -80,7 +111,7 @@ function buildSpecTitleMap(specmap: Store["specmap"]): Map<string, string> {
   const result = new Map<string, string>();
   // specmap is { current: { [specid]: entry }, snapshot: { [specid]: entry } }
   for (const group of Object.values(specmap)) {
-    for (const entry of Object.values(group as Record<string, { shortname: string; title: string }>)) {
+    for (const entry of Object.values(group as unknown as Record<string, { url: string; shortname: string; title: string }>)) {
       result.set(entry.shortname, entry.title);
     }
   }
