@@ -39,6 +39,7 @@ describe("rate limiting behavior", () => {
     let nextCalled = false;
     await middleware(req, blockedRes, () => { nextCalled = true; });
     expect(blockedRes._status).toBe(429);
+    expect(blockedRes.headers["retry-after"]).toBeDefined();
     expect(nextCalled).toBe(false);
   });
 
