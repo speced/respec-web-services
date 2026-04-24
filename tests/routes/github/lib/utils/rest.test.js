@@ -35,4 +35,59 @@ describe("routes/github/lib/utils/rest - requestData", () => {
       /endpoint origin must be https:\/\/api\.github\.com/,
     );
   });
+
+  it("throws for a blob: URL with matching origin", async () => {
+    const gen = requestData("blob:https://api.github.com/some-uuid");
+    await expectAsync(gen.next()).toBeRejectedWithError(
+      /endpoint origin must be https:\/\/api\.github\.com/,
+    );
+  });
+
+  it("throws for a data: URL", async () => {
+    const gen = requestData("data:text/html,<h1>hi</h1>");
+    await expectAsync(gen.next()).toBeRejectedWithError(
+      /endpoint origin must be https:\/\/api\.github\.com/,
+    );
+  });
+
+  it("accepts a valid GitHub API URL", async () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = async () => new Response(JSON.stringify([]), {
+      status: 200,
+      headers: {
+        "x-ratelimit-remaining": "10",
+        "x-ratelimit-reset": "9999999999",
+        "x-ratelimit-limit": "60",
+      },
+    });
+    try {
+      const gen = requestData("https://api.github.com/repos/w3c/respec/issues");
+      const { value } = await gen.next();
+      expect(value.url).toBe("https://api.github.com/repos/w3c/respec/issues");
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  it("rejects a malicious pagination URL in Link header", async () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = async () => new Response(JSON.stringify([]), {
+      status: 200,
+      headers: {
+        link: '<https://evil.com/page2>; rel="next"',
+        "x-ratelimit-remaining": "10",
+        "x-ratelimit-reset": "9999999999",
+        "x-ratelimit-limit": "60",
+      },
+    });
+    try {
+      const gen = requestData("https://api.github.com/repos/w3c/respec/issues");
+      await gen.next();
+      await expectAsync(gen.next()).toBeRejectedWithError(
+        /endpoint origin must be https:\/\/api\.github\.com/,
+      );
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
 });

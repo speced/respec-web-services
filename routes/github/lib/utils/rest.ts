@@ -12,7 +12,7 @@ function tryURL(url: string) {
 
 function assertGitHubAPIUrl(url: string) {
   const parsed = tryURL(url);
-  if (parsed?.origin !== GITHUB_API_ORIGIN) {
+  if (parsed?.protocol !== "https:" || parsed.origin !== GITHUB_API_ORIGIN) {
     throw new Error(
       `requestData: endpoint origin must be ${GITHUB_API_ORIGIN}, got ${parsed?.origin ?? "invalid URL"}`,
     );
