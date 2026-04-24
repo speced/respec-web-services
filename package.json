@@ -35,6 +35,11 @@
     "update-data-sources": "node build/scripts/update-data-sources.js"
   },
   "packageManager": "pnpm@9.8.0",
+  "pnpm": {
+    "overrides": {
+      "html-minifier": "npm:html-minifier-terser@^7.2.0"
+    }
+  },
   "simple-git-hooks": {
     "post-merge": "pnpm i && pnpm build"
   },
