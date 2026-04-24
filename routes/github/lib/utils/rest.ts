@@ -2,18 +2,19 @@ import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
 
 const GITHUB_API_ORIGIN = "https://api.github.com";
 
-function assertGitHubAPIUrl(url: string) {
-  let origin: string;
+function tryURL(url: string) {
   try {
-    origin = new URL(url).origin;
+    return new URL(url);
   } catch {
-    throw new Error(
-      `requestData: endpoint is not a valid URL: ${url}`,
-    );
+    return null;
   }
-  if (origin !== GITHUB_API_ORIGIN) {
+}
+
+function assertGitHubAPIUrl(url: string) {
+  const parsed = tryURL(url);
+  if (parsed?.origin !== GITHUB_API_ORIGIN) {
     throw new Error(
-      `requestData: endpoint origin must be ${GITHUB_API_ORIGIN}, got ${origin}`,
+      `requestData: endpoint origin must be ${GITHUB_API_ORIGIN}, got ${parsed?.origin ?? "invalid URL"}`,
     );
   }
 }

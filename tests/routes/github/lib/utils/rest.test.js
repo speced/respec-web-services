@@ -25,7 +25,7 @@ describe("routes/github/lib/utils/rest - requestData", () => {
   it("throws for an empty string endpoint", async () => {
     const gen = requestData("");
     await expectAsync(gen.next()).toBeRejectedWithError(
-      /endpoint is not a valid URL/,
+      /endpoint origin must be https:\/\/api\.github\.com/,
     );
   });
 

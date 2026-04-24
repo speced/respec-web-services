@@ -34,17 +34,8 @@ registerViewEngine(app);
 // Defaults https://www.npmjs.com/package/helmet#how-it-works
 app.use(
   helmet({
-    // Disable X-Frame-Options so CSP frame-ancestors takes sole control.
-    // Helmet's default SAMEORIGIN would block cross-origin embedding
-    // even when frame-ancestors allows it in older browsers.
+    // ReSpec pill UI is embedded via iframe on any spec-hosting site.
     frameguard: false,
-    contentSecurityPolicy: {
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        // Allow embedding in iframes from respec.org (ReSpec pill UI).
-        "frame-ancestors": ["'self'", "https://respec.org"],
-      },
-    },
   }),
 );
 
