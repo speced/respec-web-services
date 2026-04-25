@@ -2,7 +2,7 @@ import path from "node:path";
 import express from "express";
 
 import { env, ms } from "../../utils/misc.js";
-import { rateLimit } from "../../utils/rate-limit.js";
+import rateLimit from "express-rate-limit";
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 
 import * as sizeRoute from "./size.js";

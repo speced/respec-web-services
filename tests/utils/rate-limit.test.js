@@ -1,4 +1,4 @@
-import { rateLimit } from "../../build/utils/rate-limit.js";
+import rateLimit from "express-rate-limit";
 
 function makeReq(ip = "127.0.0.1") {
   return { ip, headers: {}, method: "GET", url: "/" };
