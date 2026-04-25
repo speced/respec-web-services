@@ -1,11 +1,10 @@
 import path from "path";
 
-import { legacyDirname } from "../../utils/misc.js";
 import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
 import { cache } from "./lib/index.js";
 import { Request, Response } from "express";
 
-const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
+const workerFile = path.join(import.meta.dirname, "update.worker.js");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
   workerFile,
   "caniuse_update",

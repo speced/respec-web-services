@@ -7,7 +7,6 @@ import helmet from "helmet";
 
 import * as logging from "./utils/logging.js";
 import { register as registerViewEngine } from "./utils/view-engine.js";
-import { legacyDirname } from "./utils/misc.js";
 import { PROJECT_ROOT } from "./utils/constants.js";
 
 import xrefRouter from "./routes/xref/index.js";
@@ -29,7 +28,7 @@ app.use(logging.stderr());
 
 app.use(express.static(path.join(PROJECT_ROOT, "/static")));
 
-app.set("views", path.join(legacyDirname(import.meta), "views"));
+app.set("views", path.join(import.meta.dirname, "views"));
 registerViewEngine(app);
 
 // Security

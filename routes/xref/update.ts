@@ -2,14 +2,13 @@ import path from "path";
 
 import { Request, Response } from "express";
 
-import { legacyDirname } from "../../utils/misc.js";
 import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
 import { ms } from "../../utils/misc.js";
 
 import { cache as searchCache } from "./lib/search.js";
 import { store } from "./lib/store-init.js";
 
-const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
+const workerFile = path.join(import.meta.dirname, "update.worker.js");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
   workerFile,
   "xref_update",

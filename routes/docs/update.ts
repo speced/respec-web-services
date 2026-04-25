@@ -1,7 +1,6 @@
 import path from "path";
 import { writeFile } from "fs/promises";
 
-import fetch from "node-fetch";
 import { Request, Response } from "express";
 
 import { HTTPError } from "../../utils/misc.js";

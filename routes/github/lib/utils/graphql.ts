@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
 
 const ENDPOINT = "https://api.github.com/graphql";
