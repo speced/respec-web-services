@@ -144,6 +144,10 @@ function renderResults(entries, query) {
     return;
   }
 
+  // Detect overloaded IDL entries that would produce identical citations.
+  // Build a map of citation key -> list of entries to find duplicates.
+  const overloadedURIs = detectOverloadedEntries(entries, term);
+
   let html = '';
   for (const entry of entries) {
     // Use the canonical matched term when available (case-insensitive fallback
@@ -152,8 +156,9 @@ function renderResults(entries, query) {
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
+    const isOverloaded = overloadedURIs.has(entry.uri);
     const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(citeTerm, entry)
+      ? howToCiteIDL(citeTerm, entry, isOverloaded)
       : metadata.types.markup.has(entry.type)
         ? howToCiteMarkup(citeTerm, entry)
         : metadata.types.css.has(entry.type) ||
@@ -172,7 +177,30 @@ function renderResults(entries, query) {
   output.innerHTML = html;
 }
 
-function howToCiteIDL(term, entry) {
+/**
+ * Detects IDL entries that would produce identical citations (overloaded
+ * methods/constructors). Returns a Set of URIs that need disambiguation.
+ */
+function detectOverloadedEntries(entries, term) {
+  const citationGroups = new Map();
+  for (const entry of entries) {
+    if (!metadata.types.idl.has(entry.type)) continue;
+    const forKey = (entry.for || []).join(',');
+    const key = `${entry.type}|${forKey}|${term}`;
+    const group = citationGroups.get(key) ?? [];
+    if (!group.length) citationGroups.set(key, group);
+    group.push(entry);
+  }
+  const overloadedURIs = new Set();
+  for (const group of citationGroups.values()) {
+    if (group.length > 1) {
+      group.forEach(entry => overloadedURIs.add(entry.uri));
+    }
+  }
+  return overloadedURIs;
+}
+
+function howToCiteIDL(term, entry, isOverloaded = false) {
   const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
@@ -180,18 +208,75 @@ function howToCiteIDL(term, entry) {
       .map(f => {
         const safeF = escapeHTML(f);
         const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
-        return `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
+        let cite = `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
+        if (isOverloaded) {
+          const hint = extractOverloadHint(entry.uri, f, term);
+          if (hint) {
+            cite += ` <small>(${escapeHTML(hint)})</small>`;
+          }
+        }
+        return cite;
       })
       .join('<br>');
   }
+  let cite;
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        return `{{"${safeTerm}"}}`;
+        cite = `{{"${safeTerm}"}}`;
+        break;
       }
     default:
-      return `{{${safeTerm}}}`;
+      cite = `{{${safeTerm}}}`;
   }
+  if (isOverloaded) {
+    const hint = extractOverloadHint(entry.uri, null, term);
+    if (hint) {
+      cite += ` <small>(${escapeHTML(hint)})</small>`;
+    }
+  }
+  return cite;
+}
+
+/**
+ * Extracts a human-readable overload hint from a URI fragment.
+ *
+ * URI fragments for WebIDL definitions follow the pattern:
+ *   #dom-<interface>-<method>-<param1>-<param2>-...
+ *
+ * For example:
+ *   #dom-window-postmessage-message-targetorigin-transfer
+ *   #dom-window-postmessage-message-options
+ *
+ * This function strips the known prefix (interface + method) and returns
+ * the remaining parts as a parameter list, e.g. "message, targetorigin, transfer".
+ */
+function extractOverloadHint(uri, forContext, term) {
+  if (!uri) return '';
+  const hash = uri.includes('#') ? uri.split('#')[1] : uri;
+  if (!hash) return '';
+
+  const parts = hash.toLowerCase().split('-');
+
+  // Build the prefix to strip: typically "dom", interface, method
+  const prefixParts = ['dom'];
+  if (forContext) {
+    prefixParts.push(...forContext.toLowerCase().split('-'));
+  }
+  const cleanTerm = term.replace(/\(.*\)$/, '').toLowerCase();
+  if (cleanTerm) {
+    prefixParts.push(...cleanTerm.split('-'));
+  }
+
+  const matches =
+    prefixParts.length <= parts.length &&
+    prefixParts.every((p, i) => parts[i] === p);
+
+  if (matches && prefixParts.length < parts.length) {
+    return parts.slice(prefixParts.length).join(', ');
+  }
+
+  return '';
 }
 
 function howToCiteMarkup(term, entry) {
