@@ -12,6 +12,11 @@ const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
 );
 
 export default async function route(req: Request, res: Response) {
+  if (req.body.action !== "published") {
+    res.status(200).send("Ignored non-publish action");
+    return;
+  }
+
   const job = taskQueue.add({ webhookId: req.get("X-GitHub-Delivery") || "" });
   try {
     const { updated } = await job.run();

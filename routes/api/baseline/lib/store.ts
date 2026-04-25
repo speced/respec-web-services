@@ -43,32 +43,27 @@ interface WebFeaturesData {
 }
 
 export function normalizeUrl(url: string): string {
-  try {
-    const u = new URL(url);
-    u.hash = "";
-    if (!u.pathname.endsWith("/") && !u.pathname.includes(".")) {
-      u.pathname += "/";
-    }
-    return u.href;
-  } catch {
-    return url;
+  const parsed = URL.parse(url);
+  if (!parsed) return url;
+  parsed.hash = "";
+  if (!parsed.pathname.endsWith("/") && !parsed.pathname.includes(".")) {
+    parsed.pathname += "/";
   }
+  return parsed.href;
 }
 
 export class BaselineStore {
   version = -1;
   data: WebFeaturesData | null = null;
-  byFeature: Map<string, FeatureData> = new Map();
-  bySpecUrl: Map<string, string[]> = new Map();
+  byFeature = new Map<string, FeatureData>();
+  bySpecUrl = new Map<string, string[]>();
 
   constructor() {
     this.fill();
   }
 
-  /** Fill the store with its contents from the filesystem. */
   fill() {
-    const DATA_DIR = env("DATA_DIR");
-    const dataFile = path.resolve(DATA_DIR, "baseline/baseline.json");
+    const dataFile = path.resolve(env("DATA_DIR"), "baseline/baseline.json");
 
     if (!existsSync(dataFile)) {
       console.warn("baseline: data file not found, store is empty.");
@@ -79,25 +74,20 @@ export class BaselineStore {
       return;
     }
 
-    const text = readFileSync(dataFile, "utf8");
-    const data: WebFeaturesData = JSON.parse(text);
-    this.data = data;
+    this.data = JSON.parse(readFileSync(dataFile, "utf8"));
 
-    this.byFeature = new Map();
+    const features = Object.entries(this.data!.features)
+      .filter(([, feature]) => feature.kind === "feature");
+
+    this.byFeature = new Map(features);
+
     this.bySpecUrl = new Map();
-
-    for (const [id, feature] of Object.entries(data.features)) {
-      if (feature.kind !== "feature") continue;
-
-      this.byFeature.set(id, feature);
-
-      if (feature.spec) {
-        for (const specUrl of feature.spec) {
-          const normalized = normalizeUrl(specUrl);
-          const existing = this.bySpecUrl.get(normalized) || [];
-          existing.push(id);
-          this.bySpecUrl.set(normalized, existing);
-        }
+    for (const [featureId, feature] of features) {
+      for (const specUrl of feature.spec ?? []) {
+        const normalized = normalizeUrl(specUrl);
+        const ids = this.bySpecUrl.get(normalized) ?? [];
+        ids.push(featureId);
+        this.bySpecUrl.set(normalized, ids);
       }
     }
 

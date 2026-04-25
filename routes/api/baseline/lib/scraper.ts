@@ -15,9 +15,6 @@ interface ReleaseResponse {
 }
 
 export default async function main() {
-  const releaseUrl =
-    "https://api.github.com/repos/web-platform-dx/web-features/releases/latest";
-
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
   };
@@ -27,7 +24,10 @@ export default async function main() {
     headers.Authorization = `Bearer ${ghToken}`;
   }
 
-  const releaseRes = await fetch(releaseUrl, { headers });
+  const releaseRes = await fetch(
+    "https://api.github.com/repos/web-platform-dx/web-features/releases/latest",
+    { headers },
+  );
   if (!releaseRes.ok) {
     throw new Error(
       `Failed to fetch latest release: ${releaseRes.status} ${releaseRes.statusText}`,
