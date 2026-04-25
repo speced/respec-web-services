@@ -11,7 +11,7 @@ import { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
 
 import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.js";
 import { uniq } from "./utils.js";
-import { Store } from "./store.js";
+import { Store, SpecMapGroup } from "./store.js";
 import { env } from "../../../utils/misc.js";
 import sh from "../../../utils/sh.js";
 
@@ -72,8 +72,8 @@ export default async function main(options: Partial<Options> = {}) {
   const dataByTerm: DataByTerm = Object.create(null);
   const dataBySpec: DataBySpec = Object.create(null);
   const specificationsMap = {
-    current: {} as Store["specmap"],
-    snapshot: {} as Store["specmap"],
+    current: {} as SpecMapGroup,
+    snapshot: {} as SpecMapGroup,
   };
 
   for (const [dir, status] of dirToStatus) {
@@ -219,7 +219,7 @@ async function getAllData(baseDir: string) {
   const urlFileContent = await readJSON<{ results: SpecsJSON[] }>(SPECS_JSON);
   const data: SpecsJSON[] = urlFileContent.results;
 
-  const specMap: Store["specmap"] = Object.create(null);
+  const specMap: SpecMapGroup = Object.create(null);
   const dfnSources: DfnsJSON[] = [];
 
   for (const entry of data) {

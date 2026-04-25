@@ -5,19 +5,19 @@ import { env } from "../../../utils/misc.js";
 import { DataEntry } from "./search.js";
 import { HeadingEntry, HeadingsBySpec } from "./scraper.js";
 
+export type SpecMapGroup = {
+  [specid: string]: {
+    url: string;
+    shortname: string;
+    title: string;
+  };
+};
+
 export class Store {
   version = -1;
   bySpec: { [shortname: string]: DataEntry[] } = {};
   byTerm: { [term: string]: DataEntry[] } = {};
-  specmap: {
-    [group: string]: {
-      [specid: string]: {
-        url: string;
-        shortname: string;
-        title: string;
-      };
-    };
-  } = {};
+  specmap: { [group: string]: SpecMapGroup } = {};
   /** Headings pre-indexed by spec shortname, then by fragment id. */
   headings: HeadingsBySpec = {};
   /** Reverse lookup: shortname → spec title. */
@@ -76,9 +76,7 @@ export class Store {
 
   private *specmapEntries() {
     for (const group of Object.values(this.specmap)) {
-      for (const [specId, entry] of Object.entries(
-        group as unknown as Record<string, { url: string; shortname: string; title: string }>
-      )) {
+      for (const [specId, entry] of Object.entries(group)) {
         yield [specId, entry] as const;
       }
     }
@@ -111,7 +109,7 @@ function buildSpecTitleMap(specmap: Store["specmap"]): Map<string, string> {
   const result = new Map<string, string>();
   // specmap is { current: { [specid]: entry }, snapshot: { [specid]: entry } }
   for (const group of Object.values(specmap)) {
-    for (const entry of Object.values(group as unknown as Record<string, { url: string; shortname: string; title: string }>)) {
+    for (const entry of Object.values(group)) {
       result.set(entry.shortname, entry.title);
     }
   }
