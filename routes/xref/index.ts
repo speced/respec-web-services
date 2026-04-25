@@ -10,6 +10,7 @@ import { env, ms } from "../../utils/misc.js";
 import { store } from "./lib/store-init.js";
 import searchRouteGet from "./search.get.js";
 import searchRoutePost from "./search.post.js";
+import headingsRoutePost from "./headings.post.js";
 import metaRoute from "./meta.js";
 import updateRoute from "./update.js";
 import { search, Options, Query } from "./lib/search.js";
@@ -26,6 +27,9 @@ xref
   .get("/search", cors(), searchRouteGet)
   .post("/search", express.json({ limit: "2mb" }), cors(), searchRoutePost);
 xref.get("/meta{/:field}", cors(), metaRoute);
+xref
+  .options("/search/headings", cors({ methods: ["POST"], maxAge: ms("1day") }))
+  .post("/search/headings", express.json({ limit: "1mb" }), cors(), headingsRoutePost);
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 

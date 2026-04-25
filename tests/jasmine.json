@@ -1,6 +1,7 @@
 {
   "spec_dir": "tests",
   "spec_files": ["**/*.test.js"],
+  "helpers": ["helpers/env.js"],
   "jsLoader": "import",
   "stopSpecOnExpectationFailure": false,
   "random": true
