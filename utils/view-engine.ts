@@ -7,14 +7,14 @@ async function engine(
 ) {
   try {
     const { default: template } = await import(filePath);
-    const html: string = template(options).toString();
-    callback(null, html);
+    const rendered: string = template(options).toString();
+    callback(null, rendered);
   } catch (error) {
-    callback(error);
+    callback(error instanceof Error ? error : new Error(String(error)));
   }
 }
 
 export function register(app: Application) {
-  app.engine("js", engine);
+  app.engine("js", engine as Parameters<Application["engine"]>[1]);
   app.set("view engine", "js");
 }

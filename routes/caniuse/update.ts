@@ -5,7 +5,7 @@ import { cache } from "./lib/index.js";
 import { Request, Response } from "express";
 
 const workerFile = path.join(import.meta.dirname, "update.worker.js");
-const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
+const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
   "caniuse_update",
 );

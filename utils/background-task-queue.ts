@@ -83,7 +83,7 @@ class Logger {
   id: string;
   input: unknown;
   timings: Record<string, Date> = {};
-  result: { type: "success" | "failure"; value: unknown };
+  result!: { type: "success" | "failure"; value: unknown };
   stdout: [date: Date, line: string][] = [];
   stderr: [date: Date, line: string][] = [];
 
@@ -118,7 +118,8 @@ class Logger {
   }
 }
 
-type TaskModule = { default: (input?: unknown) => unknown };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TaskModule = { default: (input?: any) => unknown };
 /**
  * Create a worker thread to run a task in background. A task/job added to the
  * queue with `add()`, and run serially in order of calling `run()` on the job

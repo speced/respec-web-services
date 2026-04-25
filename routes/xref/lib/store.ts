@@ -94,8 +94,8 @@ function readJson(filename: string) {
 function readJsonOptional(filename: string) {
   try {
     return readJson(filename);
-  } catch (err: any) {
-    if (err?.code === "ENOENT") {
+  } catch (err: unknown) {
+    if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
       console.warn(`Optional data file not found: ${filename}`);
       return {};
     }

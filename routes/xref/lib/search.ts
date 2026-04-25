@@ -105,7 +105,7 @@ export function searchOne(
 
 function normalizeQuery(query: Query, options: Options) {
   if (Array.isArray(query.specs) && !Array.isArray(query.specs[0])) {
-    // @ts-ignore
+    // @ts-expect-error - backward compatibility: wrapping flat specs array
     query.specs = [query.specs]; // for backward compatibility
   }
   if (!Array.isArray(query.types) || !query.types.length) {

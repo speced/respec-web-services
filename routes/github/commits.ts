@@ -37,6 +37,7 @@ export default async function route(req: IRequest, res: Response) {
     res.json(commits);
   } catch (error) {
     res.set("Content-Type", "text/plain");
-    res.status(404).send(error.message);
+    const message = error instanceof Error ? error.message : String(error);
+    res.status(404).send(message);
   }
 }

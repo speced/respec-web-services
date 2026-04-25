@@ -65,7 +65,8 @@ export default async function route(req: IRequest, res: Response) {
     res.set("Cache-Control", `max-age=${seconds("24h")}`);
     res.json(groupInfo);
   } catch (error) {
-    const { statusCode = 500, message } = error;
+    const statusCode = error instanceof HTTPError ? error.statusCode : 500;
+    const message = error instanceof Error ? error.message : String(error);
     res.set("Content-Type", "text/plain");
     res.status(statusCode).send(message);
   }
@@ -118,8 +119,8 @@ async function fetchGroupInfo(
     var json = (await res.json()) as APIResponse;
   } catch (error) {
     throw new HTTPError(
-      error.statusCode || 500,
-      error.message
+      error instanceof HTTPError ? error.statusCode : 500,
+      error instanceof Error ? error.message : String(error),
     );
   }
 

@@ -86,7 +86,7 @@ export class DiskCache<ValueType> {
       const text = await readFile(fileName, "utf-8");
       return JSON.parse(text) as CacheEntry<ValueType>;
     } catch (error) {
-      if (error.code !== "ENOENT") {
+      if (error instanceof Error && (error as NodeJS.ErrnoException).code !== "ENOENT") {
         console.error(error);
       }
     }
