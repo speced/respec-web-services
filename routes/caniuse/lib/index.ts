@@ -15,6 +15,7 @@ import {
 export { Data };
 
 const DATA_DIR = env("DATA_DIR");
+const CANIUSE_DIR = path.join(DATA_DIR, "caniuse");
 
 interface Options {
   feature: string;
@@ -106,11 +107,22 @@ function sanitizeBrowsersList(browsers?: string | string[]) {
 }
 
 export async function getData(feature: string) {
+  // Try the feature as-is first, then fall back to stripping the "wf-" prefix.
+  // E.g., "wf-css-grid" falls back to looking up "css-grid" in caniuse data.
+  const data = await readFeatureFile(feature);
+  if (data) return data;
+  if (feature.startsWith("wf-") && feature.length > 3) {
+    return readFeatureFile(feature.slice(3));
+  }
+  return null;
+}
+
+async function readFeatureFile(feature: string) {
   if (cache.has(feature)) {
     return cache.get(feature) as Data;
   }
   const file = path.format({
-    dir: path.join(DATA_DIR, "caniuse"),
+    dir: CANIUSE_DIR,
     name: `${feature}.json`,
   });
 
@@ -120,7 +132,10 @@ export async function getData(feature: string) {
     cache.set(feature, data);
     return data;
   } catch (error) {
-    console.error(error);
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code !== "ENOENT") {
+      console.error(error);
+    }
     return null;
   }
 }

@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { seconds } from "../../utils/misc.js";
 import { BROWSERS, DEFAULT_BROWSERS } from "./lib/constants.js";
 import { Data, getData } from "./lib/index.js";
 
@@ -11,16 +10,18 @@ export default async function route(req: IRequest, res: Response) {
   const { feature } = req.params;
   const browsers = normalizeBrowsers(req.query.browsers);
 
-
   try {
     const data = await getData(feature);
     if (data === null) {
-      res.sendStatus(404);
+      const hint = feature.startsWith("wf-") && feature.length > 3
+        ? ` The "wf-" prefix indicates a web-features ID. No matching caniuse data was found for "${feature}" or "${feature.slice(3)}".`
+        : "";
+      res.status(404).json({ error: `Feature "${feature}" not found.${hint}` });
       return;
     }
     const result = [];
     for (const browser of browsers) {
-      result.push({ browser, ...getBrowserData(data?.all[browser]) });
+      result.push({ browser, ...getBrowserData(data.all[browser]) });
     }
     res.json({ result });
   } catch (error) {
