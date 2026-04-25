@@ -26,7 +26,10 @@ export function updateRateLimit(token: string, rateLimit: RateLimit) {
 }
 
 export function getLimits() {
-  const secureToken = (token: string) => token.replace(/.{30}$/, "*".repeat(2));
+  const secureToken = (token: string) =>
+    token.length <= 4
+      ? "*".repeat(token.length)
+      : "*".repeat(token.length - 4) + token.slice(-4);
   const result: Record<string, RateLimit | null> = {};
   for (const [token, limits] of LIMITS) {
     result[secureToken(token)] = limits;
