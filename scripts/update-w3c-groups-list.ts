@@ -6,8 +6,6 @@
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
 
-import "dotenv/config";
-
 import { env } from "../utils/misc.js";
 
 const DATA_DIR = env("DATA_DIR");
