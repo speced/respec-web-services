@@ -1,10 +1,9 @@
 import { getToken, updateRateLimit, RateLimit } from "./tokens.js";
-import { tryURL } from "../../../../utils/misc.js";
 
 const GITHUB_API_ORIGIN = "https://api.github.com";
 
 function assertGitHubAPIUrl(url: string) {
-  const parsed = tryURL(url);
+  const parsed = URL.parse(url);
   if (parsed?.protocol !== "https:" || parsed.origin !== GITHUB_API_ORIGIN) {
     throw new Error(
       `requestData: expected ${GITHUB_API_ORIGIN}, got ${parsed?.origin ?? "invalid URL"}`,

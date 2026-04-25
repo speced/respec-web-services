@@ -33,22 +33,13 @@ const prettyJSON = (() => {
       .join(" ");
 })();
 
-const tryURL = (url?: string, base?: string) => {
-  try {
-    if (!url) return null;
-    return new URL(url, base);
-  } catch {
-    return null;
-  }
-};
-
 const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
   const date = tokens.date(req, res, "iso");
   const remoteAddr = tokens["remote-addr"](req, res);
   const method = tokens.method(req, res);
   const status = parseInt(tokens.status(req, res) || "", 10);
-  const url = tryURL(tokens.url(req, res)!, "https://respec.org/")!;
-  const referrer = tryURL(tokens.referrer(req, res));
+  const url = URL.parse(tokens.url(req, res)!, "https://respec.org/")!;
+  const referrer = URL.parse(tokens.referrer(req, res) ?? "");
   const contentLength = res.getHeader("content-length") as number | undefined;
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
@@ -90,7 +81,7 @@ const skipCommon = (req: Request, res: Response) => {
   const { method, query } = req;
   const { statusCode } = res;
   const ref = req.get("referer") || req.get("referrer");
-  const referrer = tryURL(ref);
+  const referrer = URL.parse(ref ?? "");
 
   return (
     // successful pre-flight requests
