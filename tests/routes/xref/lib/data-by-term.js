@@ -262,6 +262,24 @@ export default {
       normative: false,
     },
   ],
+  foreignObject: [
+    {
+      type: "element",
+      spec: "svg2",
+      shortname: "svg",
+      status: "current",
+      uri: "embedded.html#elementdef-foreignObject",
+    },
+  ],
+  clipPath: [
+    {
+      type: "element",
+      spec: "svg2",
+      shortname: "svg",
+      status: "current",
+      uri: "masking.html#elementdef-clipPath",
+    },
+  ],
   "user agents": [
     {
       type: "dfn",
