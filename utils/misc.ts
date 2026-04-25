@@ -55,3 +55,11 @@ export class HTTPError extends Error {
     super(message);
   }
 }
+
+export function tryURL(url: string, base?: string) {
+  try {
+    return new URL(url, base);
+  } catch {
+    return null;
+  }
+}
