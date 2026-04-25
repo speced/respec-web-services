@@ -5,8 +5,9 @@ import {
 import { buildTermLowerIndex } from "../../../../build/routes/xref/lib/store.js";
 
 import byTerm from "./data-by-term.js";
+import bySpec from "./data-by-spec.js";
 
-const store = { byTerm, byTermLower: buildTermLowerIndex(byTerm) };
+const store = { byTerm, bySpec, byTermLower: buildTermLowerIndex(byTerm) };
 
 /**
  * @param {import("../../../../routes/xref/lib/search.js").Query} query
@@ -106,6 +107,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@term", () => {
+    beforeEach(() => cache.clear());
+
     it("empty string", () => {
       const result = [{ uri: "#dom-referrerpolicy" }];
       expect(search({ term: "", for: "ReferrerPolicy" })).toEqual(result);
@@ -207,6 +210,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@specs", () => {
+    beforeEach(() => cache.clear());
+
     it("skips filter if query.specs not provided", () => {
       const results = search({ term: "script" }).sort((a, b) =>
         a.uri.localeCompare(b.uri),
@@ -253,6 +258,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@types", () => {
+    beforeEach(() => cache.clear());
+
     const resultMarker = [
       { uri: "#marker" },
       { uri: "painting.html#elementdef-marker" },
@@ -299,6 +306,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@for", () => {
+    beforeEach(() => cache.clear());
+
     it("skips filter if for is not provided", () => {
       expect(search({ term: "[[context]]" })).toHaveSize(0);
 
@@ -334,6 +343,81 @@ describe("xref - search", () => {
         { uri: "#dom-abortsignal-aborted" },
       ]);
       expect(search({ term: "aborted", for: "abortsignal" })).toEqual([]);
+    });
+  });
+
+  describe("empty term with specs (browse all terms)", () => {
+    beforeEach(() => cache.clear());
+
+    it("returns all entries for a spec when term is empty", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], id: "" },
+        { all: true },
+      );
+      // dom has: EventInit (dictionary), event (dfn), event (attr for Window),
+      // aborted (attr for AbortSignal)
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("returns all entries for a spec filtered by type", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], types: ["attribute"], id: "" },
+        { all: true },
+      );
+      expect(results).toEqual([
+        { uri: "#dom-window-event" },
+        { uri: "#dom-abortsignal-aborted" },
+      ]);
+    });
+
+    it("returns all entries for a spec filtered by aggregate type", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], types: ["_IDL_"], id: "" },
+        { all: true },
+      );
+      // _IDL_ includes: dictionary, attribute
+      // dom has: EventInit (dictionary), event (attr), aborted (attr)
+      expect(results).toEqual([
+        { uri: "#dictdef-eventinit" },
+        { uri: "#dom-window-event" },
+        { uri: "#dom-abortsignal-aborted" },
+      ]);
+    });
+
+    it("returns all enum-values for a spec (issue #278)", () => {
+      const results = search(
+        { term: "", specs: [["fetch"]], types: ["enum-value"], id: "" },
+        { all: true },
+      );
+      const sorted = results.sort((a, b) => a.uri.localeCompare(b.uri));
+      expect(sorted).toEqual([
+        { uri: "#dom-requestdestination" },
+        { uri: "#dom-requestdestination-script" },
+      ]);
+    });
+
+    it("returns empty when term is empty and no specs are given", () => {
+      // Without specs, empty term should use the normal byTerm[""] path
+      const results = search({ term: "", id: "" });
+      expect(results).toEqual([]);
+    });
+
+    it("filters by for context when browsing a spec", () => {
+      const results = search({
+        term: "",
+        specs: [["dom"]],
+        for: "Window",
+        id: "",
+      });
+      expect(results).toEqual([{ uri: "#dom-window-event" }]);
+    });
+
+    it("combines multiple specs in a single fallback list", () => {
+      const results = search(
+        { term: "", specs: [["css-lists-3", "web-bluetooth-1"]], id: "" },
+        { all: true },
+      );
+      expect(results.length).toBeGreaterThan(0);
     });
   });
 });
