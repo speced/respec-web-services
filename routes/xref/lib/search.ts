@@ -99,6 +99,7 @@ export function searchOne(
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
   prefereredData = filterPreferLatestVersion(prefereredData);
+  if (!query.term) prefereredData = prefereredData.slice(0, 1000);
   const result = prefereredData.map(item => pickFields(item, options.fields));
   return result;
 }
@@ -120,6 +121,14 @@ function normalizeQuery(query: Query, options: Options) {
 }
 
 function filter(query: Query, store: Store, options: Options) {
+  // When no term is provided but specs are, return all entries from those specs.
+  if (!query.term && query.specs?.length) {
+    const entries = collectBySpecs(query.specs, store);
+    const byType = filterByType(entries, query);
+    const byForContext = filterByForContext(byType, query, options);
+    return byForContext;
+  }
+
   let result: DataEntry[] = [];
   for (const term of getTermVariations(query)) {
     const byTerm = filterByTerm(term, store);
@@ -132,6 +141,16 @@ function filter(query: Query, store: Store, options: Options) {
     }
   }
   return result;
+}
+
+/** Collect all entries from the store that belong to any of the given specs. */
+function collectBySpecs(specsLists: string[][], store: Store) {
+  const seen = new Set<string>();
+  return specsLists.flatMap(specs =>
+    specs
+      .filter(spec => !seen.has(spec) && seen.add(spec))
+      .flatMap(spec => store.bySpec[spec] ?? [])
+  );
 }
 
 function getTermVariations(query: Query) {
@@ -214,7 +233,7 @@ function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   for (const item of sorted) {
     if (
       item.status === preferredType ||
-      !preferredData.find(it => item.spec === it.spec && item.type === it.type)
+      !preferredData.find(it => item.spec === it.spec && item.type === it.type && item.uri === it.uri)
     ) {
       preferredData.push(item);
     }
