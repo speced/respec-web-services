@@ -186,28 +186,28 @@ export class BackgroundTaskQueue<M extends TaskModule> {
       this.worker.stderr.pipe(split2()).on("data", log.onstderr);
 
       try {
-        return await new Promise<RetType>((resolve, reject) => {
-          const listener = (response: Response) => {
-            if (response.id === id) {
-              this.lock.release();
-              this.worker.removeListener("message", listener);
+        const { promise, resolve, reject } = Promise.withResolvers<RetType>();
+        const listener = (response: Response) => {
+          if (response.id === id) {
+            this.lock.release();
+            this.worker.removeListener("message", listener);
 
-              const { type, result } = response;
+            const { type, result } = response;
 
-              log.setResult(type, result);
-              this.worker.stdout.off("data", log.onstdout);
-              this.worker.stderr.off("data", log.onstderr);
-              log.markTime("finish");
+            log.setResult(type, result);
+            this.worker.stdout.off("data", log.onstdout);
+            this.worker.stderr.off("data", log.onstderr);
+            log.markTime("finish");
 
-              if (type === "success") {
-                resolve(result as RetType);
-              } else {
-                reject(deserializeError(result));
-              }
+            if (type === "success") {
+              resolve(result as RetType);
+            } else {
+              reject(deserializeError(result));
             }
-          };
-          this.worker.addListener("message", listener);
-        });
+          }
+        };
+        this.worker.addListener("message", listener);
+        return await promise;
       } finally {
         await log.write();
       }
@@ -224,19 +224,19 @@ export class BackgroundTaskQueue<M extends TaskModule> {
     const msg: OperationRequest = { id, type: "init", modulePath };
     this.worker.postMessage(msg);
 
-    await new Promise<void>((resolve, reject) => {
-      this.worker.once("message", (response: Response) => {
-        if (response.id !== id) {
-          reject(new Error(`Failed to register worker module: ${modulePath}`));
+    const { promise, resolve, reject } = Promise.withResolvers<void>();
+    this.worker.once("message", (response: Response) => {
+      if (response.id !== id) {
+        reject(new Error(`Failed to register worker module: ${modulePath}`));
+      } else {
+        if (response.type === "success") {
+          resolve();
         } else {
-          if (response.type === "success") {
-            resolve();
-          } else {
-            reject(deserializeError(response.result));
-          }
+          reject(deserializeError(response.result));
         }
-      });
+      }
     });
+    await promise;
   }
 
   private generateId() {
