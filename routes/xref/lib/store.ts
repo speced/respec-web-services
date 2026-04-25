@@ -43,24 +43,7 @@ export class Store {
     id: string,
   ): (HeadingEntry & { specTitle: string }) | null {
     const normalizedSpec = spec.toLowerCase();
-    let specHeadings = this.headings[normalizedSpec];
-    // Fallback: try stripping version suffix (e.g., cssom-view → cssom-view-1)
-    // or adding it via specmap lookup
-    if (!specHeadings) {
-      const stripped = normalizedSpec.replace(/-\d+$/, "");
-      if (stripped !== normalizedSpec) {
-        specHeadings = this.headings[stripped];
-      }
-      if (!specHeadings) {
-        // Try resolving series shortname to versioned via specmap
-        for (const [specId, entry] of this.specmapEntries()) {
-          if (entry.shortname === normalizedSpec || entry.shortname === stripped) {
-            specHeadings = this.headings[specId];
-            if (specHeadings) break;
-          }
-        }
-      }
-    }
+    const specHeadings = this.resolveHeadings(normalizedSpec);
     if (!specHeadings) return null;
 
     const heading = specHeadings[id];
@@ -74,12 +57,28 @@ export class Store {
     };
   }
 
-  private *specmapEntries() {
+  private resolveHeadings(spec: string): Record<string, HeadingEntry> | null {
+    const direct = this.headings[spec];
+    if (direct) return direct;
+
+    // Try stripping version suffix (e.g., cssom-view-1 → cssom-view)
+    const stripped = spec.replace(/-\d+$/, "");
+    if (stripped !== spec) {
+      const unversioned = this.headings[stripped];
+      if (unversioned) return unversioned;
+    }
+
+    // Try resolving series shortname to versioned (or vice versa) via specmap
     for (const group of Object.values(this.specmap)) {
       for (const [specId, entry] of Object.entries(group)) {
-        yield [specId, entry] as const;
+        if (entry.shortname === spec || entry.shortname === stripped) {
+          const resolved = this.headings[specId];
+          if (resolved) return resolved;
+        }
       }
     }
+
+    return null;
   }
 }
 

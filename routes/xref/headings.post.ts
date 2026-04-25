@@ -34,15 +34,13 @@ export default function route(req: IRequest, res: Response) {
   }
   for (const item of queries) {
     if (typeof item?.spec !== "string" || typeof item?.id !== "string") {
-      res
-        .status(400)
-        .json({ error: "each query must have string fields: spec, id" });
+      res.status(400);
+      res.json({ error: "each query must have string fields: spec, id" });
       return;
     }
     if (!item.spec.trim() || !item.id.trim()) {
-      res
-        .status(400)
-        .json({ error: "spec and id must be non-empty strings" });
+      res.status(400);
+      res.json({ error: "spec and id must be non-empty strings" });
       return;
     }
   }
