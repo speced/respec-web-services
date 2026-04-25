@@ -47,7 +47,10 @@ export default async function sh(
         if (shouldStream) log.err(line);
         stderr.push(line);
       });
-      child.on("exit", code => {
+      child.on("error", err => {
+        reject({ command, stdout, stderr, code: null, error: err });
+      });
+      child.on("close", code => {
         if (output === "buffer") {
           if (stdout.length) log.out(stdout.join("\n"));
           if (stderr.length) log.err(stderr.join("\n"));
