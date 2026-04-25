@@ -5,13 +5,13 @@
 
 import path from "path";
 import { existsSync } from "fs";
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "fs/promises";
 
 import { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
 
 import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.js";
 import { uniq } from "./utils.js";
-import { Store } from "./store.js";
+import { Store, SpecMapGroup } from "./store.js";
 import { env } from "../../../utils/misc.js";
 import sh from "../../../utils/sh.js";
 
@@ -25,6 +25,7 @@ const OUT_DIR_BASE = path.join(DATA_DIR, "xref");
 const OUTFILE_BY_TERM = path.resolve(OUT_DIR_BASE, "./xref.json");
 const OUTFILE_BY_SPEC = path.resolve(OUT_DIR_BASE, "./specs.json");
 const OUTFILE_SPECMAP = path.resolve(OUT_DIR_BASE, "./specmap.json");
+const OUTFILE_HEADINGS = path.resolve(OUT_DIR_BASE, "./headings.json");
 
 type Status = "current" | "snapshot";
 const dirToStatus = [
@@ -41,6 +42,22 @@ interface DataBySpec {
   [shortname: string]: Omit<ParsedDataEntry, "shortname" | "isExported">[];
 }
 
+export interface HeadingEntry {
+  id: string;
+  href: string;
+  title: string;
+  number?: string;
+  level: number;
+}
+
+export interface HeadingsBySpec {
+  [shortname: string]: { [id: string]: HeadingEntry };
+}
+
+interface HeadingsJSON {
+  headings?: HeadingEntry[];
+}
+
 const defaultOptions = { forceUpdate: false };
 type Options = typeof defaultOptions;
 
@@ -55,8 +72,8 @@ export default async function main(options: Partial<Options> = {}) {
   const dataByTerm: DataByTerm = Object.create(null);
   const dataBySpec: DataBySpec = Object.create(null);
   const specificationsMap = {
-    current: {} as Store["specmap"],
-    snapshot: {} as Store["specmap"],
+    current: {} as SpecMapGroup,
+    snapshot: {} as SpecMapGroup,
   };
 
   for (const [dir, status] of dirToStatus) {
@@ -83,12 +100,18 @@ export default async function main(options: Partial<Options> = {}) {
     dataByTerm[term] = uniq(dataByTerm[term]);
   }
 
+  // Read headings data from webref (ed/ only, same as xref default)
+  const headingsBySpec = await readAllHeadings(
+    path.join(INPUT_DIR_BASE, "ed", "headings"),
+  );
+
   console.log("Writing processed data files...");
   await mkdir(OUT_DIR_BASE, { recursive: true });
   await Promise.all([
     writeFile(OUTFILE_BY_TERM, JSON.stringify(dataByTerm, null, 2)),
     writeFile(OUTFILE_BY_SPEC, JSON.stringify(dataBySpec, null, 2)),
     writeFile(OUTFILE_SPECMAP, JSON.stringify(specificationsMap, null, 2)),
+    writeFile(OUTFILE_HEADINGS, JSON.stringify(headingsBySpec, null, 2)),
   ]);
   return true;
 }
@@ -193,15 +216,15 @@ function normalizeTerm(term: string, type: string) {
 async function getAllData(baseDir: string) {
   const SPECS_JSON = path.resolve(baseDir, "./index.json");
   console.log(`Getting data from ${SPECS_JSON}`);
-  const urlFileContent = await readJSON(SPECS_JSON);
+  const urlFileContent = await readJSON<{ results: SpecsJSON[] }>(SPECS_JSON);
   const data: SpecsJSON[] = urlFileContent.results;
 
-  const specMap: Store["specmap"] = Object.create(null);
+  const specMap: SpecMapGroup = Object.create(null);
   const dfnSources: DfnsJSON[] = [];
 
   for (const entry of data) {
     if (entry.dfns) {
-      const dfnsData = await readJSON(path.join(baseDir, entry.dfns));
+      const dfnsData = await readJSON<{ dfns: InputDfn[] }>(path.join(baseDir, entry.dfns));
       const dfns: InputDfn[] = dfnsData.dfns;
       dfnSources.push({
         series: entry.series.shortname,
@@ -221,7 +244,48 @@ async function getAllData(baseDir: string) {
   return { specMap, dfnSources };
 }
 
-async function readJSON(filePath: string) {
+async function readJSON<T = unknown>(filePath: string): Promise<T> {
   const text = await readFile(filePath, "utf-8");
-  return JSON.parse(text);
+  return JSON.parse(text) as T;
+}
+
+/**
+ * Read all headings data from webref's ed/headings/ directory.
+ * Returns { shortname: { id: HeadingEntry } } — pre-indexed for O(1) lookup.
+ */
+async function readAllHeadings(
+  headingsDir: string,
+): Promise<HeadingsBySpec> {
+  const result: HeadingsBySpec = Object.create(null);
+  if (!existsSync(headingsDir)) {
+    console.warn(`Headings directory not found: ${headingsDir}`);
+    return result;
+  }
+
+  const files = await readdir(headingsDir);
+  const jsonFiles = files.filter(f => f.endsWith(".json"));
+
+  console.log(`Processing ${jsonFiles.length} heading files...`);
+  for (const file of jsonFiles) {
+    try {
+      const data = await readJSON<HeadingsJSON>(path.join(headingsDir, file));
+      // Shortname derived from filename (webref doesn't include it in the JSON)
+      const shortname = file.replace(/\.json$/, "").toLowerCase();
+      const byId: { [id: string]: HeadingEntry } = Object.create(null);
+      for (const h of data.headings || []) {
+        byId[h.id] = {
+          id: h.id,
+          href: h.href,
+          title: h.title,
+          number: h.number,
+          level: h.level,
+        };
+      }
+      result[shortname] = byId;
+    } catch (error) {
+      console.error(`Error reading headings from ${file}:`, error);
+    }
+  }
+
+  return result;
 }
