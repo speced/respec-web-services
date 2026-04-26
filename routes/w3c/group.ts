@@ -1,10 +1,11 @@
 import path from "path";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 
 import { Request, Response } from "express";
 
 import { MemCache } from "../../utils/mem-cache.js";
 import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
+import update from "../../scripts/update-w3c-groups-list.js";
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
@@ -18,7 +19,16 @@ type GroupType = "wg" | "cg" | "ig" | "bg" | "other";
 export type Groups = Record<string, GroupMeta>;
 export type GroupsByType = Record<GroupType, Groups>;
 
-const groups: GroupsByType = JSON.parse(readFileSync(dataSource, "utf-8"));
+
+let groups: GroupsByType;
+try {
+  groups = existsSync(dataSource)
+    ? JSON.parse(readFileSync(dataSource, "utf-8"))
+    : { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
+} catch (error) {
+  console.error("Failed to parse groups.json at startup:", error);
+  groups = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
+}
 
 interface Group {
   id: number;
@@ -31,6 +41,31 @@ interface Group {
   patentPolicy?: "PP2017" | "PP2020" | null;
 }
 const cache = new MemCache<Group>(ms("1 day"));
+
+function reloadGroups() {
+  try {
+    if (existsSync(dataSource)) {
+      groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+      cache.clear();
+    }
+  } catch (error) {
+    console.error("Failed to reload groups.json:", error);
+  }
+}
+
+async function refreshGroups() {
+  try {
+    await update();
+    reloadGroups();
+    console.log("W3C groups list refreshed.");
+  } catch (error) {
+    console.error("Failed to refresh W3C groups:", error);
+  }
+}
+
+setInterval(refreshGroups, ms("24h")).unref();
+if (!existsSync(dataSource)) refreshGroups();
+
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
