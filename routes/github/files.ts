@@ -19,9 +19,10 @@ export default async function route(req: IRequest, res: Response) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const errorCode = message === "INTERNAL_ERROR" ? 500 : 404;
+    console.error("Failed to get repository files", error);
     res.status(errorCode);
     res.setHeader("Content-Type", "text/plain");
-    res.send(message);
+    res.send(errorCode === 500 ? "Internal server error" : "Not found");
   }
 }
 
