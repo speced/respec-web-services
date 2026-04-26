@@ -27,16 +27,31 @@ type IRequest = Request<any, any, any, Query>;
 
 export async function route(req: IRequest, res: Response) {
   res.locals.deprecated = true;
-  const options = {
-    feature: req.query.feature,
-    browsers: req.query.browsers ? req.query.browsers.split(",") : "default",
-    versions: parseInt(req.query.versions || "", 10),
-    format: req.query.format,
-  };
-  if (!options.feature) {
+
+  if (typeof req.query.feature !== "string" || !req.query.feature) {
     res.sendStatus(400);
     return;
   }
+
+  const browsers =
+    typeof req.query.browsers === "string"
+      ? req.query.browsers.split(",")
+      : "default";
+
+  const versions =
+    typeof req.query.versions === "string"
+      ? parseInt(req.query.versions, 10)
+      : 0;
+
+  const format = req.query.format === "html" ? "html" : "json";
+
+  const options = {
+    feature: req.query.feature,
+    browsers,
+    versions,
+    format,
+  };
+
   if (Number.isNaN(options.versions)) {
     options.versions = 0;
   }

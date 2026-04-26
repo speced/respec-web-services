@@ -112,7 +112,11 @@ export async function getData(feature: string) {
   const data = await readFeatureFile(feature);
   if (data) return data;
   if (feature.startsWith("wf-") && feature.length > 3) {
-    return readFeatureFile(feature.slice(3));
+    const fallbackData = await readFeatureFile(feature.slice(3));
+    if (fallbackData) {
+      cache.set(feature, fallbackData);
+    }
+    return fallbackData;
   }
   return null;
 }
