@@ -107,6 +107,8 @@ function sanitizeBrowsersList(browsers?: string | string[]) {
 }
 
 export async function getData(feature: string) {
+  if (typeof feature !== "string" || !feature) return null;
+  if (!/^[a-z0-9][a-z0-9._-]*$/i.test(feature)) return null;
   // Try the feature as-is first, then fall back to stripping the "wf-" prefix.
   // E.g., "wf-css-grid" falls back to looking up "css-grid" in caniuse data.
   const data = await readFeatureFile(feature);
