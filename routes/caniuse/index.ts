@@ -43,7 +43,7 @@ export async function route(req: IRequest, res: Response) {
       ? parseInt(req.query.versions, 10)
       : 0;
 
-  const format = req.query.format === "html" ? "html" : "json";
+  const format: "html" | "json" = req.query.format === "html" ? "html" : "json";
 
   const options = {
     feature: req.query.feature,
