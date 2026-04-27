@@ -29,17 +29,22 @@ export default function route(req: IRequest, res: Response) {
 
   if (!specs.every(s => typeof s === "string")) {
     res.status(400);
-    res.json({ error: "Each spec must be a string URL." });
+    res.json({ error: "Each spec must be a string." });
     return;
   }
 
   const normalizedSpecs = specs.map(normalizeUrl);
 
-  const matchingIds = [...store.bySpecUrl.entries()]
-    .filter(([url]) => normalizedSpecs.some(spec => url.startsWith(spec)))
-    .flatMap(([, ids]) => ids);
+  const matchingIds = new Set<string>();
+  for (const [url, ids] of store.bySpecUrl) {
+    if (normalizedSpecs.some(spec => url.startsWith(spec))) {
+      for (const id of ids) {
+        matchingIds.add(id);
+      }
+    }
+  }
 
-  const result = [...new Set(matchingIds)]
+  const result = [...matchingIds]
     .map(id => ({ id, ...store.byFeature.get(id)! }))
     .filter(entry => entry.name);
 

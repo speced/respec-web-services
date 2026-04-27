@@ -74,23 +74,34 @@ export class BaselineStore {
       return;
     }
 
-    this.data = JSON.parse(readFileSync(dataFile, "utf8"));
+    try {
+      const data = JSON.parse(readFileSync(dataFile, "utf8")) as WebFeaturesData;
 
-    const features = Object.entries(this.data!.features)
-      .filter(([, feature]) => feature.kind === "feature");
+      const features = Object.entries(data.features).filter(
+        ([, feature]) => feature.kind === "feature",
+      );
 
-    this.byFeature = new Map(features);
-
-    this.bySpecUrl = new Map();
-    for (const [featureId, feature] of features) {
-      for (const specUrl of feature.spec ?? []) {
-        const normalized = normalizeUrl(specUrl);
-        const ids = this.bySpecUrl.get(normalized) ?? [];
-        ids.push(featureId);
-        this.bySpecUrl.set(normalized, ids);
+      const byFeature = new Map(features);
+      const bySpecUrl = new Map<string, string[]>();
+      for (const [featureId, feature] of features) {
+        for (const specUrl of feature.spec ?? []) {
+          const normalized = normalizeUrl(specUrl);
+          const ids = bySpecUrl.get(normalized) ?? [];
+          ids.push(featureId);
+          bySpecUrl.set(normalized, ids);
+        }
       }
-    }
 
-    this.version = Date.now();
+      this.data = data;
+      this.byFeature = byFeature;
+      this.bySpecUrl = bySpecUrl;
+      this.version = Date.now();
+    } catch (error) {
+      console.warn(
+        "baseline: failed to read or parse data file, keeping existing store data.",
+        error,
+      );
+      return;
+    }
   }
 }
