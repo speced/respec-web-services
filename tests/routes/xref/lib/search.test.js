@@ -162,11 +162,23 @@ describe("xref - search", () => {
       expect(
         search({ term: "foreignObject", types: ["element", "dfn"] }),
       ).toEqual(foreignObject);
+      expect(
+        search({ term: "foreignObject", types: ["_CONCEPT_"] }),
+      ).toEqual(foreignObject);
+      expect(
+        search({ term: "foreignObject", types: ["element", "dfn"] }),
+      ).toEqual(foreignObject);
 
       const clipPath = [{ uri: "masking.html#elementdef-clipPath" }];
       expect(search({ term: "clipPath", types: ["element"] })).toEqual(
         clipPath,
       );
+      expect(search({ term: "clipPath", types: ["_CONCEPT_"] })).toEqual(
+        clipPath,
+      );
+      expect(
+        search({ term: "clipPath", types: ["element", "dfn"] }),
+      ).toEqual(clipPath);
       expect(search({ term: "clipPath", types: ["_CONCEPT_"] })).toEqual(
         clipPath,
       );
