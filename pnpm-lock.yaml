@@ -24,7 +24,7 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1
       express-rate-limit:
-        specifier: ^8.4.0
+        specifier: ^8.4.1
         version: 8.4.1(express@5.2.1)
       helmet:
         specifier: ^8.1.0
