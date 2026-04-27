@@ -209,7 +209,11 @@ export class BackgroundTaskQueue<M extends TaskModule> {
           this.worker.removeListener("message", listener);
           this.lock.release();
           cleanup();
-          reject(new Error(`Worker exited unexpectedly with code ${code}`));
+          reject(
+            new Error(
+              `Worker exited unexpectedly with code ${code} (job: ${id})`,
+            ),
+          );
         };
 
         const listener = (response: Response) => {
