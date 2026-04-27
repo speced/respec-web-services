@@ -34,34 +34,41 @@ export default async function sh(
     const { promise, resolve, reject } = Promise.withResolvers<string>();
     let stdout: string[] = [];
     let stderr: string[] = [];
-    return await new Promise<string>((resolve, reject) => {
-      let stdout: string[] = [];
-      let stderr: string[] = [];
-      const child = exec(command, {
-        ...execOptions,
-        env: { ...process.env, ...execOptions.env },
-        encoding: "utf-8",
-      });
-      child.stdout!.pipe(split()).on("data", (line: string) => {
-        if (shouldStream) log.out(line);
-        stdout.push(line);
-      });
-      child.stderr!.pipe(split()).on("data", (line: string) => {
-        if (shouldStream) log.err(line);
-        stderr.push(line);
-      });
-      child.on("exit", code => {
-        if (output === "buffer") {
-          if (stdout.length) log.out(stdout.join("\n"));
-          if (stderr.length) log.err(stderr.join("\n"));
-        }
-        if (code === 0) {
-          resolve(stdout.join("\n"));
-        } else {
-          reject({ command, stdout, stderr, code });
-        }
-      });
+    const child = exec(command, {
+      ...execOptions,
+      env: { ...process.env, ...execOptions.env },
+      encoding: "utf-8",
     });
+    child.stdout!.pipe(split()).on("data", (line: string) => {
+      if (shouldStream) log.out(line);
+      stdout.push(line);
+    });
+    child.stderr!.pipe(split()).on("data", (line: string) => {
+      if (shouldStream) log.err(line);
+      stderr.push(line);
+    });
+    child.on("error", err => {
+      reject(Object.assign(err, { command, stdout, stderr, code: null }));
+    });
+    child.on("close", code => {
+      if (output === "buffer") {
+        if (stdout.length) log.out(stdout.join("\n"));
+        if (stderr.length) log.err(stderr.join("\n"));
+      }
+      if (code === 0) {
+        resolve(stdout.join("\n"));
+      } else {
+        reject(
+          Object.assign(new Error(`Command failed: ${command}`), {
+            command,
+            stdout,
+            stderr,
+            code,
+          }),
+        );
+      }
+    });
+    return await promise;
   } finally {
     if (output !== "silent") {
       console.groupEnd();

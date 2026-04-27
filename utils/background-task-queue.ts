@@ -182,22 +182,46 @@ export class BackgroundTaskQueue<M extends TaskModule> {
       const msg: CallRequest = { id, type: "call", input };
       this.worker.postMessage(msg);
 
-      this.worker.stdout.pipe(split2()).on("data", log.onstdout);
-      this.worker.stderr.pipe(split2()).on("data", log.onstderr);
+      const stdoutSplit = this.worker.stdout.pipe(split2());
+      const stderrSplit = this.worker.stderr.pipe(split2());
+      stdoutSplit.on("data", log.onstdout);
+      stderrSplit.on("data", log.onstderr);
+
+      const cleanup = () => {
+        stdoutSplit.off("data", log.onstdout);
+        stderrSplit.off("data", log.onstderr);
+        this.worker.stdout.unpipe(stdoutSplit);
+        this.worker.stderr.unpipe(stderrSplit);
+        log.markTime("finish");
+      };
 
       try {
         const { promise, resolve, reject } = Promise.withResolvers<RetType>();
+
+        const onWorkerError = (err: Error) => {
+          this.worker.removeListener("message", listener);
+          this.lock.release();
+          cleanup();
+          reject(err);
+        };
+
+        const onWorkerExit = (code: number | null) => {
+          this.worker.removeListener("message", listener);
+          this.lock.release();
+          cleanup();
+          reject(new Error(`Worker exited unexpectedly with code ${code}`));
+        };
+
         const listener = (response: Response) => {
           if (response.id === id) {
-            this.lock.release();
             this.worker.removeListener("message", listener);
+            this.worker.removeListener("error", onWorkerError);
+            this.worker.removeListener("exit", onWorkerExit);
+            this.lock.release();
 
             const { type, result } = response;
-
             log.setResult(type, result);
-            this.worker.stdout.off("data", log.onstdout);
-            this.worker.stderr.off("data", log.onstderr);
-            log.markTime("finish");
+            cleanup();
 
             if (type === "success") {
               resolve(result as RetType);
@@ -206,6 +230,9 @@ export class BackgroundTaskQueue<M extends TaskModule> {
             }
           }
         };
+
+        this.worker.once("error", onWorkerError);
+        this.worker.once("exit", onWorkerExit);
         this.worker.addListener("message", listener);
         return await promise;
       } finally {
@@ -225,7 +252,27 @@ export class BackgroundTaskQueue<M extends TaskModule> {
     this.worker.postMessage(msg);
 
     const { promise, resolve, reject } = Promise.withResolvers<void>();
+
+    const onError = (err: Error) => {
+      this.worker.removeListener("exit", onExit);
+      reject(err);
+    };
+
+    const onExit = (code: number | null) => {
+      this.worker.removeListener("error", onError);
+      reject(
+        new Error(
+          `Worker exited with code ${code} during module initialization: ${modulePath}`,
+        ),
+      );
+    };
+
+    this.worker.once("error", onError);
+    this.worker.once("exit", onExit);
+
     this.worker.once("message", (response: Response) => {
+      this.worker.removeListener("error", onError);
+      this.worker.removeListener("exit", onExit);
       if (response.id !== id) {
         reject(new Error(`Failed to register worker module: ${modulePath}`));
       } else {
