@@ -10,6 +10,7 @@ async function update() {
   const { default: updateGroupsList } = await import("../../scripts/update-w3c-groups-list.js");
   return updateGroupsList();
 }
+
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
 
@@ -22,20 +23,7 @@ type GroupType = "wg" | "cg" | "ig" | "bg" | "other";
 export type Groups = Record<string, GroupMeta>;
 export type GroupsByType = Record<GroupType, Groups>;
 
-
-let groups: GroupsByType;
-try {
-  groups = existsSync(dataSource)
-    ? JSON.parse(readFileSync(dataSource, "utf-8"))
-    : { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
-} catch (error) {
-  console.error("Failed to parse groups.json at startup:", error);
-  groups = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
-  void refreshGroups();
-  void refreshGroups();
-  void refreshGroups();
-  void refreshGroups();
-}
+const EMPTY_GROUPS: GroupsByType = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
 
 interface Group {
   id: number;
@@ -49,6 +37,18 @@ interface Group {
 }
 const cache = new MemCache<Group>(ms("1 day"));
 
+let needsImmediateRefresh = !existsSync(dataSource);
+let groups: GroupsByType;
+try {
+  groups = needsImmediateRefresh
+    ? EMPTY_GROUPS
+    : JSON.parse(readFileSync(dataSource, "utf-8"));
+} catch (error) {
+  console.error("Failed to parse groups.json at startup:", error);
+  groups = EMPTY_GROUPS;
+  needsImmediateRefresh = true;
+}
+
 function reloadGroups() {
   try {
     if (existsSync(dataSource)) {
@@ -60,24 +60,17 @@ function reloadGroups() {
   }
 }
 
-let refreshing = false;
-async function refreshGroups() {
-  if (refreshing) return;
-function reloadGroups(clearCache: () => void = () => {}) {
-  try {
-    if (existsSync(dataSource)) {
-      groups = JSON.parse(readFileSync(dataSource, "utf-8"));
-      clearCache();
-    }
-  } catch (error) {
-    console.error("Failed to reload groups.json:", error);
-  }
-}
+const GROUPS_REFRESH_INTERVAL_MS = ms("24h");
+const GROUPS_REFRESH_RETRY_MS = ms("15m");
 
-async function refreshGroups(clearCache: () => void = () => {}) {
+let refreshing = false;
+
+async function refreshGroups(): Promise<boolean> {
+  if (refreshing) return false;
+  refreshing = true;
   try {
     await update();
-    reloadGroups(clearCache);
+    reloadGroups();
     if (!existsSync(dataSource)) {
       console.error(
         "Failed to refresh W3C groups: groups.json is still missing after update."
@@ -89,11 +82,11 @@ async function refreshGroups(clearCache: () => void = () => {}) {
   } catch (error) {
     console.error("Failed to refresh W3C groups:", error);
     return false;
+  } finally {
+    refreshing = false;
   }
 }
 
-void refreshGroups();
-void refreshGroups();
 function scheduleGroupsRefresh(delay: number) {
   setTimeout(async () => {
     const refreshed = await refreshGroups();
@@ -105,7 +98,7 @@ function scheduleGroupsRefresh(delay: number) {
   }, delay);
 }
 
-scheduleGroupsRefresh(existsSync(dataSource) ? GROUPS_REFRESH_INTERVAL_MS : 0);
+scheduleGroupsRefresh(needsImmediateRefresh ? 0 : GROUPS_REFRESH_INTERVAL_MS);
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
