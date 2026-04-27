@@ -69,19 +69,39 @@ async function refreshGroups() {
   } catch (error) {
     console.error("Failed to refresh W3C groups:", error);
   } finally {
-    refreshing = false;
+const GROUPS_REFRESH_INTERVAL_MS = ms("24h");
+const GROUPS_REFRESH_RETRY_MS = ms("15m");
+
+async function refreshGroups(): Promise<boolean> {
+  try {
+    await update();
+    reloadGroups();
+    if (!existsSync(dataSource)) {
+      console.error(
+        "Failed to refresh W3C groups: groups.json is still missing after update."
+      );
+      return false;
+    }
+    console.log("W3C groups list refreshed.");
+    return true;
+  } catch (error) {
+    console.error("Failed to refresh W3C groups:", error);
+    return false;
   }
 }
 
-function scheduleRefresh() {
+function scheduleGroupsRefresh(delay: number) {
   setTimeout(async () => {
-    await refreshGroups();
-    scheduleRefresh();
-  }, ms("24h")).unref();
+    const refreshed = await refreshGroups();
+    const nextDelay =
+      refreshed || existsSync(dataSource)
+        ? GROUPS_REFRESH_INTERVAL_MS
+        : GROUPS_REFRESH_RETRY_MS;
+    scheduleGroupsRefresh(nextDelay);
+  }, delay);
 }
-scheduleRefresh();
-if (!existsSync(dataSource)) void refreshGroups();
 
+scheduleGroupsRefresh(existsSync(dataSource) ? GROUPS_REFRESH_INTERVAL_MS : 0);
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
