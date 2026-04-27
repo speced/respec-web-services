@@ -1,6 +1,7 @@
 import { Router } from "express";
 import cors from "cors";
 import { Request, Response } from "express";
+import escapeHtml from "escape-html";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, seconds } from "../../utils/misc.js";
@@ -66,7 +67,8 @@ export async function route(req: IRequest, res: Response) {
     const message = `Feature "${feature}" not found.${hint}`;
 
     if (options.format === "html") {
-      res.status(404).type("html").send(`<p>${message}</p>`);
+      const escapedMessage = escapeHtml(message);
+      res.status(404).type("html").send(`<p>${escapedMessage}</p>`);
       return;
     }
 
