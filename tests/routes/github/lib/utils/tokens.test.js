@@ -101,9 +101,10 @@ describe("routes/github/lib/utils/tokens", () => {
 
       const maskedKey = keys[0];
       // Should show only the last 4 characters, rest are asterisks
-      const expectedSuffix = fullToken.slice(-4);
-      const expectedStars = "*".repeat(fullToken.length - 4);
-      expect(maskedKey).toBe(expectedStars + expectedSuffix);
+      const expectedMaskedToken = fullToken.length <= 4
+        ? fullToken
+        : "*".repeat(fullToken.length - 4) + fullToken.slice(-4);
+      expect(maskedKey).toBe(expectedMaskedToken);
     });
 
     it("masked key has the same length as the full token", () => {
