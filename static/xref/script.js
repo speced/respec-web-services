@@ -183,7 +183,9 @@ function detectOverloadedEntries(entries, term) {
   for (const entry of entries) {
     if (!metadata.types.idl.has(entry.type)) continue;
     const forKey = (entry.for || []).join(',');
-    const key = `${entry.type}|${forKey}|${term}`;
+    const specKey = entry.spec || '';
+    const statusKey = entry.status || '';
+    const key = `${entry.type}|${forKey}|${term}|${specKey}|${statusKey}`;
     const group = citationGroups.get(key) ?? [];
     if (!group.length) citationGroups.set(key, group);
     group.push(entry);
