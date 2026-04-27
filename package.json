@@ -22,7 +22,8 @@
     "nanoid": "^5.1.9",
     "serialize-error": "^13.0.1",
     "split2": "^4.2.0",
-    "ucontent": "^2.0.0"
+    "ucontent": "^2.0.0",
+    "escape-html": "^1.0.3"
   },
   "scripts": {
     "build": "tsc",
