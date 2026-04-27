@@ -151,6 +151,15 @@ function formatAsHTML(
   data: Data["summary"],
 ): string {
   const getSupportTitle = (keys: SupportKeys) => {
+    const keySet = new Set(keys);
+    if (keySet.has("d")) {
+      if (keySet.has("y")) {
+        return "Supported (disabled by default, needs to be enabled).";
+      }
+      if (keySet.has("a")) {
+        return "Almost supported (disabled by default, needs to be enabled).";
+      }
+    }
     return keys
       .filter(key => SUPPORT_TITLES.has(key))
       .map(key => SUPPORT_TITLES.get(key)!)
