@@ -200,6 +200,7 @@ export class BackgroundTaskQueue<M extends TaskModule> {
 
         const onWorkerError = (err: Error) => {
           this.worker.removeListener("message", listener);
+          this.worker.removeListener("exit", onWorkerExit);
           this.lock.release();
           cleanup();
           reject(err);
@@ -207,6 +208,7 @@ export class BackgroundTaskQueue<M extends TaskModule> {
 
         const onWorkerExit = (code: number | null) => {
           this.worker.removeListener("message", listener);
+          this.worker.removeListener("error", onWorkerError);
           this.lock.release();
           cleanup();
           reject(
