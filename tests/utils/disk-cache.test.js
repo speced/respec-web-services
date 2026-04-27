@@ -65,30 +65,41 @@ describe("utils/DiskCache", () => {
   describe("TTL expiry", () => {
     it("returns undefined for expired entries", async () => {
       // Use a very short TTL
+      const fakeNowStart = 1_000;
+      let fakeNow = fakeNowStart;
+      spyOn(Date, "now").and.callFake(() => fakeNow);
+
       const cache = new DiskCache({ ttl: 1, path: "test-cache" });
       await cache.set("key", "value");
 
-      // Wait briefly to ensure TTL expires
-      await new Promise(resolve => setTimeout(resolve, 10));
+      fakeNow = fakeNowStart + 10;
       expect(await cache.get("key")).toBeUndefined();
     });
 
     it("returns stale value when allowStale is true", async () => {
+      const fakeNowStart = 2_000;
+      let fakeNow = fakeNowStart;
+      spyOn(Date, "now").and.callFake(() => fakeNow);
+
       const cache = new DiskCache({ ttl: 1, path: "test-cache" });
       await cache.set("key", "value");
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      fakeNow = fakeNowStart + 10;
       expect(await cache.get("key", true)).toBe("value");
     });
   });
 
   describe("invalidate()", () => {
     it("removes expired entries from memory and disk", async () => {
+      const fakeNowStart = 3_000;
+      let fakeNow = fakeNowStart;
+      spyOn(Date, "now").and.callFake(() => fakeNow);
+
       const cache = new DiskCache({ ttl: 1, path: "test-cache" });
       await cache.set("a", 1);
       await cache.set("b", 2);
 
-      await new Promise(resolve => setTimeout(resolve, 10));
+      fakeNow = fakeNowStart + 10;
       await cache.invalidate();
 
       expect(await cache.get("a", true)).toBeUndefined();
