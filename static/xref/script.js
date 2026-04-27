@@ -199,11 +199,13 @@ function detectOverloadedEntries(entries, term) {
 
 function howToCiteIDL(term, entry, isOverloaded = false) {
   const { type, for: forList } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
     return forList
       .map(f => {
-        const termPart = type === 'enum-value' ? `"${term}"` : term;
-        let cite = `{{${f}/${term ? termPart : '""'}}}`;
+        const safeF = escapeHTML(f);
+        const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+        let cite = `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
         if (isOverloaded) {
           const hint = extractOverloadHint(entry.uri, f, term);
           if (hint) {
@@ -218,11 +220,11 @@ function howToCiteIDL(term, entry, isOverloaded = false) {
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        cite = `{{"${term}"}}`;
+        cite = `{{"${safeTerm}"}}`;
         break;
       }
     default:
-      cite = `{{${term}}}`;
+      cite = `{{${safeTerm}}}`;
   }
   if (isOverloaded) {
     const hint = extractOverloadHint(entry.uri, null, term);
@@ -302,9 +304,9 @@ function howToCiteAnchor(term, entry) {
 
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
-  term = term.replace('/', '\\/');
+  term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
-    return forList.map(f => `[=${f}/${term}=]`).join('<br>');
+    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`).join('<br>');
   }
   return `[=${term}=]`;
 }
