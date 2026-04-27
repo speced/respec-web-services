@@ -63,21 +63,21 @@ function reloadGroups() {
 let refreshing = false;
 async function refreshGroups() {
   if (refreshing) return;
-  refreshing = true;
+function reloadGroups(clearCache: () => void = () => {}) {
   try {
-    await update();
-    reloadGroups();
-    console.log("W3C groups list refreshed.");
+    if (existsSync(dataSource)) {
+      groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+      clearCache();
+    }
   } catch (error) {
-    console.error("Failed to refresh W3C groups:", error);
-  } finally {
-const GROUPS_REFRESH_INTERVAL_MS = ms("24h");
-const GROUPS_REFRESH_RETRY_MS = ms("15m");
+    console.error("Failed to reload groups.json:", error);
+  }
+}
 
-async function refreshGroups(): Promise<boolean> {
+async function refreshGroups(clearCache: () => void = () => {}) {
   try {
     await update();
-    reloadGroups();
+    reloadGroups(clearCache);
     if (!existsSync(dataSource)) {
       console.error(
         "Failed to refresh W3C groups: groups.json is still missing after update."
