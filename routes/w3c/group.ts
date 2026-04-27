@@ -34,6 +34,7 @@ try {
   void refreshGroups();
   void refreshGroups();
   void refreshGroups();
+  void refreshGroups();
 }
 
 interface Group {
