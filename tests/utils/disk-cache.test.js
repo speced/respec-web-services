@@ -8,19 +8,23 @@ describe("utils/DiskCache", () => {
   let originalDataDir;
 
   beforeEach(async () => {
+    tempDir = undefined;
     originalDataDir = process.env.DATA_DIR;
     tempDir = await mkdtemp(join(tmpdir(), "disk-cache-test-"));
     process.env.DATA_DIR = tempDir;
   });
 
   afterEach(async () => {
-    if (originalDataDir !== undefined) {
-      process.env.DATA_DIR = originalDataDir;
-    } else {
-      delete process.env.DATA_DIR;
-    }
-    if (tempDir) {
-      await rm(tempDir, { recursive: true, force: true });
+    try {
+      if (originalDataDir !== undefined) {
+        process.env.DATA_DIR = originalDataDir;
+      } else {
+        delete process.env.DATA_DIR;
+      }
+    } finally {
+      if (tempDir) {
+        await rm(tempDir, { recursive: true, force: true });
+      }
     }
   });
 
