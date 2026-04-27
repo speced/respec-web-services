@@ -118,7 +118,9 @@ class Logger {
   }
 }
 
-type TaskModule = { default: (input?: unknown) => unknown };
+// Method shorthand syntax enables bivariant parameter checking so concrete
+// worker input types (e.g. `{ webhookId: string }`) satisfy this constraint.
+type TaskModule = { default(input?: unknown): unknown };
 /**
  * Create a worker thread to run a task in background. A task/job added to the
  * queue with `add()`, and run serially in order of calling `run()` on the job

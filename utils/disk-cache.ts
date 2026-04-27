@@ -1,7 +1,7 @@
 import path from "path";
 import { mkdir, readFile, unlink, writeFile } from "fs/promises";
 
-import { env } from "./misc.js";
+import { env, getErrnoCode } from "./misc.js";
 import { MemCache } from "./mem-cache.js";
 
 interface CacheEntry<V> {
@@ -86,11 +86,7 @@ export class DiskCache<ValueType> {
       const text = await readFile(fileName, "utf-8");
       return JSON.parse(text) as CacheEntry<ValueType>;
     } catch (error) {
-      const code =
-        typeof error === "object" && error !== null
-          ? (error as NodeJS.ErrnoException).code
-          : undefined;
-      if (code !== "ENOENT") {
+      if (getErrnoCode(error) !== "ENOENT") {
         console.error(error);
       }
     }
