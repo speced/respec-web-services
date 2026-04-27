@@ -35,7 +35,9 @@ export async function route(req: IRequest, res: Response) {
 
   const browsers =
     typeof req.query.browsers === "string"
-      ? req.query.browsers.split(",")
+      ? req.query.browsers === "all"
+        ? "all"
+        : req.query.browsers.split(",")
       : "default";
 
   const versions =
@@ -61,7 +63,14 @@ export async function route(req: IRequest, res: Response) {
     const hint = feature.startsWith("wf-") && feature.length > 3
       ? ` Try "${feature.slice(3)}" instead — "wf-" is a web-features prefix, not a caniuse ID.`
       : "";
-    res.status(404).json({ error: `Feature "${feature}" not found.${hint}` });
+    const message = `Feature "${feature}" not found.${hint}`;
+
+    if (options.format === "html") {
+      res.status(404).type("html").send(`<p>${message}</p>`);
+      return;
+    }
+
+    res.status(404).json({ error: message });
     return;
   }
 

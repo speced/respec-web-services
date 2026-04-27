@@ -139,10 +139,10 @@ async function readFeatureFile(feature: string) {
     return data;
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
-    if (code !== "ENOENT") {
-      console.error(error);
+    if (code === "ENOENT") {
+      return null;
     }
-    return null;
+    throw error;
   }
 }
 
