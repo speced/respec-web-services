@@ -212,7 +212,7 @@ describe("github/lib/utils/rest - requestData", () => {
   // -- Page limit --
 
   describe("page limit", () => {
-    it("respects the pages argument", async () => {
+    it("respects the pages argument and warns when pages remain", async () => {
       // Create a fetch that always returns a next page link
       let callCount = 0;
       globalThis.fetch = jasmine.createSpy("fetch").and.callFake(() => {
@@ -231,6 +231,8 @@ describe("github/lib/utils/rest - requestData", () => {
         );
       });
 
+      spyOn(console, "warn");
+
       // Request only 2 pages
       const gen = requestData(
         "https://api.github.com/repos/w3c/respec/issues",
@@ -242,6 +244,9 @@ describe("github/lib/utils/rest - requestData", () => {
       }
       expect(results).toEqual([{ page: 1 }, { page: 2 }]);
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+      expect(console.warn).toHaveBeenCalledWith(
+        jasmine.stringMatching(/Some pages were skipped/),
+      );
     });
   });
 
