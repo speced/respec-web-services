@@ -5,8 +5,11 @@ import { Request, Response } from "express";
 
 import { MemCache } from "../../utils/mem-cache.js";
 import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
-import update from "../../scripts/update-w3c-groups-list.js";
 
+async function update() {
+  const { default: updateGroupsList } = await import("../../scripts/update-w3c-groups-list.js");
+  return updateGroupsList();
+}
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
 
@@ -28,6 +31,7 @@ try {
 } catch (error) {
   console.error("Failed to parse groups.json at startup:", error);
   groups = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
+  void refreshGroups();
   void refreshGroups();
 }
 
