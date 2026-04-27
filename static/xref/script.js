@@ -145,17 +145,16 @@ function renderResults(entries, query) {
   }
 
   // Detect overloaded IDL entries that would produce identical citations.
-  // Build a map of citation key -> list of entries to find duplicates.
-  const overloadedURIs = detectOverloadedEntries(entries, term);
+  // Build a set of "uri|forContext" pairs for entries that need disambiguation.
+  const overloadedPairs = detectOverloadedEntries(entries, term);
 
   let html = '';
   for (const entry of entries) {
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
-    const isOverloaded = overloadedURIs.has(entry.uri);
     const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(term, entry, isOverloaded)
+      ? howToCiteIDL(term, entry, overloadedPairs)
       : metadata.types.markup.has(entry.type)
         ? howToCiteMarkup(term, entry)
         : metadata.types.css.has(entry.type) ||
@@ -176,7 +175,9 @@ function renderResults(entries, query) {
 
 /**
  * Detects IDL entries that would produce identical citations (overloaded
- * methods/constructors). Returns a Set of URIs that need disambiguation.
+ * methods/constructors). Returns a Set of "uri|forContext" keys for entries
+ * that need disambiguation. Entries without a `for` list use an empty string
+ * as the forContext part.
  */
 function detectOverloadedEntries(entries, term) {
   const citationGroups = new Map();
@@ -187,26 +188,33 @@ function detectOverloadedEntries(entries, term) {
     const forList = entry.for || [];
     // Group per individual rendered citation (one per `f`), so overlapping
     // `for` contexts across entries are correctly detected as ambiguous.
-    const keys =
-      forList.length > 0
-        ? forList.map(f => `${f}|${term}|${specKey}|${statusKey}`)
-        : [`|${term}|${specKey}|${statusKey}`];
-    for (const key of keys) {
+    if (forList.length > 0) {
+      for (const f of forList) {
+        const key = `${f}|${term}|${specKey}|${statusKey}`;
+        const group = citationGroups.get(key) ?? [];
+        if (!group.length) citationGroups.set(key, group);
+        group.push({ entry, f });
+      }
+    } else {
+      const key = `|${term}|${specKey}|${statusKey}`;
       const group = citationGroups.get(key) ?? [];
       if (!group.length) citationGroups.set(key, group);
-      group.push(entry);
+      group.push({ entry, f: '' });
     }
   }
-  const overloadedURIs = new Set();
+  // Build a Set of "uri|forContext" strings for ambiguous (entry, f) pairs.
+  const overloadedPairs = new Set();
   for (const group of citationGroups.values()) {
     if (group.length > 1) {
-      group.forEach(entry => overloadedURIs.add(entry.uri));
+      for (const { entry, f } of group) {
+        overloadedPairs.add(`${entry.uri}|${f}`);
+      }
     }
   }
-  return overloadedURIs;
+  return overloadedPairs;
 }
 
-function howToCiteIDL(term, entry, isOverloaded = false) {
+function howToCiteIDL(term, entry, overloadedPairs = null) {
   const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
@@ -214,7 +222,7 @@ function howToCiteIDL(term, entry, isOverloaded = false) {
       .map(f => {
         const safeF = escapeHTML(f);
         let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
-        if (isOverloaded) {
+        if (overloadedPairs?.has(`${entry.uri}|${f}`)) {
           const hint = extractOverloadHint(entry.uri, f, term);
           if (hint) {
             displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
@@ -234,7 +242,7 @@ function howToCiteIDL(term, entry, isOverloaded = false) {
     default:
       cite = `{{${safeTerm}}}`;
   }
-  if (isOverloaded) {
+  if (overloadedPairs?.has(`${entry.uri}|`)) {
     const hint = extractOverloadHint(entry.uri, null, term);
     if (hint) {
       cite = cite.replace('()', `(${escapeHTML(hint)})`);
