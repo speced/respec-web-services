@@ -95,7 +95,8 @@ export function searchOne(
   const options = { ...defaultOptions, ...opts };
   normalizeQuery(query, options);
 
-  const filtered = cache.getOr(query.id, () => filter(query, store, options));
+  const cacheKey = options.all ? `${query.id}:all` : query.id;
+  const filtered = cache.getOr(cacheKey, () => filter(query, store, options));
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
   prefereredData = filterPreferLatestVersion(prefereredData);
