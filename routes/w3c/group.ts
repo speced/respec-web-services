@@ -56,21 +56,21 @@ function reloadGroups() {
       cache.clear();
     }
   } catch (error) {
+function reloadGroups(clearCache: () => void = () => {}) {
+  try {
+    if (existsSync(dataSource)) {
+      groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+      clearCache();
+    }
+  } catch (error) {
     console.error("Failed to reload groups.json:", error);
   }
 }
 
-const GROUPS_REFRESH_INTERVAL_MS = ms("24h");
-const GROUPS_REFRESH_RETRY_MS = ms("15m");
-
-let refreshing = false;
-
-async function refreshGroups(): Promise<boolean> {
-  if (refreshing) return false;
-  refreshing = true;
+async function refreshGroups(clearCache: () => void = () => {}) {
   try {
     await update();
-    reloadGroups();
+    reloadGroups(clearCache);
     if (!existsSync(dataSource)) {
       console.error(
         "Failed to refresh W3C groups: groups.json is still missing after update."
