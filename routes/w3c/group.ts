@@ -33,6 +33,7 @@ try {
   groups = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
   void refreshGroups();
   void refreshGroups();
+  void refreshGroups();
 }
 
 interface Group {
