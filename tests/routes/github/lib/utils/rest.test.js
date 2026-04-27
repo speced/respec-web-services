@@ -1,5 +1,5 @@
 // Set env before importing the module (tokens.ts reads GH_TOKEN at import time)
-process.env.GH_TOKEN ??= "test-token-for-rest-tests";
+process.env.GH_TOKEN ||= "test-token-for-rest-tests";
 
 const { requestData } = await import(
   "../../../../../build/routes/github/lib/utils/rest.js"

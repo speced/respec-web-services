@@ -8,12 +8,30 @@ const DATA_DIR = mkdtempSync(path.join(tmpdir(), "respec-size-test-"));
 const TEST_SECRET = "test-secret-key-12345";
 const origDataDir = process.env.DATA_DIR;
 const origSecret = process.env.RESPEC_GH_ACTION_SECRET;
-process.env.DATA_DIR = DATA_DIR;
-process.env.RESPEC_GH_ACTION_SECRET = TEST_SECRET;
+const previousDataDir = process.env.DATA_DIR;
+const previousRespecGhActionSecret = process.env.RESPEC_GH_ACTION_SECRET;
 
-// Dynamic import so env vars are set before module-level code runs.
-const { get, put } = await import("../../../build/routes/respec/size.js");
+let get;
+let put;
+try {
+  process.env.DATA_DIR = DATA_DIR;
+  process.env.RESPEC_GH_ACTION_SECRET = TEST_SECRET;
 
+  // Dynamic import so env vars are set before module-level code runs.
+  ({ get, put } = await import("../../../build/routes/respec/size.js"));
+} finally {
+  if (previousDataDir === undefined) {
+    delete process.env.DATA_DIR;
+  } else {
+    process.env.DATA_DIR = previousDataDir;
+  }
+
+  if (previousRespecGhActionSecret === undefined) {
+    delete process.env.RESPEC_GH_ACTION_SECRET;
+  } else {
+    process.env.RESPEC_GH_ACTION_SECRET = previousRespecGhActionSecret;
+  }
+}
 /** A valid 40-char hex SHA. */
 const VALID_SHA = "a".repeat(40);
 
@@ -46,8 +64,16 @@ function mockRes() {
 describe("routes/respec/size", () => {
   afterAll(async () => {
     await rm(DATA_DIR, { recursive: true, force: true });
-    process.env.DATA_DIR = origDataDir;
-    process.env.RESPEC_GH_ACTION_SECRET = origSecret;
+    if (origDataDir === undefined) {
+      delete process.env.DATA_DIR;
+    } else {
+      process.env.DATA_DIR = origDataDir;
+    }
+    if (origSecret === undefined) {
+      delete process.env.RESPEC_GH_ACTION_SECRET;
+    } else {
+      process.env.RESPEC_GH_ACTION_SECRET = origSecret;
+    }
   });
 
   describe("PUT handler", () => {
