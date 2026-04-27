@@ -144,12 +144,13 @@ describe("utils/MemCache", () => {
 
   describe("expires()", () => {
     it("returns remaining TTL for a valid entry", () => {
+      const fixedNow = 1_700_000_000_000;
+      spyOn(Date, "now").and.returnValue(fixedNow);
+
       const cache = new MemCache(10_000);
-      cache.set("key", "val", Date.now());
-      const remaining = cache.expires("key");
-      // Should be close to 10_000 but we give some tolerance
-      expect(remaining).toBeGreaterThan(9_900);
-      expect(remaining).toBeLessThanOrEqual(10_000);
+      cache.set("key", "val", fixedNow);
+
+      expect(cache.expires("key")).toBe(10_000);
     });
 
     it("returns 0 for missing key", () => {
