@@ -88,6 +88,7 @@ async function refreshGroups(clearCache: () => void = () => {}) {
 }
 
 void refreshGroups();
+void refreshGroups();
 function scheduleGroupsRefresh(delay: number) {
   setTimeout(async () => {
     const refreshed = await refreshGroups();
