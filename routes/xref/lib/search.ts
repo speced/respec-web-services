@@ -149,9 +149,12 @@ function resolveSpecKey(spec: string, store: Store) {
     return spec;
   }
 
-  const mappedSpec = store.specmap?.[spec];
-  if (mappedSpec && store.bySpec[mappedSpec]) {
-    return mappedSpec;
+  // specmap is { [group]: { [specid]: { shortname, url, title } } }
+  for (const group of Object.values(store.specmap ?? {})) {
+    const entry = group[spec];
+    if (entry?.shortname && store.bySpec[entry.shortname]) {
+      return entry.shortname;
+    }
   }
 
   const versionlessSpec = spec.replace(/-\d+$/, "");
@@ -160,9 +163,11 @@ function resolveSpecKey(spec: string, store: Store) {
       return versionlessSpec;
     }
 
-    const mappedVersionlessSpec = store.specmap?.[versionlessSpec];
-    if (mappedVersionlessSpec && store.bySpec[mappedVersionlessSpec]) {
-      return mappedVersionlessSpec;
+    for (const group of Object.values(store.specmap ?? {})) {
+      const entry = group[versionlessSpec];
+      if (entry?.shortname && store.bySpec[entry.shortname]) {
+        return entry.shortname;
+      }
     }
   }
 

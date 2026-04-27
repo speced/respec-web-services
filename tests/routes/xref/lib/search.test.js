@@ -5,7 +5,22 @@ import {
 
 import byTerm from "./data-by-term.js";
 import bySpec from "./data-by-spec.js";
-const store = { byTerm, bySpec };
+
+// Minimal specmap matching production shape: { [group]: { [specid]: { shortname, url, title } } }
+const specmap = {
+  current: {
+    "referrer-policy-1": { url: "", shortname: "referrer-policy", title: "Referrer Policy" },
+    "font-metrics-api-1": { url: "", shortname: "font-metrics-api", title: "Font Metrics API" },
+    "css-cascade-3": { url: "", shortname: "css-cascade", title: "CSS Cascading Level 3" },
+    "css-cascade-4": { url: "", shortname: "css-cascade", title: "CSS Cascading Level 4" },
+    "css-lists-3": { url: "", shortname: "css-lists", title: "CSS Lists Level 3" },
+    "web-bluetooth-1": { url: "", shortname: "web-bluetooth", title: "Web Bluetooth" },
+    "wai-aria-1.2": { url: "", shortname: "wai-aria", title: "WAI-ARIA 1.2" },
+  },
+  snapshot: {},
+};
+
+const store = { byTerm, bySpec, specmap };
 
 /**
  * @param {import("../../../../routes/xref/lib/search.js").Query} query
@@ -359,6 +374,17 @@ describe("xref - search", () => {
     it("combines multiple specs in a single fallback list", () => {
       const results = search(
         { term: "", specs: [["css-lists", "web-bluetooth"]], id: "" },
+        { all: true },
+      );
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("resolves versioned spec ids to series shortname via specmap", () => {
+      // css-lists-3 and web-bluetooth-1 are versioned spec ids; bySpec is keyed
+      // by series shortname (css-lists, web-bluetooth), so collectBySpecs() must
+      // resolve them via specmap to return results.
+      const results = search(
+        { term: "", specs: [["css-lists-3", "web-bluetooth-1"]], id: "" },
         { all: true },
       );
       expect(results.length).toBeGreaterThan(0);
