@@ -62,17 +62,6 @@ describe("utils/DiskCache", () => {
     expect(await cache2.get("persist")).toBe("data");
   });
 
-  describe("TTL expiry", () => {
-    it("returns undefined for expired entries", async () => {
-      // Use a very short TTL
-      const fakeNowStart = 1_000;
-      let fakeNow = fakeNowStart;
-      spyOn(Date, "now").and.callFake(() => fakeNow);
-
-      const cache = new DiskCache({ ttl: 1, path: "test-cache" });
-      await cache.set("key", "value");
-
-      fakeNow = fakeNowStart + 10;
   describe("time-dependent expiry", () => {
     let now;
 
@@ -138,6 +127,16 @@ describe("utils/DiskCache", () => {
         Error,
         /Invalid (key|path)/i
       );
+    });
+
+    it("rejects prefix-bypass traversal (../test-cache-evil)", async () => {
+      // A key like ../test-cache-evil/pwn resolves to a path that *starts with*
+      // the base directory string but escapes it (e.g. /tmp/test-cache-evil).
+      // The check must use baseDir + sep to prevent this bypass.
+      const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
+      await expectAsync(
+        cache.set("../test-cache-evil/pwn", "data")
+      ).toBeRejectedWithError(Error, /Invalid (key|path)/i);
     });
   });
 });
