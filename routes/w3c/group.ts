@@ -28,6 +28,7 @@ try {
 } catch (error) {
   console.error("Failed to parse groups.json at startup:", error);
   groups = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
+  void refreshGroups();
 }
 
 interface Group {
@@ -53,18 +54,29 @@ function reloadGroups() {
   }
 }
 
+let refreshing = false;
 async function refreshGroups() {
+  if (refreshing) return;
+  refreshing = true;
   try {
     await update();
     reloadGroups();
     console.log("W3C groups list refreshed.");
   } catch (error) {
     console.error("Failed to refresh W3C groups:", error);
+  } finally {
+    refreshing = false;
   }
 }
 
-setInterval(refreshGroups, ms("24h")).unref();
-if (!existsSync(dataSource)) refreshGroups();
+function scheduleRefresh() {
+  setTimeout(async () => {
+    await refreshGroups();
+    scheduleRefresh();
+  }, ms("24h")).unref();
+}
+scheduleRefresh();
+if (!existsSync(dataSource)) void refreshGroups();
 
 
 // Support non W3C shortnames for backward compatibility.
