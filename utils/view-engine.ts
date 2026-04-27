@@ -2,18 +2,11 @@ import { Application } from "express";
 
 type EngineCallback = Parameters<Application["engine"]>[1];
 
-const engine: EngineCallback = (
-  filePath: string,
-  options: object,
-  callback: (err: Error | null, rendered?: string) => void,
-) => {
+const engine: EngineCallback = (filePath, options, callback) => {
   import(filePath).then(
-    ({ default: template }) => {
-      callback(null, (template(options) as { toString(): string }).toString());
-    },
-    error => {
-      callback(error instanceof Error ? error : new Error(String(error)));
-    },
+    ({ default: template }) => callback(null, template(options).toString()),
+    error =>
+      callback(error instanceof Error ? error : new Error(String(error))),
   );
 };
 
