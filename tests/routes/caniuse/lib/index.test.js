@@ -100,7 +100,7 @@ describe("caniuse - constants", () => {
       expect(SUPPORT_TITLES.get("x")).toBe("Requires prefix to work.");
       expect(SUPPORT_TITLES.get("p")).toBe("No support, but has Polyfill.");
       expect(SUPPORT_TITLES.get("d")).toBe(
-        "Disabled by default (needs to enabled).",
+        "Disabled by default (needs to be enabled).",
       );
     });
 
@@ -161,6 +161,22 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       JSON.stringify(fixtureData),
     );
 
+    // Write a fixture with compound and unknown support keys for HTML tests
+    const compoundFixture = {
+      all: {
+        chrome: [["120", ["y", "x"]]],
+        firefox: [["121", ["z"]]],
+      },
+      summary: {
+        chrome: [["120", ["y", "x"]]],
+        firefox: [["121", ["z"]]],
+      },
+    };
+    await writeFile(
+      path.join(caniuseDir, "compound-feature.json"),
+      JSON.stringify(compoundFixture),
+    );
+
     // Set DATA_DIR before importing the module that reads it at load time
     origDataDir = process.env.DATA_DIR;
     process.env.DATA_DIR = tmpDir;
@@ -173,8 +189,12 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
   });
 
   afterAll(async () => {
-    process.env.DATA_DIR = origDataDir;
-    await rm(tmpDir, { recursive: true, force: true });
+    if (origDataDir !== undefined) {
+      process.env.DATA_DIR = origDataDir;
+    }
+    if (tmpDir) {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it("returns default browsers for undefined input", async () => {
@@ -271,38 +291,39 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
     expect(result).not.toBeNull();
     expect(result.chrome.length).toBe(2);
   });
-});
 
-describe("caniuse - getSupportTitle logic", () => {
-  // getSupportTitle is a closure inside formatAsHTML, so test the logic
-  // using the SUPPORT_TITLES map directly (same algorithm).
-  function getSupportTitle(keys) {
-    return keys
-      .filter(key => SUPPORT_TITLES.has(key))
-      .map(key => SUPPORT_TITLES.get(key))
-      .join(" ");
-  }
+  describe("HTML title attributes (getSupportTitle via formatAsHTML)", () => {
+    it("renders 'Supported.' title for a 'y' support key", async () => {
+      const html = await createResponseBody({
+        feature: "test-feature",
+        browsers: ["chrome"],
+        format: "html",
+      });
+      expect(html).not.toBeNull();
+      expect(html).toContain('title="Supported."');
+    });
 
-  it("maps a single key correctly", () => {
-    expect(getSupportTitle(["y"])).toBe("Supported.");
-    expect(getSupportTitle(["n"])).toBe("No support, or disabled by default.");
-  });
+    it("renders compound title for ['y', 'x'] support keys", async () => {
+      const html = await createResponseBody({
+        feature: "compound-feature",
+        browsers: ["chrome"],
+        format: "html",
+      });
+      expect(html).not.toBeNull();
+      expect(html).toContain(
+        'title="Supported. Requires prefix to work."',
+      );
+    });
 
-  it("handles compound key arrays", () => {
-    expect(getSupportTitle(["y", "x"])).toBe(
-      "Supported. Requires prefix to work.",
-    );
-    expect(getSupportTitle(["a", "d"])).toBe(
-      "Almost supported (aka Partial support). Disabled by default (needs to enabled).",
-    );
-  });
-
-  it("filters out unknown keys", () => {
-    expect(getSupportTitle(["y", "unknown"])).toBe("Supported.");
-    expect(getSupportTitle(["unknown"])).toBe("");
-  });
-
-  it("returns empty string for empty array", () => {
-    expect(getSupportTitle([])).toBe("");
+    it("renders empty title for unknown support keys", async () => {
+      // firefox has ["z"] (unknown) in the compound fixture
+      const html = await createResponseBody({
+        feature: "compound-feature",
+        browsers: ["firefox"],
+        format: "html",
+      });
+      expect(html).not.toBeNull();
+      expect(html).toContain('title=""');
+    });
   });
 });

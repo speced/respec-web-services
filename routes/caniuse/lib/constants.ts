@@ -32,7 +32,7 @@ export const SUPPORT_TITLES = new Map([
   ["p", "No support, but has Polyfill."],
   ["u", "Support unknown."],
   ["x", "Requires prefix to work."],
-  ["d", "Disabled by default (needs to enabled)."],
+  ["d", "Disabled by default (needs to be enabled)."],
 ]);
 
 export type SupportKeys = ("y" | "n" | "a" | string)[];
