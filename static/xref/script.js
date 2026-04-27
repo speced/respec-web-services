@@ -207,15 +207,14 @@ function howToCiteIDL(term, entry, isOverloaded = false) {
     return forList
       .map(f => {
         const safeF = escapeHTML(f);
-        const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
-        let cite = `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
+        let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
         if (isOverloaded) {
           const hint = extractOverloadHint(entry.uri, f, term);
           if (hint) {
-            cite += ` <small>(${escapeHTML(hint)})</small>`;
+            displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
           }
         }
-        return cite;
+        return `{{${safeF}/${displayTerm ? displayTerm : '""'}}}`;
       })
       .join('<br>');
   }
@@ -232,7 +231,7 @@ function howToCiteIDL(term, entry, isOverloaded = false) {
   if (isOverloaded) {
     const hint = extractOverloadHint(entry.uri, null, term);
     if (hint) {
-      cite += ` <small>(${escapeHTML(hint)})</small>`;
+      cite = cite.replace('()', `(${escapeHTML(hint)})`);
     }
   }
   return cite;
