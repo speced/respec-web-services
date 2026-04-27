@@ -2,7 +2,11 @@ import { env, seconds, ms, HTTPError } from "../../build/utils/misc.js";
 
 describe("utils/misc", () => {
   describe("env()", () => {
-    const savedEnv = {};
+    let savedEnv;
+
+    beforeEach(() => {
+      savedEnv = {};
+    });
 
     afterEach(() => {
       for (const key of Object.keys(savedEnv)) {
@@ -20,13 +24,23 @@ describe("utils/misc", () => {
     it("throws when env variable is not set", () => {
       savedEnv.SURELY_UNSET_VAR = process.env.SURELY_UNSET_VAR;
       delete process.env.SURELY_UNSET_VAR;
-      expect(() => env("SURELY_UNSET_VAR")).toThrow();
+      try {
+        env("SURELY_UNSET_VAR");
+        fail("Expected env() to throw");
+      } catch (thrown) {
+        expect(thrown).toBe("env variable `SURELY_UNSET_VAR` is not set.");
+      }
     });
 
     it("throws when env variable is empty string", () => {
       savedEnv.EMPTY_VAR = process.env.EMPTY_VAR;
       process.env.EMPTY_VAR = "";
-      expect(() => env("EMPTY_VAR")).toThrow();
+      try {
+        env("EMPTY_VAR");
+        fail("Expected env() to throw");
+      } catch (thrown) {
+        expect(thrown).toBe("env variable `EMPTY_VAR` is not set.");
+      }
     });
   });
 
