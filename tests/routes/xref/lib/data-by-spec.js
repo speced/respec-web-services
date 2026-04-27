@@ -1,7 +1,8 @@
-// bySpec is keyed by spec id (not shortname), mapping to all DataEntry items
-// for that spec. This is derived from the data in data-by-term.js.
+// bySpec is keyed by spec series shortname (matching production specs.json shape),
+// mapping to all DataEntry items for that series. Each entry retains its versioned
+// spec id in the `spec` field to allow version-preference tests.
 export default {
-  "referrer-policy-1": [
+  "referrer-policy": [
     {
       type: "enum-value",
       spec: "referrer-policy-1",
@@ -45,7 +46,7 @@ export default {
       for: ["XMLHttpRequestResponseType"],
     },
   ],
-  "font-metrics-api-1": [
+  "font-metrics-api": [
     {
       type: "interface",
       spec: "font-metrics-api-1",
@@ -56,7 +57,7 @@ export default {
       htmlProse: "test html Prose",
     },
   ],
-  svg2: [
+  svg: [
     {
       type: "dfn",
       spec: "svg2",
@@ -98,6 +99,20 @@ export default {
       shortname: "svg",
       status: "current",
       uri: "painting.html#elementdef-marker",
+    },
+    {
+      type: "element",
+      spec: "svg",
+      shortname: "svg",
+      status: "snapshot",
+      uri: "script.html#ScriptElement",
+    },
+    {
+      type: "element",
+      spec: "svg",
+      shortname: "svg",
+      status: "snapshot",
+      uri: "painting.html#MarkerElement",
     },
   ],
   html: [
@@ -137,23 +152,7 @@ export default {
       for: ["HTMLScriptElement"],
     },
   ],
-  svg: [
-    {
-      type: "element",
-      spec: "svg",
-      shortname: "svg",
-      status: "snapshot",
-      uri: "script.html#ScriptElement",
-    },
-    {
-      type: "element",
-      spec: "svg",
-      shortname: "svg",
-      status: "snapshot",
-      uri: "painting.html#MarkerElement",
-    },
-  ],
-  "css-cascade-3": [
+  "css-cascade": [
     {
       type: "dfn",
       spec: "css-cascade-3",
@@ -168,8 +167,6 @@ export default {
       status: "current",
       uri: "#inherited-value",
     },
-  ],
-  "css-cascade-4": [
     {
       type: "dfn",
       spec: "css-cascade-4",
@@ -185,7 +182,7 @@ export default {
       uri: "#inherited-value",
     },
   ],
-  "css-lists-3": [
+  "css-lists": [
     {
       type: "dfn",
       spec: "css-lists-3",
@@ -226,7 +223,7 @@ export default {
       for: ["AbortSignal"],
     },
   ],
-  "web-bluetooth-1": [
+  "web-bluetooth": [
     {
       type: "attribute",
       spec: "web-bluetooth-1",
@@ -254,7 +251,7 @@ export default {
       normative: true,
     },
   ],
-  "wai-aria-1.2": [
+  "wai-aria": [
     {
       type: "dfn",
       spec: "wai-aria-1.2",
