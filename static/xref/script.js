@@ -295,13 +295,14 @@ function extractOverloadHint(uri, forContext, term) {
 
 function howToCiteMarkup(term, entry) {
   const { type, for: forList, shortname } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList.map(f => `[^${f}/${term}^]`).join('<br>');
+    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`).join('<br>');
   }
   if (type === 'element-attr') {
-    return `[^/${term}^]`;
+    return `[^/${safeTerm}^]`;
   }
-  return `[^${term}^]`;
+  return `[^${safeTerm}^]`;
 }
 
 function howToCiteAnchor(term, entry) {
