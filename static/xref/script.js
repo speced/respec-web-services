@@ -182,13 +182,20 @@ function detectOverloadedEntries(entries, term) {
   const citationGroups = new Map();
   for (const entry of entries) {
     if (!metadata.types.idl.has(entry.type)) continue;
-    const forKey = (entry.for || []).join(',');
     const specKey = entry.spec || '';
     const statusKey = entry.status || '';
-    const key = `${entry.type}|${forKey}|${term}|${specKey}|${statusKey}`;
-    const group = citationGroups.get(key) ?? [];
-    if (!group.length) citationGroups.set(key, group);
-    group.push(entry);
+    const forList = entry.for || [];
+    // Group per individual rendered citation (one per `f`), so overlapping
+    // `for` contexts across entries are correctly detected as ambiguous.
+    const keys =
+      forList.length > 0
+        ? forList.map(f => `${f}|${term}|${specKey}|${statusKey}`)
+        : [`|${term}|${specKey}|${statusKey}`];
+    for (const key of keys) {
+      const group = citationGroups.get(key) ?? [];
+      if (!group.length) citationGroups.set(key, group);
+      group.push(entry);
+    }
   }
   const overloadedURIs = new Set();
   for (const group of citationGroups.values()) {
@@ -254,7 +261,8 @@ function extractOverloadHint(uri, forContext, term) {
   const hash = uri.includes('#') ? uri.split('#')[1] : uri;
   if (!hash) return '';
 
-  const parts = hash.toLowerCase().split('-');
+  const originalParts = hash.split('-');
+  const lowerParts = hash.toLowerCase().split('-');
 
   // Build the prefix to strip: typically "dom", interface, method
   const prefixParts = ['dom'];
@@ -267,11 +275,11 @@ function extractOverloadHint(uri, forContext, term) {
   }
 
   const matches =
-    prefixParts.length <= parts.length &&
-    prefixParts.every((p, i) => parts[i] === p);
+    prefixParts.length <= lowerParts.length &&
+    prefixParts.every((p, i) => lowerParts[i] === p);
 
-  if (matches && prefixParts.length < parts.length) {
-    return parts.slice(prefixParts.length).join(', ');
+  if (matches && prefixParts.length < lowerParts.length) {
+    return originalParts.slice(prefixParts.length).join(', ');
   }
 
   return '';
