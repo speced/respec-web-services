@@ -49,31 +49,34 @@ try {
   needsImmediateRefresh = true;
 }
 
-function reloadGroups() {
+function reloadGroups(): boolean {
   try {
     if (existsSync(dataSource)) {
       groups = JSON.parse(readFileSync(dataSource, "utf-8"));
       cache.clear();
+      return true;
     }
-  } catch (error) {
-function reloadGroups(clearCache: () => void = () => {}) {
-  try {
-    if (existsSync(dataSource)) {
-      groups = JSON.parse(readFileSync(dataSource, "utf-8"));
-      clearCache();
-    }
+    return false;
   } catch (error) {
     console.error("Failed to reload groups.json:", error);
+    return false;
   }
 }
 
-async function refreshGroups(clearCache: () => void = () => {}) {
+const GROUPS_REFRESH_INTERVAL_MS = ms("24h");
+const GROUPS_REFRESH_RETRY_MS = ms("15m");
+
+let refreshing = false;
+
+async function refreshGroups(): Promise<boolean> {
+  if (refreshing) return false;
+  refreshing = true;
   try {
     await update();
-    reloadGroups(clearCache);
-    if (!existsSync(dataSource)) {
+    const reloaded = reloadGroups();
+    if (!reloaded) {
       console.error(
-        "Failed to refresh W3C groups: groups.json is still missing after update."
+        "Failed to refresh W3C groups: groups.json is missing or unreadable after update."
       );
       return false;
     }
@@ -87,8 +90,6 @@ async function refreshGroups(clearCache: () => void = () => {}) {
   }
 }
 
-void refreshGroups();
-void refreshGroups();
 function scheduleGroupsRefresh(delay: number) {
   setTimeout(async () => {
     const refreshed = await refreshGroups();
