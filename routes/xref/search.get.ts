@@ -17,9 +17,9 @@ export default async function route(req: IRequest, res: Response) {
   const { term, for: forContext } = req.query;
   const specs = splitQueryParam(req.query.specs);
   const types = splitQueryParam(req.query.type)?.flat(2) as Query["types"];
-  if (typeof term === "undefined" && !specs?.length && !types?.length) {
+  if (typeof term === "undefined" && !specs?.length) {
     res.status(400).json({
-      message: { type: "error", text: "Missing required query parameter: term (or provide specs or type)" },
+      message: { type: "error", text: "Missing required query parameter: term (or provide specs)" },
     });
     return;
   }

@@ -98,9 +98,7 @@ export function searchOne(
   const filtered = cache.getOr(query.id, () => filter(query, store, options));
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
-  if (!query.term) prefereredData = prefereredData.slice(0, 1000);
   prefereredData = filterPreferLatestVersion(prefereredData);
-  if (!query.term) prefereredData = prefereredData.slice(0, 1000);
   const result = prefereredData.map(item => pickFields(item, options.fields));
   return result;
 }
@@ -123,11 +121,12 @@ function normalizeQuery(query: Query, options: Options) {
 
 function filter(query: Query, store: Store, options: Options) {
   // When no term is provided but specs are, return all entries from those specs.
+  // Cap at 1000 here so the cached value is memory-bounded.
   if (!query.term && query.specs?.length) {
     const entries = collectBySpecs(query.specs, store);
     const byType = filterByType(entries, query);
     const byForContext = filterByForContext(byType, query, options);
-    return byForContext;
+    return byForContext.slice(0, 1000);
   }
 
   let result: DataEntry[] = [];
