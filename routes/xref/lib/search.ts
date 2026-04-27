@@ -98,6 +98,7 @@ export function searchOne(
   const filtered = cache.getOr(query.id, () => filter(query, store, options));
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
+  if (!query.term) prefereredData = prefereredData.slice(0, 1000);
   prefereredData = filterPreferLatestVersion(prefereredData);
   if (!query.term) prefereredData = prefereredData.slice(0, 1000);
   const result = prefereredData.map(item => pickFields(item, options.fields));
@@ -143,11 +144,37 @@ function filter(query: Query, store: Store, options: Options) {
   return result;
 }
 
+function resolveSpecKey(spec: string, store: Store) {
+  if (store.bySpec[spec]) {
+    return spec;
+  }
+
+  const mappedSpec = store.specmap?.[spec];
+  if (mappedSpec && store.bySpec[mappedSpec]) {
+    return mappedSpec;
+  }
+
+  const versionlessSpec = spec.replace(/-\d+$/, "");
+  if (versionlessSpec !== spec) {
+    if (store.bySpec[versionlessSpec]) {
+      return versionlessSpec;
+    }
+
+    const mappedVersionlessSpec = store.specmap?.[versionlessSpec];
+    if (mappedVersionlessSpec && store.bySpec[mappedVersionlessSpec]) {
+      return mappedVersionlessSpec;
+    }
+  }
+
+  return spec;
+}
+
 /** Collect all entries from the store that belong to any of the given specs. */
 function collectBySpecs(specsLists: string[][], store: Store) {
   const seen = new Set<string>();
   return specsLists.flatMap(specs =>
     specs
+      .map(spec => resolveSpecKey(spec, store))
       .filter(spec => !seen.has(spec) && seen.add(spec))
       .flatMap(spec => store.bySpec[spec] ?? [])
   );

@@ -358,7 +358,7 @@ describe("xref - search", () => {
 
     it("combines multiple specs in a single fallback list", () => {
       const results = search(
-        { term: "", specs: [["css-lists-3", "web-bluetooth-1"]], id: "" },
+        { term: "", specs: [["css-lists", "web-bluetooth"]], id: "" },
         { all: true },
       );
       expect(results.length).toBeGreaterThan(0);
