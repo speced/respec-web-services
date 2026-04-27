@@ -118,8 +118,7 @@ class Logger {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type TaskModule = { default: (input?: any) => unknown };
+type TaskModule = { default: (input?: unknown) => unknown };
 /**
  * Create a worker thread to run a task in background. A task/job added to the
  * queue with `add()`, and run serially in order of calling `run()` on the job
