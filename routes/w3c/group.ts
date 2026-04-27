@@ -90,10 +90,9 @@ async function refreshGroups(): Promise<boolean> {
 function scheduleGroupsRefresh(delay: number) {
   setTimeout(async () => {
     const refreshed = await refreshGroups();
-    const nextDelay =
-      refreshed || existsSync(dataSource)
-        ? GROUPS_REFRESH_INTERVAL_MS
-        : GROUPS_REFRESH_RETRY_MS;
+    const nextDelay = refreshed
+      ? GROUPS_REFRESH_INTERVAL_MS
+      : GROUPS_REFRESH_RETRY_MS;
     scheduleGroupsRefresh(nextDelay);
   }, delay);
 }
