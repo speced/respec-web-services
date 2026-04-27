@@ -57,7 +57,11 @@ export async function route(req: IRequest, res: Response) {
   }
   const body = await createResponseBody(options);
   if (body === null) {
-    res.sendStatus(404);
+    const feature = options.feature;
+    const hint = feature.startsWith("wf-") && feature.length > 3
+      ? ` Try "${feature.slice(3)}" instead — "wf-" is a web-features prefix, not a caniuse ID.`
+      : "";
+    res.status(404).json({ error: `Feature "${feature}" not found.${hint}` });
     return;
   }
 
