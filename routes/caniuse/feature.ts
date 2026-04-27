@@ -26,8 +26,7 @@ export default async function route(req: IRequest, res: Response) {
     res.json({ result });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    const statusCode = message === "INTERNAL_ERROR" ? 500 : 404;
-    res.status(statusCode).json({ error: message });
+    res.status(500).json({ error: message });
   }
 }
 

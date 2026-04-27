@@ -120,4 +120,25 @@ describe("caniuse - feature route", () => {
       }
     });
   });
+
+  describe("500 responses", () => {
+    it("returns JSON 500 when the feature file is malformed JSON", async () => {
+      await fs.mkdir(CANIUSE_DIR, { recursive: true });
+      await fs.writeFile(
+        path.join(CANIUSE_DIR, "broken-feature.json"),
+        "not valid json",
+        "utf8",
+      );
+      try {
+        const res = mockRes();
+        await route(mockReq("broken-feature"), res);
+        expect(res.statusCode).toBe(500);
+        expect(res.body).toEqual(jasmine.objectContaining({ error: jasmine.any(String) }));
+      } finally {
+        try {
+          await fs.unlink(path.join(CANIUSE_DIR, "broken-feature.json"));
+        } catch { /* ignore */ }
+      }
+    });
+  });
 });
