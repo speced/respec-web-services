@@ -13,6 +13,11 @@ interface SearchBody {
 type IRequest = Request<unknown, unknown, SearchBody>;
 
 export default function route(req: IRequest, res: Response) {
+  if (!store.data) {
+    res.sendStatus(503);
+    return;
+  }
+
   const { specs } = req.body;
 
   if (!Array.isArray(specs) || specs.length === 0) {
@@ -27,9 +32,9 @@ export default function route(req: IRequest, res: Response) {
     return;
   }
 
-  if (!specs.every(s => typeof s === "string")) {
+  if (!specs.every(s => typeof s === "string" && s.trim().length > 0)) {
     res.status(400);
-    res.json({ error: "Each spec must be a string." });
+    res.json({ error: "Each spec must be a non-empty string." });
     return;
   }
 

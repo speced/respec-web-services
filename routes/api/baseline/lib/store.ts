@@ -46,6 +46,7 @@ export function normalizeUrl(url: string): string {
   const parsed = URL.parse(url);
   if (!parsed) return url;
   parsed.hash = "";
+  parsed.search = "";
   if (!parsed.pathname.endsWith("/") && !parsed.pathname.includes(".")) {
     parsed.pathname += "/";
   }
