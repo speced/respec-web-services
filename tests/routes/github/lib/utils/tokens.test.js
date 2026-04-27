@@ -91,6 +91,10 @@ describe("routes/github/lib/utils/tokens", () => {
 
     it("masks all but the last 4 characters of the token", () => {
       const fullToken = process.env.GH_TOKEN;
+      if (fullToken.length <= 4) {
+        pending("GH_TOKEN too short to verify masking pattern");
+        return;
+      }
       const limits = getLimits();
       const keys = Object.keys(limits);
       expect(keys).toHaveSize(1);

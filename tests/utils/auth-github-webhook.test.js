@@ -234,15 +234,38 @@ describe("utils/auth-github-webhook", () => {
       expect(res.statusCode).toBe(401);
     });
 
+    it("returns 401 for wrong-length signature", () => {
+      const payload = { action: "opened" };
+      const rawBody = Buffer.from(JSON.stringify(payload));
+
+      const req = mockReq({
+        body: rawBody,
+        headers: { "X-Hub-Signature": "sha1=short" },
+      });
+      const res = mockRes();
+      let nextCalled = false;
+
+      verifier(req, res, () => {
+        nextCalled = true;
+      });
+
+      expect(nextCalled).toBeFalse();
+      expect(res.statusCode).toBe(401);
+    });
+
     it("returns 401 for non-ASCII signature (Buffer byte length mismatch)", () => {
       const body = JSON.stringify({ ref: "refs/heads/main" });
-      const validSig = sign(body, SECRET);
+      const rawBody = Buffer.from(body);
+      const validSig = sign(rawBody, SECRET);
       // Replace last chars with non-ASCII that has same JS string length
       // but different UTF-8 byte length
       const nonAsciiSig = validSig.slice(0, -2) + "ñ" + "a";
       expect(nonAsciiSig.length).toBe(validSig.length);
 
-      const req = mockReq(body, nonAsciiSig);
+      const req = mockReq({
+        body: rawBody,
+        headers: { "X-Hub-Signature": nonAsciiSig },
+      });
       const res = mockRes();
       let nextCalled = false;
 
