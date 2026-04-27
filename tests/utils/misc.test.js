@@ -87,19 +87,19 @@ describe("utils/misc", () => {
     });
 
     it("throws on invalid format", () => {
-      expect(() => seconds("")).toThrowError('Invalid duration format: ""');
+      expect(() => seconds("")).toThrowError("Invalid duration format: \"\"");
       expect(() => seconds("abc")).toThrowError(
-        'Invalid duration format: "abc"',
+        "Invalid duration format: \"abc\"",
       );
       expect(() => seconds("1x")).toThrowError(
-        'Invalid duration format: "1x"',
+        "Invalid duration format: \"1x\"",
       );
     });
 
     it("throws on zero value", () => {
       // parseFloat("0") returns 0, which is falsy, so the guard rejects it
       expect(() => seconds("0s")).toThrowError(
-        'Invalid duration format: "0s"',
+        "Invalid duration format: \"0s\"",
       );
     });
   });
@@ -112,7 +112,7 @@ describe("utils/misc", () => {
     });
 
     it("throws on invalid format", () => {
-      expect(() => ms("bad")).toThrowError('Invalid duration format: "bad"');
+      expect(() => ms("bad")).toThrowError("Invalid duration format: \"bad\"");
     });
   });
 

@@ -73,54 +73,71 @@ describe("utils/DiskCache", () => {
       await cache.set("key", "value");
 
       fakeNow = fakeNowStart + 10;
-      expect(await cache.get("key")).toBeUndefined();
+  describe("time-dependent expiry", () => {
+    let now;
+
+    beforeEach(() => {
+      now = 1_000;
+      spyOn(Date, "now").and.callFake(() => now);
     });
 
-    it("returns stale value when allowStale is true", async () => {
-      const fakeNowStart = 2_000;
-      let fakeNow = fakeNowStart;
-      spyOn(Date, "now").and.callFake(() => fakeNow);
+    describe("TTL expiry", () => {
+      it("returns undefined for expired entries", async () => {
+        // Use a very short TTL
+        const cache = new DiskCache({ ttl: 1, path: "test-cache" });
+        await cache.set("key", "value");
 
-      const cache = new DiskCache({ ttl: 1, path: "test-cache" });
-      await cache.set("key", "value");
+        now += 10;
+        expect(await cache.get("key")).toBeUndefined();
+      });
 
-      fakeNow = fakeNowStart + 10;
-      expect(await cache.get("key", true)).toBe("value");
+      it("returns stale value when allowStale is true", async () => {
+        const cache = new DiskCache({ ttl: 1, path: "test-cache" });
+        await cache.set("key", "value");
+
+        now += 10;
+        expect(await cache.get("key", true)).toBe("value");
+      });
     });
-  });
 
-  describe("invalidate()", () => {
-    it("removes expired entries from memory and disk", async () => {
-      const fakeNowStart = 3_000;
-      let fakeNow = fakeNowStart;
-      spyOn(Date, "now").and.callFake(() => fakeNow);
+    describe("invalidate()", () => {
+      it("removes expired entries from memory and disk", async () => {
+        const cache = new DiskCache({ ttl: 1, path: "test-cache" });
+        await cache.set("a", 1);
+        await cache.set("b", 2);
 
-      const cache = new DiskCache({ ttl: 1, path: "test-cache" });
-      await cache.set("a", 1);
-      await cache.set("b", 2);
+        now += 10;
+        await cache.invalidate();
 
-      fakeNow = fakeNowStart + 10;
-      await cache.invalidate();
-
-      expect(await cache.get("a", true)).toBeUndefined();
-      expect(await cache.get("b", true)).toBeUndefined();
+        expect(await cache.get("a", true)).toBeUndefined();
+        expect(await cache.get("b", true)).toBeUndefined();
+      });
     });
   });
 
   describe("path traversal prevention", () => {
     it("rejects keys with path traversal (..)", async () => {
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
-      await expectAsync(cache.set("foo/../evil", "data")).toBeRejected();
+      await expectAsync(cache.set("foo/../evil", "data")).toBeRejectedWithError(
+        Error,
+        /Invalid (key|path)/i
+      );
     });
 
     it("rejects keys with double slashes", async () => {
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
-      await expectAsync(cache.set("foo//bar", "data")).toBeRejected();
+      await expectAsync(cache.set("foo//bar", "data")).toBeRejectedWithError(
+        Error,
+        /Invalid (key|path)/i
+      );
     });
 
     it("rejects keys with dot segments", async () => {
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
-      await expectAsync(cache.set("foo/./bar", "data")).toBeRejected();
+      await expectAsync(cache.set("foo/./bar", "data")).toBeRejectedWithError(
+        Error,
+        /Invalid (key|path)/i
+      );
     });
   });
 });
