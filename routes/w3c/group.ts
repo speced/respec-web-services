@@ -6,11 +6,6 @@ import { Request, Response } from "express";
 import { MemCache } from "../../utils/mem-cache.js";
 import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
 
-async function update() {
-  const { default: updateGroupsList } = await import("../../scripts/update-w3c-groups-list.js");
-  return updateGroupsList();
-}
-
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
 
@@ -37,19 +32,17 @@ interface Group {
 }
 const cache = new MemCache<Group>(ms("1 day"));
 
-let needsImmediateRefresh = !existsSync(dataSource);
 let groups: GroupsByType;
 try {
-  groups = needsImmediateRefresh
-    ? EMPTY_GROUPS
-    : JSON.parse(readFileSync(dataSource, "utf-8"));
+  groups = existsSync(dataSource)
+    ? JSON.parse(readFileSync(dataSource, "utf-8"))
+    : EMPTY_GROUPS;
 } catch (error) {
   console.error("Failed to parse groups.json at startup:", error);
   groups = EMPTY_GROUPS;
-  needsImmediateRefresh = true;
 }
 
-function reloadGroups(): boolean {
+export function reloadGroups(): boolean {
   try {
     if (existsSync(dataSource)) {
       groups = JSON.parse(readFileSync(dataSource, "utf-8"));
@@ -62,45 +55,6 @@ function reloadGroups(): boolean {
     return false;
   }
 }
-
-const GROUPS_REFRESH_INTERVAL_MS = ms("24h");
-const GROUPS_REFRESH_RETRY_MS = ms("15m");
-
-let refreshing = false;
-
-async function refreshGroups(): Promise<boolean> {
-  if (refreshing) return false;
-  refreshing = true;
-  try {
-    await update();
-    const reloaded = reloadGroups();
-    if (!reloaded) {
-      console.error(
-        "Failed to refresh W3C groups: groups.json is missing or unreadable after update."
-      );
-      return false;
-    }
-    console.log("W3C groups list refreshed.");
-    return true;
-  } catch (error) {
-    console.error("Failed to refresh W3C groups:", error);
-    return false;
-  } finally {
-    refreshing = false;
-  }
-}
-
-function scheduleGroupsRefresh(delay: number) {
-  setTimeout(async () => {
-    const refreshed = await refreshGroups();
-    const nextDelay = refreshed
-      ? GROUPS_REFRESH_INTERVAL_MS
-      : GROUPS_REFRESH_RETRY_MS;
-    scheduleGroupsRefresh(nextDelay);
-  }, delay);
-}
-
-scheduleGroupsRefresh(needsImmediateRefresh ? 0 : GROUPS_REFRESH_INTERVAL_MS);
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
