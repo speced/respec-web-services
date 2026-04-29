@@ -2,19 +2,9 @@ import {
   search as _search,
   cache,
 } from "../../../../build/routes/xref/lib/search.js";
+import { buildTermLowerIndex } from "../../../../build/routes/xref/lib/store.js";
 
 import byTerm from "./data-by-term.js";
-
-function buildTermLowerIndex(byTerm) {
-  const index = new Map();
-  for (const term of Object.keys(byTerm)) {
-    const lower = term.toLowerCase();
-    const existing = index.get(lower);
-    if (existing) existing.push(term);
-    else index.set(lower, [term]);
-  }
-  return index;
-}
 
 const store = { byTerm, byTermLower: buildTermLowerIndex(byTerm) };
 

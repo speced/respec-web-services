@@ -117,7 +117,7 @@ function buildSpecTitleMap(specmap: Store["specmap"]): Map<string, string> {
 }
 
 /** Build a lowercase → original-case-keys index for case-insensitive lookup. */
-function buildTermLowerIndex(
+export function buildTermLowerIndex(
   byTerm: Store["byTerm"],
 ): Map<string, string[]> {
   const index = new Map<string, string[]>();
