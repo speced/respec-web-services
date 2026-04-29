@@ -118,8 +118,9 @@ async function fetchGroupInfo(
     }
     var json = (await res.json()) as APIResponse;
   } catch (error) {
+    if (error instanceof HTTPError) throw error;
     throw new HTTPError(
-      error instanceof HTTPError ? error.statusCode : 500,
+      500,
       error instanceof Error ? error.message : String(error),
     );
   }
