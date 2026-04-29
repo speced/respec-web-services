@@ -4,7 +4,19 @@ import {
 } from "../../../../build/routes/xref/lib/search.js";
 
 import byTerm from "./data-by-term.js";
-const store = { byTerm };
+
+function buildTermLowerIndex(byTerm) {
+  const index = new Map();
+  for (const term of Object.keys(byTerm)) {
+    const lower = term.toLowerCase();
+    const existing = index.get(lower);
+    if (existing) existing.push(term);
+    else index.set(lower, [term]);
+  }
+  return index;
+}
+
+const store = { byTerm, byTermLower: buildTermLowerIndex(byTerm) };
 
 /**
  * @param {import("../../../../routes/xref/lib/search.js").Query} query
@@ -136,12 +148,21 @@ describe("xref - search", () => {
     it("preserves case based on query.types", () => {
       const baseline = [{ uri: "text.html#TermBaseline" }];
       const baselineInterface = [{ uri: "#baseline" }];
+      const baselineBoth = [
+        { uri: "text.html#TermBaseline" },
+        { uri: "#baseline" },
+      ];
 
       expect(search({ term: "baseline" })).toEqual(baseline);
-      expect(search({ term: "baseLine" })).toEqual([]);
+      // Case-insensitive fallback finds all variants
+      expect(search({ term: "baseLine" })).toEqual(baselineBoth);
 
       expect(search({ term: "baseLine", types: ["dfn"] })).toEqual(baseline);
-      expect(search({ term: "baseLine", types: ["_IDL_"] })).toEqual([]);
+      // IDL exact-case match: "baseLine" doesn't match "Baseline" directly,
+      // but case-insensitive fallback finds it
+      expect(search({ term: "baseLine", types: ["_IDL_"] })).toEqual(
+        baselineInterface,
+      );
 
       expect(search({ term: "Baseline", types: ["dfn"] })).toEqual(baseline);
       expect(search({ term: "Baseline", types: ["_IDL_"] })).toEqual(

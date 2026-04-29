@@ -17,6 +17,7 @@ export class Store {
   version = -1;
   bySpec: { [shortname: string]: DataEntry[] } = {};
   byTerm: { [term: string]: DataEntry[] } = {};
+  byTermLower: Map<string, string[]> = new Map();
   specmap: { [group: string]: SpecMapGroup } = {};
   /** Headings pre-indexed by spec shortname, then by fragment id. */
   headings: HeadingsBySpec = {};
@@ -34,6 +35,7 @@ export class Store {
     this.specmap = readJson("specmap.json");
     this.headings = readJsonOptional("headings.json");
     this.specTitleByShortname = buildSpecTitleMap(this.specmap);
+    this.byTermLower = buildTermLowerIndex(this.byTerm);
     this.version = Date.now();
   }
 
@@ -106,11 +108,27 @@ function readJsonOptional(filename: string) {
 /** Build a shortname → title map from the specmap for O(1) title lookup. */
 function buildSpecTitleMap(specmap: Store["specmap"]): Map<string, string> {
   const result = new Map<string, string>();
-  // specmap is { current: { [specid]: entry }, snapshot: { [specid]: entry } }
   for (const group of Object.values(specmap)) {
     for (const entry of Object.values(group)) {
       result.set(entry.shortname, entry.title);
     }
   }
   return result;
+}
+
+/** Build a lowercase → original-case-keys index for case-insensitive lookup. */
+function buildTermLowerIndex(
+  byTerm: Store["byTerm"],
+): Map<string, string[]> {
+  const index = new Map<string, string[]>();
+  for (const term of Object.keys(byTerm)) {
+    const lower = term.toLowerCase();
+    const existing = index.get(lower);
+    if (existing) {
+      existing.push(term);
+    } else {
+      index.set(lower, [term]);
+    }
+  }
+  return index;
 }

@@ -155,7 +155,13 @@ function getTermVariations(query: Query) {
 }
 
 function filterByTerm(term: Query["term"], store: Store) {
-  return store.byTerm[term] || [];
+  if (term == null) return [];
+  const direct = store.byTerm[term];
+  if (direct) return direct;
+  const lower = term.toLowerCase();
+  const variants = store.byTermLower.get(lower);
+  if (!variants) return [];
+  return variants.flatMap(v => store.byTerm[v] || []);
 }
 
 function filterBySpec(data: DataEntry[], query: Query) {
