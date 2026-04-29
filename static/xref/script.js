@@ -166,7 +166,7 @@ function renderResults(entries, query) {
         <td><a href="${link}">${title}</a></td>
         <td>${entry.shortname}</td>
         <td>${entry.type}</td>
-        <td>${cite}</td>
+        <td class="cite-cell" role="button" tabindex="0" title="Click to copy">${cite}</td>
       </tr>`;
     html += row;
   }
@@ -332,6 +332,30 @@ function howToCiteTerm(term, entry) {
 function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+// Click-to-copy on cite cells
+document.getElementById('output').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cite-cell');
+  if (!cell) return;
+  const text = cell.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.createElement('div');
+    toast.textContent = `Copied: ${text}`;
+    Object.assign(toast.style, {
+      position: 'fixed', bottom: '1.5rem', left: '50%', transform: 'translateX(-50%)',
+      background: '#1e293b', color: 'white', padding: '0.5rem 1.2rem',
+      borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'system-ui, sans-serif',
+      zIndex: '9999', opacity: '0', transition: 'opacity 0.2s',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    });
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 200);
+    }, 1500);
+  });
+});
 
 async function ready() {
   const updateInput = (el, values) => {
