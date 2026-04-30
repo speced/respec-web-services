@@ -22,7 +22,7 @@ const app = express();
 app.use(compression());
 
 // logging
-app.enable("trust proxy"); // for :remote-addr
+app.set("trust proxy", 2); // Cloudflare → nginx → Express
 app.use(logging.stdout());
 app.use(logging.stderr());
 
