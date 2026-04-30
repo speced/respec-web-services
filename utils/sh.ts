@@ -48,7 +48,7 @@ export default async function sh(
         stderr.push(line);
       });
       child.on("error", err => {
-        reject({ command, stdout, stderr, code: null, error: err });
+        reject(Object.assign(err, { command, stdout, stderr, code: null }));
       });
       child.on("close", code => {
         if (output === "buffer") {
@@ -58,7 +58,14 @@ export default async function sh(
         if (code === 0) {
           resolve(stdout.join("\n"));
         } else {
-          reject({ command, stdout, stderr, code });
+          reject(
+            Object.assign(new Error(`Command failed: ${command}`), {
+              command,
+              stdout,
+              stderr,
+              code,
+            })
+          );
         }
       });
     });
