@@ -59,13 +59,13 @@ function searchTerms(query: string, limit: number): string[] {
 }
 
 interface QueryParams {
-  q?: string;
+  q?: string | string[];
   limit?: string;
 }
 type IRequest = Request<never, any, never, QueryParams>;
 
 export default function route(req: IRequest, res: Response) {
-  const { q } = req.query;
+  const q = Array.isArray(req.query.q) ? req.query.q[0] : req.query.q;
   if (!q || q.length < 2) {
     res.status(400).json({ error: "query must be at least 2 characters" });
     return;
