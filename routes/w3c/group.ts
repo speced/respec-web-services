@@ -1,5 +1,5 @@
 import path from "path";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync } from "fs";
 
 import { Request, Response } from "express";
 
@@ -32,24 +32,18 @@ interface Group {
 }
 const cache = new MemCache<Group>(ms("1 day"));
 
-let groups: GroupsByType;
+let groups: GroupsByType = EMPTY_GROUPS;
 try {
-  groups = existsSync(dataSource)
-    ? JSON.parse(readFileSync(dataSource, "utf-8"))
-    : EMPTY_GROUPS;
+  groups = JSON.parse(readFileSync(dataSource, "utf-8"));
 } catch (error) {
   console.error("Failed to parse groups.json at startup:", error);
-  groups = EMPTY_GROUPS;
 }
 
 export function reloadGroups(): boolean {
   try {
-    if (existsSync(dataSource)) {
-      groups = JSON.parse(readFileSync(dataSource, "utf-8"));
-      cache.clear();
-      return true;
-    }
-    return false;
+    groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+    cache.clear();
+    return true;
   } catch (error) {
     console.error("Failed to reload groups.json:", error);
     return false;
