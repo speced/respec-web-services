@@ -6,7 +6,7 @@ import { BackgroundTaskQueue } from "../../../utils/background-task-queue.js";
 import { store } from "./lib/store-init.js";
 
 const workerFile = path.join(import.meta.dirname, "update.worker.js");
-const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
+const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
   "baseline_update",
 );
