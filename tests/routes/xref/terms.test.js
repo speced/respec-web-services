@@ -16,6 +16,7 @@ const FIXTURE_XREF = {
   "foreignObject": [{ type: "element", spec: "svg", uri: "#foreignObject" }],
   fetch: [{ type: "dfn", spec: "fetch", uri: "#concept-fetch" }],
   "fire an event": [{ type: "dfn", spec: "dom", uri: "#concept-event-fire" }],
+  "live event": [{ type: "dfn", spec: "html", uri: "#concept-live-event" }],
   URL: [{ type: "interface", spec: "url", uri: "#url" }],
   "url": [{ type: "dfn", spec: "url", uri: "#concept-url" }],
   AbortController: [{ type: "interface", spec: "dom", uri: "#abortcontroller" }],
@@ -78,6 +79,17 @@ describe("xref/terms - server autocomplete", () => {
     const res = mockRes();
     route(mockReq({ q: "a" }), res);
     expect(res._status).toBe(400);
+  });
+
+  it("returns prefix matches before infix-only matches", () => {
+    const res = mockRes();
+    route(mockReq({ q: "ev" }), res);
+    const results = res._body;
+    const firstInfix = results.findIndex(t => !t.toLowerCase().startsWith("ev"));
+    const lastPrefix = results.findLastIndex(t => t.toLowerCase().startsWith("ev"));
+    if (firstInfix !== -1) {
+      expect(lastPrefix).toBeLessThan(firstInfix);
+    }
   });
 
   it("returns prefix matches first", () => {
