@@ -12,6 +12,7 @@ import searchRouteGet from "./search.get.js";
 import searchRoutePost from "./search.post.js";
 import headingsRoutePost from "./headings.post.js";
 import metaRoute from "./meta.js";
+import termsRoute from "./terms.get.js";
 import updateRoute from "./update.js";
 import { search, Options, Query } from "./lib/search.js";
 
@@ -26,6 +27,7 @@ xref
   .options("/search", cors({ methods: ["POST", "GET"], maxAge: ms("1day") }))
   .get("/search", cors(), searchRouteGet)
   .post("/search", express.json({ limit: "2mb" }), cors(), searchRoutePost);
+xref.get("/meta/terms/search", cors(), termsRoute);
 xref.get("/meta{/:field}", cors(), metaRoute);
 xref
   .options("/search/headings", cors({ methods: ["POST"], maxAge: ms("1day") }))
