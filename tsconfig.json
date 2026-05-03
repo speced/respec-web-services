@@ -5,11 +5,11 @@
     "target": "ESNext",
     "removeComments": false,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "noImplicitThis": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
-    "module": "esnext",
+    "module": "nodenext",
     "outDir": "build",
     "sourceMap": true,
     "resolveJsonModule": true

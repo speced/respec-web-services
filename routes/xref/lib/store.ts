@@ -1,7 +1,7 @@
 import path from "path";
 import { readFileSync } from "fs";
 
-import { env } from "../../../utils/misc.js";
+import { env, getErrnoCode } from "../../../utils/misc.js";
 import { DataEntry } from "./search.js";
 import { HeadingEntry, HeadingsBySpec } from "./scraper.js";
 
@@ -94,8 +94,8 @@ function readJson(filename: string) {
 function readJsonOptional(filename: string) {
   try {
     return readJson(filename);
-  } catch (err: any) {
-    if (err?.code === "ENOENT") {
+  } catch (err: unknown) {
+    if (getErrnoCode(err) === "ENOENT") {
       console.warn(`Optional data file not found: ${filename}`);
       return {};
     }

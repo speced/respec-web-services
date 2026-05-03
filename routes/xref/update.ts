@@ -9,7 +9,7 @@ import { cache as searchCache } from "./lib/search.js";
 import { store } from "./lib/store-init.js";
 
 const workerFile = path.join(import.meta.dirname, "update.worker.js");
-const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker")>(
+const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
   "xref_update",
 );
