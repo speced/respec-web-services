@@ -14,6 +14,7 @@ import caniuseRouter from "./routes/caniuse/index.js";
 import githubRouter from "./routes/github/index.js";
 import respecRouter from "./routes/respec/index.js";
 import w3cRouter from "./routes/w3c/index.js";
+import baselineRouter from "./routes/api/baseline/index.js";
 import wellKnownRouter from "./routes/well-known/index.js";
 import docsRouter from "./routes/docs/index.js";
 
@@ -46,6 +47,7 @@ app.use(
 
 app.use("/xref", xrefRouter);
 app.use("/caniuse", caniuseRouter);
+app.use("/api/baseline", baselineRouter);
 app.use("/github/:org/:repo", githubRouter);
 app.use("/respec", respecRouter);
 app.use("/w3c", w3cRouter);
