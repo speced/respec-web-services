@@ -16,6 +16,7 @@ import respecRouter from "./routes/respec/index.js";
 import w3cRouter from "./routes/w3c/index.js";
 import baselineRouter from "./routes/api/baseline/index.js";
 import wellKnownRouter from "./routes/well-known/index.js";
+import monitorRouter from "./routes/monitor/index.js";
 import docsRouter from "./routes/docs/index.js";
 
 const app = express();
@@ -52,6 +53,7 @@ app.use("/github/:org/:repo", githubRouter);
 app.use("/respec", respecRouter);
 app.use("/w3c", w3cRouter);
 app.use("/.well-known", wellKnownRouter);
+app.use("/monitor", monitorRouter);
 app.use("/docs", docsRouter);
 app.get("/", (_req, res) => res.redirect("/docs/"));
 
