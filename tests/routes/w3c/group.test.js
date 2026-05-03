@@ -1,4 +1,4 @@
-import { mkdtemp, writeFile, mkdir, rm } from "fs/promises";
+import { mkdtemp, writeFile, mkdir, rm, unlink } from "fs/promises";
 import path from "path";
 import { tmpdir } from "os";
 
@@ -20,17 +20,17 @@ const FIXTURE_GROUPS = {
 };
 
 let tmpDir;
+let groupsJsonPath;
 let route;
+let reloadGroups;
 let origDataDir;
 
 beforeAll(async () => {
   tmpDir = await mkdtemp(path.join(tmpdir(), "w3c-group-test-"));
   const w3cDir = path.join(tmpDir, "w3c");
+  groupsJsonPath = path.join(w3cDir, "groups.json");
   await mkdir(w3cDir, { recursive: true });
-  await writeFile(
-    path.join(w3cDir, "groups.json"),
-    JSON.stringify(FIXTURE_GROUPS),
-  );
+  await writeFile(groupsJsonPath, JSON.stringify(FIXTURE_GROUPS));
 
   // Set DATA_DIR before importing the module
   origDataDir = process.env.DATA_DIR;
@@ -38,6 +38,7 @@ beforeAll(async () => {
 
   const mod = await import("../../../build/routes/w3c/group.js");
   route = mod.default;
+  reloadGroups = mod.reloadGroups;
 });
 
 afterAll(async () => {
@@ -174,3 +175,51 @@ describe("w3c/group - getGroupMeta disambiguation", () => {
   });
 });
 
+describe("w3c/group - reloadGroups()", () => {
+  afterEach(async () => {
+    await writeFile(groupsJsonPath, JSON.stringify(FIXTURE_GROUPS));
+    reloadGroups();
+  });
+
+  it("returns true and updates in-memory groups from valid JSON", async () => {
+    const updated = {
+      wg: {
+        newgroup: { id: 99999, name: "New Group", URI: "https://example.com" },
+      },
+      cg: {},
+      ig: {},
+      bg: {},
+      other: {},
+    };
+    await writeFile(groupsJsonPath, JSON.stringify(updated));
+    expect(reloadGroups()).toBe(true);
+
+    const req = mockReq({}, { accept: "application/json" });
+    const res = mockRes();
+    await route(req, res);
+    expect(res._jsonBody.wg.newgroup).toBeDefined();
+    expect(res._jsonBody.wg.newgroup.id).toBe(99999);
+    expect(res._jsonBody.wg.css).toBeUndefined();
+  });
+
+  it("returns false when groups.json is missing", async () => {
+    await unlink(groupsJsonPath);
+    expect(reloadGroups()).toBe(false);
+
+    const req = mockReq({}, { accept: "application/json" });
+    const res = mockRes();
+    await route(req, res);
+    expect(res._jsonBody.wg.css).toBeDefined();
+  });
+
+  it("returns false when groups.json contains invalid JSON", async () => {
+    await writeFile(groupsJsonPath, "{not valid json!!!");
+    expect(reloadGroups()).toBe(false);
+
+    const req = mockReq({}, { accept: "application/json" });
+    const res = mockRes();
+    await route(req, res);
+    expect(res._jsonBody.wg.css).toBeDefined();
+  });
+
+});
