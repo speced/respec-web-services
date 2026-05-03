@@ -188,15 +188,16 @@ function detectOverloadedEntries(entries, term) {
     const forList = entry.for || [];
     // Group per individual rendered citation (one per `f`), so overlapping
     // `for` contexts across entries are correctly detected as ambiguous.
+    const citeFmt = entry.type === 'enum-value' ? 'e' : 'o';
     if (forList.length > 0) {
       for (const f of forList) {
-        const key = `${f}|${term}|${specKey}|${statusKey}`;
+        const key = `${f}|${citeFmt}|${term}|${specKey}|${statusKey}`;
         const group = citationGroups.get(key) ?? [];
         if (!group.length) citationGroups.set(key, group);
         group.push({ entry, f });
       }
     } else {
-      const key = `|${term}|${specKey}|${statusKey}`;
+      const key = `|${citeFmt}|${term}|${specKey}|${statusKey}`;
       const group = citationGroups.get(key) ?? [];
       if (!group.length) citationGroups.set(key, group);
       group.push({ entry, f: '' });
