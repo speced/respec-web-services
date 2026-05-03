@@ -441,7 +441,6 @@ async function ready() {
       http: new Set(types.http),
     },
     specs,
-    terms,
   };
 }
 
