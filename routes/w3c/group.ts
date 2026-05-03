@@ -18,7 +18,7 @@ type GroupType = "wg" | "cg" | "ig" | "bg" | "other";
 export type Groups = Record<string, GroupMeta>;
 export type GroupsByType = Record<GroupType, Groups>;
 
-const groups: GroupsByType = JSON.parse(readFileSync(dataSource, "utf-8"));
+const EMPTY_GROUPS: GroupsByType = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
 
 interface Group {
   id: number;
@@ -31,6 +31,24 @@ interface Group {
   patentPolicy?: "PP2017" | "PP2020" | null;
 }
 const cache = new MemCache<Group>(ms("1 day"));
+
+let groups: GroupsByType = EMPTY_GROUPS;
+try {
+  groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+} catch (error) {
+  console.error("Failed to parse groups.json at startup:", error);
+}
+
+export function reloadGroups(): boolean {
+  try {
+    groups = JSON.parse(readFileSync(dataSource, "utf-8"));
+    cache.clear();
+    return true;
+  } catch (error) {
+    console.error("Failed to reload groups.json:", error);
+    return false;
+  }
+}
 
 // Support non W3C shortnames for backward compatibility.
 const LEGACY_SHORTNAMES = new Map([
