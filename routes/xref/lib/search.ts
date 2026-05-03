@@ -120,9 +120,13 @@ function normalizeQuery(query: Query, options: Options) {
 }
 
 function filter(query: Query, store: Store, options: Options) {
+  const { types = [] } = query;
+  const isIDL = types.some(t => IDL_TYPES.has(t));
+  const allowCaseFallback = !isIDL;
+
   let result: DataEntry[] = [];
   for (const term of getTermVariations(query)) {
-    const byTerm = filterByTerm(term, store);
+    const byTerm = filterByTerm(term, store, allowCaseFallback);
     const bySpec = filterBySpec(byTerm, query);
     const byType = filterByType(bySpec, query);
     const byForContext = filterByForContext(byType, query, options);
@@ -154,10 +158,11 @@ function getTermVariations(query: Query) {
   }
 }
 
-function filterByTerm(term: Query["term"], store: Store) {
+function filterByTerm(term: Query["term"], store: Store, allowCaseFallback: boolean) {
   if (term == null) return [];
   const direct = store.byTerm[term];
   if (direct) return direct;
+  if (!allowCaseFallback) return [];
   const lower = term.toLowerCase();
   const variants = store.byTermLower.get(lower);
   if (!variants) return [];

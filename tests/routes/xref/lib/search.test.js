@@ -148,11 +148,8 @@ describe("xref - search", () => {
       expect(search({ term: "baseLine" })).toEqual(baselineBoth);
 
       expect(search({ term: "baseLine", types: ["dfn"] })).toEqual(baseline);
-      // IDL exact-case match: "baseLine" doesn't match "Baseline" directly,
-      // but case-insensitive fallback finds it
-      expect(search({ term: "baseLine", types: ["_IDL_"] })).toEqual(
-        baselineInterface,
-      );
+      // IDL is case-sensitive: "baseLine" must not match "Baseline"
+      expect(search({ term: "baseLine", types: ["_IDL_"] })).toEqual([]);
 
       expect(search({ term: "Baseline", types: ["dfn"] })).toEqual(baseline);
       expect(search({ term: "Baseline", types: ["_IDL_"] })).toEqual(
