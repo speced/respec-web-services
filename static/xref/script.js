@@ -267,8 +267,9 @@ async function ready() {
     fetch(text, update) {
       if (text.length < 2) return update([]);
       fetch(`${termsBaseURL}?q=${encodeURIComponent(text)}&limit=15`)
-        .then(r => r.json())
-        .then(update);
+        .then(r => r.ok ? r.json() : [])
+        .then(update)
+        .catch(() => update([]));
     },
     onSelect(suggestion) {
       this.input.value = suggestion;
