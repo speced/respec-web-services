@@ -27,6 +27,8 @@ export interface DataEntry {
   normative: boolean;
   for?: string[];
   htmlProse?: string;
+  /** The canonical term this entry was indexed under (set on case-insensitive fallback hits). */
+  term?: string;
 }
 
 type SpecType = DataEntry["status"] | "draft" | "official";
@@ -163,10 +165,15 @@ function filterByTerm(term: Query["term"], store: Store, allowCaseFallback: bool
   const direct = store.byTerm[term];
   if (direct) return direct;
   if (!allowCaseFallback) return [];
+  // Case-insensitive fallback: tag each entry with its canonical term so
+  // downstream consumers (e.g. the xref UI) can build correct cite syntax
+  // instead of using the user's potentially miscased input.
   const lower = term.toLowerCase();
   const variants = store.byTermLower.get(lower);
   if (!variants) return [];
-  return variants.flatMap(v => store.byTerm[v] || []);
+  return variants.flatMap(v =>
+    (store.byTerm[v] || []).map(entry => ({ ...entry, term: v })),
+  );
 }
 
 function filterBySpec(data: DataEntry[], query: Query) {

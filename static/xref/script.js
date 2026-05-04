@@ -84,7 +84,7 @@ const specStatusType = {
 
 let metadata;
 const options = {
-  fields: ['shortname', 'spec', 'uri', 'type', 'for', 'status'],
+  fields: ['shortname', 'spec', 'uri', 'type', 'for', 'status', 'term'],
   spec_type: ['draft', 'snapshot'],
   all: true,
 };
@@ -146,17 +146,20 @@ function renderResults(entries, query) {
 
   let html = '';
   for (const entry of entries) {
+    // Use the canonical matched term when available (case-insensitive fallback
+    // hits); otherwise fall back to the user's query term (exact match).
+    const citeTerm = entry.term || term;
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
     const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(term, entry)
+      ? howToCiteIDL(citeTerm, entry)
       : metadata.types.markup.has(entry.type)
-        ? howToCiteMarkup(term, entry)
+        ? howToCiteMarkup(citeTerm, entry)
         : metadata.types.css.has(entry.type) ||
             metadata.types.http.has(entry.type)
-          ? howToCiteAnchor(term, entry)
-          : howToCiteTerm(term, entry);
+          ? howToCiteAnchor(citeTerm, entry)
+          : howToCiteTerm(citeTerm, entry);
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>

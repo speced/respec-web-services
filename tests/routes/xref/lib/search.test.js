@@ -156,6 +156,27 @@ describe("xref - search", () => {
         baselineInterface,
       );
     });
+
+    it("includes canonical term on case-insensitive fallback hits", () => {
+      // When the case-insensitive fallback fires, each result entry should
+      // include the canonical term it was indexed under, so cite syntax can
+      // use the correct casing instead of the user's input.
+      const searchWithTerm = query => {
+        const response = _search([query], store, { fields: ["uri", "term"] });
+        return response.result[0][1];
+      };
+
+      // Exact match: no term field (not a fallback hit)
+      const exact = searchWithTerm({ term: "baseline" });
+      expect(exact).toEqual([{ uri: "text.html#TermBaseline", term: undefined }]);
+
+      // Case-insensitive fallback: term field present with canonical casing
+      const fallback = searchWithTerm({ term: "baseLine" });
+      expect(fallback).toEqual([
+        { uri: "text.html#TermBaseline", term: "baseline" },
+        { uri: "#baseline", term: "Baseline" },
+      ]);
+    });
   });
 
   describe("filter@specs", () => {
