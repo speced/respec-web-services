@@ -1,4 +1,4 @@
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
 import express from "express";
 import { NextFunction, Request, Response } from "express";
@@ -27,6 +27,11 @@ export default function githubWebhookAuthenticator(secret: string) {
  * See: https://developer.github.com/webhooks/securing/
  */
 function isValidGithubSignature(req: RawRequest, secret: string) {
-  const hash = createHmac("sha1", secret).update(req.body).digest("hex");
-  return req.get("X-Hub-Signature") === `sha1=${hash}`;
+  const signature = req.get("X-Hub-Signature");
+  if (!signature) return false;
+  const expected = `sha1=${createHmac("sha1", secret).update(req.body).digest("hex")}`;
+  const sigBuf = Buffer.from(signature);
+  const expBuf = Buffer.from(expected);
+  if (sigBuf.length !== expBuf.length) return false;
+  return timingSafeEqual(sigBuf, expBuf);
 }
