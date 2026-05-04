@@ -4,7 +4,23 @@ import {
 } from "../../../../build/routes/xref/lib/search.js";
 
 import byTerm from "./data-by-term.js";
-const store = { byTerm };
+import bySpec from "./data-by-spec.js";
+
+// Minimal specmap matching production shape: { [group]: { [specid]: { shortname, url, title } } }
+const specmap = {
+  current: {
+    "referrer-policy-1": { url: "", shortname: "referrer-policy", title: "Referrer Policy" },
+    "font-metrics-api-1": { url: "", shortname: "font-metrics-api", title: "Font Metrics API" },
+    "css-cascade-3": { url: "", shortname: "css-cascade", title: "CSS Cascading Level 3" },
+    "css-cascade-4": { url: "", shortname: "css-cascade", title: "CSS Cascading Level 4" },
+    "css-lists-3": { url: "", shortname: "css-lists", title: "CSS Lists Level 3" },
+    "web-bluetooth-1": { url: "", shortname: "web-bluetooth", title: "Web Bluetooth" },
+    "wai-aria-1.2": { url: "", shortname: "wai-aria", title: "WAI-ARIA 1.2" },
+  },
+  snapshot: {},
+};
+
+const store = { byTerm, bySpec, specmap };
 
 /**
  * @param {import("../../../../routes/xref/lib/search.js").Query} query
@@ -104,6 +120,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@term", () => {
+    beforeEach(() => cache.clear());
+
     it("empty string", () => {
       const result = [{ uri: "#dom-referrerpolicy" }];
       expect(search({ term: "", for: "ReferrerPolicy" })).toEqual(result);
@@ -178,6 +196,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@specs", () => {
+    beforeEach(() => cache.clear());
+
     it("skips filter if query.specs not provided", () => {
       const results = search({ term: "script" }).sort((a, b) =>
         a.uri.localeCompare(b.uri),
@@ -224,6 +244,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@types", () => {
+    beforeEach(() => cache.clear());
+
     const resultMarker = [
       { uri: "#marker" },
       { uri: "painting.html#elementdef-marker" },
@@ -270,6 +292,8 @@ describe("xref - search", () => {
   });
 
   describe("filter@for", () => {
+    beforeEach(() => cache.clear());
+
     it("skips filter if for is not provided", () => {
       expect(search({ term: "[[context]]" })).toHaveSize(0);
 
@@ -305,6 +329,92 @@ describe("xref - search", () => {
         { uri: "#dom-abortsignal-aborted" },
       ]);
       expect(search({ term: "aborted", for: "abortsignal" })).toEqual([]);
+    });
+  });
+
+  describe("empty term with specs (browse all terms)", () => {
+    beforeEach(() => cache.clear());
+
+    it("returns all entries for a spec when term is empty", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], id: "" },
+        { all: true },
+      );
+      // dom has: EventInit (dictionary), event (dfn), event (attr for Window),
+      // aborted (attr for AbortSignal)
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("returns all entries for a spec filtered by type", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], types: ["attribute"], id: "" },
+        { all: true },
+      );
+      expect(results).toEqual([
+        { uri: "#dom-window-event" },
+        { uri: "#dom-abortsignal-aborted" },
+      ]);
+    });
+
+    it("returns all entries for a spec filtered by aggregate type", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], types: ["_IDL_"], id: "" },
+        { all: true },
+      );
+      // _IDL_ includes: dictionary, attribute
+      // dom has: EventInit (dictionary), event (attr), aborted (attr)
+      expect(results).toEqual([
+        { uri: "#dictdef-eventinit" },
+        { uri: "#dom-window-event" },
+        { uri: "#dom-abortsignal-aborted" },
+      ]);
+    });
+
+    it("returns all enum-values for a spec (issue #278)", () => {
+      const results = search(
+        { term: "", specs: [["fetch"]], types: ["enum-value"], id: "" },
+        { all: true },
+      );
+      const sorted = results.sort((a, b) => a.uri.localeCompare(b.uri));
+      expect(sorted).toEqual([
+        { uri: "#dom-requestdestination" },
+        { uri: "#dom-requestdestination-script" },
+      ]);
+    });
+
+    it("returns empty when term is empty and no specs are given", () => {
+      // Without specs, empty term should use the normal byTerm[""] path
+      const results = search({ term: "", id: "" });
+      expect(results).toEqual([]);
+    });
+
+    it("filters by for context when browsing a spec", () => {
+      const results = search({
+        term: "",
+        specs: [["dom"]],
+        for: "Window",
+        id: "",
+      });
+      expect(results).toEqual([{ uri: "#dom-window-event" }]);
+    });
+
+    it("combines multiple specs in a single fallback list", () => {
+      const results = search(
+        { term: "", specs: [["css-lists", "web-bluetooth"]], id: "" },
+        { all: true },
+      );
+      expect(results.length).toBeGreaterThan(0);
+    });
+
+    it("resolves versioned spec ids to series shortname via specmap", () => {
+      // css-lists-3 and web-bluetooth-1 are versioned spec ids; bySpec is keyed
+      // by series shortname (css-lists, web-bluetooth), so collectBySpecs() must
+      // resolve them via specmap to return results.
+      const results = search(
+        { term: "", specs: [["css-lists-3", "web-bluetooth-1"]], id: "" },
+        { all: true },
+      );
+      expect(results.length).toBeGreaterThan(0);
     });
   });
 });

@@ -99,6 +99,11 @@ export function searchOne(
 
   let prefereredData = filterBySpecType(filtered, options.spec_type);
   prefereredData = filterPreferLatestVersion(prefereredData);
+  // Cap empty-term browsing results after preference filters have run so that
+  // preferred entries (e.g. current over snapshot, latest version) are retained.
+  if (!query.term && prefereredData.length > BROWSE_LIMIT) {
+    prefereredData = prefereredData.slice(0, BROWSE_LIMIT);
+  }
   const result = prefereredData.map(item => pickFields(item, options.fields));
   return result;
 }
@@ -119,7 +124,23 @@ function normalizeQuery(query: Query, options: Options) {
   }
 }
 
+/** Maximum entries returned for empty-term browsing queries. */
+const BROWSE_LIMIT = 1000;
+
 function filter(query: Query, store: Store, options: Options) {
+  // When no term is provided but specs are, return all entries from those specs.
+  // Types-only browsing (no term, no specs) is deliberately unsupported as it
+  // would require scanning the entire store. The route layer rejects such
+  // requests with a 400. The result limit (BROWSE_LIMIT) is applied after
+  // preference filtering in searchOne() so that filterBySpecType and
+  // filterPreferLatestVersion can properly select preferred entries before
+  // the cap is enforced.
+  if (!query.term && query.specs?.length) {
+    const entries = collectBySpecs(query.specs, store);
+    const byType = filterByType(entries, query);
+    return filterByForContext(byType, query, options);
+  }
+
   let result: DataEntry[] = [];
   for (const term of getTermVariations(query)) {
     const byTerm = filterByTerm(term, store);
@@ -132,6 +153,47 @@ function filter(query: Query, store: Store, options: Options) {
     }
   }
   return result;
+}
+
+function resolveSpecKey(spec: string, store: Store) {
+  if (store.bySpec[spec]) {
+    return spec;
+  }
+
+  // specmap is { [group]: { [specid]: { shortname, url, title } } }
+  for (const group of Object.values(store.specmap ?? {})) {
+    const entry = group[spec];
+    if (entry?.shortname && store.bySpec[entry.shortname]) {
+      return entry.shortname;
+    }
+  }
+
+  const versionlessSpec = spec.replace(/-\d+$/, "");
+  if (versionlessSpec !== spec) {
+    if (store.bySpec[versionlessSpec]) {
+      return versionlessSpec;
+    }
+
+    for (const group of Object.values(store.specmap ?? {})) {
+      const entry = group[versionlessSpec];
+      if (entry?.shortname && store.bySpec[entry.shortname]) {
+        return entry.shortname;
+      }
+    }
+  }
+
+  return spec;
+}
+
+/** Collect all entries from the store that belong to any of the given specs. */
+function collectBySpecs(specsLists: string[][], store: Store) {
+  const seen = new Set<string>();
+  return specsLists.flatMap(specs =>
+    specs
+      .map(spec => resolveSpecKey(spec, store))
+      .filter(spec => !seen.has(spec) && seen.add(spec))
+      .flatMap(spec => store.bySpec[spec] ?? [])
+  );
 }
 
 function getTermVariations(query: Query) {
@@ -215,7 +277,7 @@ function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   for (const item of sorted) {
     if (
       item.status === preferredType ||
-      !preferredData.find(it => item.spec === it.spec && item.type === it.type)
+      !preferredData.find(it => item.spec === it.spec && item.type === it.type && item.uri === it.uri)
     ) {
       preferredData.push(item);
     }
