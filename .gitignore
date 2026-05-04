@@ -2,7 +2,6 @@
 .env
 .vscode
 data
-ecosystem.config.cjs
 node_modules
 package-lock.json
 yarn.lock
