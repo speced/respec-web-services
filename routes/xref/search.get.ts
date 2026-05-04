@@ -17,9 +17,12 @@ export default async function route(req: IRequest, res: Response) {
   const { term, for: forContext } = req.query;
   const specs = splitQueryParam(req.query.specs);
   const types = splitQueryParam(req.query.type)?.flat(2) as Query["types"];
+  // Empty-term browsing requires specs to scope the results. Types alone would
+  // scan the entire store, so types-only requests without term or specs are
+  // rejected here.
   if (typeof term === "undefined" && !specs?.length) {
     res.status(400).json({
-      message: { type: "error", text: "Missing required query parameter: term (or provide specs)" },
+      message: { type: "error", text: "Missing required query parameter: term (or provide specs to browse)" },
     });
     return;
   }
