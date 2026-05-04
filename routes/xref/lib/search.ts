@@ -144,7 +144,8 @@ function getTermVariations(query: Query) {
   if (shouldTreatAsConcept) {
     const term = inputTerm.toLowerCase();
     return (function* () {
-      yield term;
+      yield inputTerm;
+      if (term !== inputTerm) yield term;
       yield* textVariations(term);
     })();
   } else {
