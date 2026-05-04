@@ -3,7 +3,7 @@ import { mkdir, readFile } from "node:fs/promises";
 
 import type { Request, Response } from "express";
 
-import { env } from "../../../utils/misc.js";
+import { env, HTTPError } from "../../../utils/misc.js";
 import sh from "../../../utils/sh.js";
 
 export const PKG_DIR = path.join(env("DATA_DIR"), "respec", "package");
@@ -25,7 +25,8 @@ export default async function route(req: Request, res: Response) {
     await pullRelease();
     res.sendStatus(200); // ok
   } catch (error) {
-    const { message = "", statusCode = 500 } = error;
+    const message = error instanceof Error ? error.message : String(error);
+    const statusCode = error instanceof HTTPError ? error.statusCode : 500;
     console.error(`Failed to pull respec release: ${message.slice(0, 400)}...`);
     res.status(statusCode);
     res.send(message);

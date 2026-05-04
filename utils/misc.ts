@@ -50,6 +50,18 @@ export function ms(duration: string) {
   return seconds(duration) * 1000;
 }
 
+/**
+ * Extract the `code` property from a thrown value, or return `undefined`.
+ * Safe to call with any `unknown` catch value (strings, plain objects, etc.).
+ */
+export function getErrnoCode(err: unknown): string | undefined {
+  if (typeof err === "object" && err !== null && "code" in err) {
+    const { code } = err as NodeJS.ErrnoException;
+    return typeof code === "string" ? code : undefined;
+  }
+  return undefined;
+}
+
 export class HTTPError extends Error {
   constructor(public statusCode: number, message: string, public url?: string) {
     super(message);
