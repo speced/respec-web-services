@@ -24,10 +24,12 @@ export default async function route(req: IRequest, res: Response) {
     }
     res.json({ result });
   } catch (error) {
-    const errorCode = error.message === "INTERNAL_ERROR" ? 500 : 404;
+    const message = error instanceof Error ? error.message : String(error);
+    const errorCode = message === "INTERNAL_ERROR" ? 500 : 404;
+    console.error("caniuse feature route error", error);
     res.status(errorCode);
     res.setHeader("Content-Type", "text/plain");
-    res.send(error.message);
+    res.send(errorCode === 500 ? "Internal Server Error" : "Not Found");
   }
 }
 
