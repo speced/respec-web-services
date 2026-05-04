@@ -235,9 +235,9 @@ async function ready() {
   };
 
   const metaURL = new URL(
-    `${form.action}/meta?fields=types,specs,terms,version`,
+    `${form.action}/meta?fields=types,specs,version`,
   ).href;
-  const { specs, types, terms, version } = await fetch(metaURL).then(res =>
+  const { specs, types, version } = await fetch(metaURL).then(res =>
     res.json(),
   );
 
@@ -260,13 +260,16 @@ async function ready() {
   const allTypes = [].concat(...Object.values(types)).sort();
   updateInput(form.types, allTypes);
 
-  const fuse = new Fuse(terms);
+  const termsBaseURL = new URL(`${form.action}/meta/terms/search`, location.href).href;
   autocomplete({
     input: form.term,
+    debounceWaitMs: 150,
     fetch(text, update) {
-      const searchResults = fuse.search(text).slice(0, 15);
-      const suggestions = searchResults.map(r => r.item);
-      update(suggestions);
+      if (text.length < 2) return update([]);
+      fetch(`${termsBaseURL}?q=${encodeURIComponent(text)}&limit=15`)
+        .then(r => r.ok ? r.json() : [])
+        .then(update)
+        .catch(() => update([]));
     },
     onSelect(suggestion) {
       this.input.value = suggestion;
@@ -330,7 +333,6 @@ async function ready() {
       http: new Set(types.http),
     },
     specs,
-    terms,
   };
 }
 
