@@ -3,6 +3,7 @@ import { mkdir } from "fs/promises";
 import { env } from "../utils/misc.js";
 import caniuse from "../routes/caniuse/lib/scraper.js";
 import xref from "../routes/xref/lib/scraper.js";
+import baseline from "../routes/api/baseline/lib/scraper.js";
 import { pullRelease } from "../routes/respec/builds/update.js";
 import w3cGroupsList from "./update-w3c-groups-list.js";
 
@@ -15,6 +16,10 @@ console.groupEnd();
 
 console.group("xref");
 await xref({ forceUpdate: true });
+console.groupEnd();
+
+console.group("baseline");
+await baseline();
 console.groupEnd();
 
 console.group("W3C Groups List");
