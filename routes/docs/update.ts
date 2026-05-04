@@ -14,7 +14,8 @@ export default async function route(_req: Request, res: Response) {
     console.log(`Successfully regenerated docs in ${Date.now() - start}ms.`);
     res.sendStatus(200); // ok
   } catch (error) {
-    const { message = "", statusCode = 500 } = error;
+    const message = error instanceof Error ? error.message : String(error);
+    const statusCode = error instanceof HTTPError ? error.statusCode : 500;
     console.error(`Failed to regenerate docs: ${message.slice(0, 400)}...`);
     res.status(statusCode);
     res.send(message);
