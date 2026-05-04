@@ -152,4 +152,18 @@ describe("xref/terms - server autocomplete", () => {
     route(mockReq({ q: "ForeignObj" }), res);
     expect(res._body).toContain("foreignObject");
   });
+
+  it("normalizes array query params to first element", () => {
+    const res = mockRes();
+    route(mockReq({ q: ["event", "ignored"] }), res);
+    expect(res._status).toBe(200);
+    expect(Array.isArray(res._body)).toBeTrue();
+    expect(res._body.length).toBeGreaterThan(0);
+  });
+
+  it("returns 400 when array query param has short first element", () => {
+    const res = mockRes();
+    route(mockReq({ q: ["a", "event"] }), res);
+    expect(res._status).toBe(400);
+  });
 });
