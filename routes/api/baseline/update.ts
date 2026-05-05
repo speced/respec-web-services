@@ -1,28 +1,29 @@
 import path from "path";
 
-import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
-import { cache } from "./lib/index.js";
 import { Request, Response } from "express";
+
+import { BackgroundTaskQueue } from "../../../utils/background-task-queue.js";
+import { store } from "./lib/store-init.js";
 
 const workerFile = path.join(import.meta.dirname, "update.worker.js");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
-  "caniuse_update",
+  "baseline_update",
 );
 
 export default async function route(req: Request, res: Response) {
-  if (req.body.ref !== "refs/heads/main") {
-    res.status(400); // Bad request
-    res.locals.reason = `ref-not-main`;
-    const msg = `Caniuse payload was for ${req.body.ref}, ignored it.`;
-    return res.send(msg);
+  if (req.body.action !== "published") {
+    res.status(400);
+    res.locals.reason = "action-not-published";
+    res.send("Webhook action ignored (expected 'published').");
+    return;
   }
 
   const job = taskQueue.add({ webhookId: req.get("X-GitHub-Delivery") || "" });
   try {
     const { updated } = await job.run();
     if (updated) {
-      cache.clear();
+      store.fill();
     }
   } catch {
     res.status(500);

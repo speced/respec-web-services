@@ -1,12 +1,12 @@
 /**
- * Run this script occasionally to update {@link {DATA_DIR}/w3c/groups.json}
- * with new group shortnames and IDs.
+ * Updates {@link {DATA_DIR}/w3c/groups.json} with current group shortnames and IDs.
+ *
+ * Standalone: node --env-file-if-exists=.env build/scripts/update-w3c-groups-list.js
+ * Via npm:    npm run update-data-sources
  */
 
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
-
-import "dotenv/config";
 
 import { env } from "../utils/misc.js";
 

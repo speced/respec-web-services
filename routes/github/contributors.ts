@@ -41,7 +41,7 @@ export default async function route(req: IRequest, res: Response) {
       contributors.push(contributor);
     }
   } catch (err) {
-    if (err.message && err.message.includes("404 Not Found")) {
+    if (err instanceof Error && err.message.includes("404 Not Found")) {
       await cache.set(cacheKey, null);
       return res.sendStatus(404);
     } else {
