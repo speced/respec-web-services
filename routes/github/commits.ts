@@ -36,7 +36,8 @@ export default async function route(req: IRequest, res: Response) {
     }
     res.json(commits);
   } catch (error) {
+    console.error("Failed to fetch commits", error);
     res.set("Content-Type", "text/plain");
-    res.status(404).send(error.message);
+    res.status(404).send("Unable to fetch commits");
   }
 }

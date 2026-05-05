@@ -1,18 +1,14 @@
 import { Application } from "express";
 
-async function engine(
-  filePath: string,
-  options: Record<string, unknown>,
-  callback: (err: Error | null, rendered?: string) => void,
-) {
-  try {
-    const { default: template } = await import(filePath);
-    const html: string = template(options).toString();
-    callback(null, html);
-  } catch (error) {
-    callback(error);
-  }
-}
+type EngineCallback = Parameters<Application["engine"]>[1];
+
+const engine: EngineCallback = (filePath, options, callback) => {
+  import(filePath).then(
+    ({ default: template }) => callback(null, template(options).toString()),
+    error =>
+      callback(error instanceof Error ? error : new Error(String(error))),
+  );
+};
 
 export function register(app: Application) {
   app.engine("js", engine);
