@@ -27,6 +27,8 @@ export interface DataEntry {
   normative: boolean;
   for?: string[];
   htmlProse?: string;
+  /** The canonical term this entry was indexed under (set on case-insensitive fallback hits). */
+  term?: string;
 }
 
 type SpecType = DataEntry["status"] | "draft" | "official";
@@ -120,9 +122,13 @@ function normalizeQuery(query: Query, options: Options) {
 }
 
 function filter(query: Query, store: Store, options: Options) {
+  const { types = [] } = query;
+  const isIDL = types.some(t => IDL_TYPES.has(t));
+  const allowCaseFallback = !isIDL;
+
   let result: DataEntry[] = [];
   for (const term of getTermVariations(query)) {
-    const byTerm = filterByTerm(term, store);
+    const byTerm = filterByTerm(term, store, allowCaseFallback);
     const bySpec = filterBySpec(byTerm, query);
     const byType = filterByType(bySpec, query);
     const byForContext = filterByForContext(byType, query, options);
@@ -155,8 +161,20 @@ function getTermVariations(query: Query) {
   }
 }
 
-function filterByTerm(term: Query["term"], store: Store) {
-  return store.byTerm[term] || [];
+function filterByTerm(term: Query["term"], store: Store, allowCaseFallback: boolean) {
+  if (term == null) return [];
+  const direct = store.byTerm[term];
+  if (direct) return direct;
+  if (!allowCaseFallback) return [];
+  // Case-insensitive fallback: tag each entry with its canonical term so
+  // downstream consumers (e.g. the xref UI) can build correct cite syntax
+  // instead of using the user's potentially miscased input.
+  const lower = term.toLowerCase();
+  const variants = store.byTermLower.get(lower);
+  if (!variants) return [];
+  return variants.flatMap(v =>
+    (store.byTerm[v] || []).map(entry => ({ ...entry, term: v })),
+  );
 }
 
 function filterBySpec(data: DataEntry[], query: Query) {
