@@ -207,9 +207,6 @@ function normalizeTerm(term: string, type: string) {
   if (type === "method" && !term.endsWith(")")) {
     return term + "()";
   }
-  if (type === "dfn") {
-    return term.toLowerCase();
-  }
   return term;
 }
 
