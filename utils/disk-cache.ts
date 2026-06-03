@@ -109,8 +109,8 @@ export class DiskCache<ValueType> {
     }
     const baseDir = path.join(env("DATA_DIR"), this.#path);
     const result = path.resolve(path.join(baseDir, `${key}.json`));
-    // avoid path traversal attack
-    if (!result.startsWith(baseDir)) {
+    // avoid path traversal attack (use sep to prevent prefix bypass e.g. ../test-cache-evil)
+    if (!result.startsWith(baseDir + path.sep)) {
       throw new Error(`Invalid path: ${key}`);
     }
     return result;

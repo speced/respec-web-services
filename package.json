@@ -14,12 +14,11 @@
     "chalk": "^5.6.2",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.4.1",
-    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
     "morgan": "^1.10.1",
-    "nanoid": "^5.1.9",
+    "nanoid": "^5.1.11",
     "serialize-error": "^13.0.1",
     "split2": "^4.2.0",
     "ucontent": "^2.0.0"
@@ -28,11 +27,11 @@
     "build": "tsc",
     "build:watch": "tsc -w",
     "prestart": "npm run update-data-sources && npm run regenerate-docs",
-    "start": "node --enable-source-maps build/app.js",
+    "start": "node --env-file-if-exists=.env --enable-source-maps build/app.js",
     "start:server": "pm2 start ecosystem.config.cjs --env production",
     "test": "jasmine --config=tests/jasmine.json",
     "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
-    "update-data-sources": "node build/scripts/update-data-sources.js"
+    "update-data-sources": "node --env-file-if-exists=.env build/scripts/update-data-sources.js"
   },
   "packageManager": "pnpm@9.8.0",
   "pnpm": {
@@ -53,7 +52,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^24.12.2",
+    "@types/node": "^25.9.1",
     "@types/split2": "^4.2.3",
     "jasmine": "^6.2.0",
     "simple-git-hooks": "^2.13.1",
