@@ -126,6 +126,15 @@ table th {
   text-align: left;
 }
 
+.cite-cell {
+  cursor: pointer;
+  user-select: all;
+}
+
+.cite-cell:hover {
+  background: #dbeafe;
+}
+
 .autocomplete {
   background: white;
   z-index: 1000;

@@ -144,13 +144,17 @@ function renderResults(entries, query) {
     return;
   }
 
+  // Detect overloaded IDL entries that would produce identical citations.
+  // Build a set of "uri|forContext" pairs for entries that need disambiguation.
+  const overloadedPairs = detectOverloadedEntries(entries, term);
+
   let html = '';
   for (const entry of entries) {
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
     const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(term, entry)
+      ? howToCiteIDL(term, entry, overloadedPairs)
       : metadata.types.markup.has(entry.type)
         ? howToCiteMarkup(term, entry)
         : metadata.types.css.has(entry.type) ||
@@ -162,42 +166,144 @@ function renderResults(entries, query) {
         <td><a href="${link}">${title}</a></td>
         <td>${entry.shortname}</td>
         <td>${entry.type}</td>
-        <td>${cite}</td>
+        <td class="cite-cell" role="button" tabindex="0" title="Click to copy">${cite}</td>
       </tr>`;
     html += row;
   }
   output.innerHTML = html;
 }
 
-function howToCiteIDL(term, entry) {
+/**
+ * Detects IDL entries that would produce identical citations (overloaded
+ * methods/constructors). Returns a Set of "uri|forContext" keys for entries
+ * that need disambiguation. Entries without a `for` list use an empty string
+ * as the forContext part.
+ */
+function detectOverloadedEntries(entries, term) {
+  const citationGroups = new Map();
+  for (const entry of entries) {
+    if (!metadata.types.idl.has(entry.type)) continue;
+    const specKey = entry.spec || '';
+    const statusKey = entry.status || '';
+    const forList = entry.for || [];
+    // Group per individual rendered citation (one per `f`), so overlapping
+    // `for` contexts across entries are correctly detected as ambiguous.
+    const citeFmt = entry.type === 'enum-value' ? 'e' : 'o';
+    if (forList.length > 0) {
+      for (const f of forList) {
+        const key = `${f}|${citeFmt}|${term}|${specKey}|${statusKey}`;
+        const group = citationGroups.get(key) ?? [];
+        if (!group.length) citationGroups.set(key, group);
+        group.push({ entry, f });
+      }
+    } else {
+      const key = `|${citeFmt}|${term}|${specKey}|${statusKey}`;
+      const group = citationGroups.get(key) ?? [];
+      if (!group.length) citationGroups.set(key, group);
+      group.push({ entry, f: '' });
+    }
+  }
+  // Build a Set of "uri|forContext" strings for ambiguous (entry, f) pairs.
+  const overloadedPairs = new Set();
+  for (const group of citationGroups.values()) {
+    if (group.length > 1) {
+      for (const { entry, f } of group) {
+        overloadedPairs.add(`${entry.uri}|${f}`);
+      }
+    }
+  }
+  return overloadedPairs;
+}
+
+function howToCiteIDL(term, entry, overloadedPairs = null) {
   const { type, for: forList } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
     return forList
       .map(f => {
-        const termPart = type === 'enum-value' ? `"${term}"` : term;
-        return `{{${f}/${term ? termPart : '""'}}}`;
+        const safeF = escapeHTML(f);
+        let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+        if (overloadedPairs?.has(`${entry.uri}|${f}`)) {
+          const hint = extractOverloadHint(entry.uri, f, term);
+          if (hint) {
+            displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
+          }
+        }
+        return `{{${safeF}/${displayTerm ? displayTerm : '""'}}}`;
       })
       .join('<br>');
   }
+  let cite;
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        return `{{"${term}"}}`;
+        cite = `{{"${safeTerm}"}}`;
+        break;
       }
     default:
-      return `{{${term}}}`;
+      cite = `{{${safeTerm}}}`;
   }
+  if (overloadedPairs?.has(`${entry.uri}|`)) {
+    const hint = extractOverloadHint(entry.uri, null, term);
+    if (hint) {
+      cite = cite.replace('()', `(${escapeHTML(hint)})`);
+    }
+  }
+  return cite;
+}
+
+/**
+ * Extracts a human-readable overload hint from a URI fragment.
+ *
+ * URI fragments for WebIDL definitions follow the pattern:
+ *   #dom-<interface>-<method>-<param1>-<param2>-...
+ *
+ * For example:
+ *   #dom-window-postmessage-message-targetorigin-transfer
+ *   #dom-window-postmessage-message-options
+ *
+ * This function strips the known prefix (interface + method) and returns
+ * the remaining parts as a parameter list, e.g. "message, targetorigin, transfer".
+ */
+function extractOverloadHint(uri, forContext, term) {
+  if (!uri) return '';
+  const hash = uri.includes('#') ? uri.split('#')[1] : uri;
+  if (!hash) return '';
+
+  const originalParts = hash.split('-');
+  const lowerParts = hash.toLowerCase().split('-');
+
+  // Build the prefix to strip: typically "dom", interface, method
+  const prefixParts = ['dom'];
+  if (forContext) {
+    prefixParts.push(...forContext.toLowerCase().split('-'));
+  }
+  const cleanTerm = term.replace(/\(.*\)$/, '').toLowerCase();
+  if (cleanTerm) {
+    prefixParts.push(...cleanTerm.split('-'));
+  }
+
+  const matches =
+    prefixParts.length <= lowerParts.length &&
+    prefixParts.every((p, i) => lowerParts[i] === p);
+
+  if (matches && prefixParts.length < lowerParts.length) {
+    return originalParts.slice(prefixParts.length).join(', ');
+  }
+
+  return '';
 }
 
 function howToCiteMarkup(term, entry) {
   const { type, for: forList, shortname } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList.map(f => `[^${f}/${term}^]`).join('<br>');
+    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`).join('<br>');
   }
   if (type === 'element-attr') {
-    return `[^/${term}^]`;
+    return `[^/${safeTerm}^]`;
   }
-  return `[^${term}^]`;
+  return `[^${safeTerm}^]`;
 }
 
 function howToCiteAnchor(term, entry) {
@@ -217,9 +323,9 @@ function howToCiteAnchor(term, entry) {
 
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
-  term = term.replace('/', '\\/');
+  term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
-    return forList.map(f => `[=${f}/${term}=]`).join('<br>');
+    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`).join('<br>');
   }
   return `[=${term}=]`;
 }
@@ -227,6 +333,30 @@ function howToCiteTerm(term, entry) {
 function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+// Click-to-copy on cite cells
+document.getElementById('output').addEventListener('click', (e) => {
+  const cell = e.target.closest('.cite-cell');
+  if (!cell) return;
+  const text = cell.textContent.trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.createElement('div');
+    toast.textContent = `Copied: ${text}`;
+    Object.assign(toast.style, {
+      position: 'fixed', bottom: '1.5rem', left: '50%', transform: 'translateX(-50%)',
+      background: '#1e293b', color: 'white', padding: '0.5rem 1.2rem',
+      borderRadius: '8px', fontSize: '0.85rem', fontFamily: 'system-ui, sans-serif',
+      zIndex: '9999', opacity: '0', transition: 'opacity 0.2s',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    });
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 200);
+    }, 1500);
+  });
+});
 
 async function ready() {
   const updateInput = (el, values) => {
