@@ -49,3 +49,4 @@ export async function route(req: IRequest, res: Response) {
   res.set("Cache-Control", `max-age=${seconds("24h")}`);
   res.send(body);
 }
+
