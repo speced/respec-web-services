@@ -17,7 +17,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.2.0",
-    "morgan": "^1.10.1",
+    "morgan": "^1.11.0",
     "nanoid": "^5.1.11",
     "serialize-error": "^13.0.1",
     "split2": "^4.2.0",
