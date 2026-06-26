@@ -174,33 +174,36 @@ function renderResults(entries, query) {
 
 function howToCiteIDL(term, entry) {
   const { type, for: forList } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
     return forList
       .map(f => {
-        const termPart = type === 'enum-value' ? `"${term}"` : term;
-        return `{{${f}/${term ? termPart : '""'}}}`;
+        const safeF = escapeHTML(f);
+        const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+        return `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
       })
       .join('<br>');
   }
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        return `{{"${term}"}}`;
+        return `{{"${safeTerm}"}}`;
       }
     default:
-      return `{{${term}}}`;
+      return `{{${safeTerm}}}`;
   }
 }
 
 function howToCiteMarkup(term, entry) {
   const { type, for: forList, shortname } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList.map(f => `[^${f}/${term}^]`).join('<br>');
+    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`).join('<br>');
   }
   if (type === 'element-attr') {
-    return `[^/${term}^]`;
+    return `[^/${safeTerm}^]`;
   }
-  return `[^${term}^]`;
+  return `[^${safeTerm}^]`;
 }
 
 function howToCiteAnchor(term, entry) {
@@ -220,9 +223,9 @@ function howToCiteAnchor(term, entry) {
 
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
-  term = term.replace('/', '\\/');
+  term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
-    return forList.map(f => `[=${f}/${term}=]`).join('<br>');
+    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`).join('<br>');
   }
   return `[=${term}=]`;
 }
