@@ -1,12 +1,112 @@
+import os from "node:os";
+import path from "node:path";
+import { promises as fs } from "node:fs";
+
+import {
+  getData,
+  cache,
+  createResponseBody,
+} from "../../../../build/routes/caniuse/lib/index.js";
+
 import {
   BROWSERS,
   DEFAULT_BROWSERS,
   SUPPORT_TITLES,
 } from "../../../../build/routes/caniuse/lib/constants.js";
 
-import { mkdtemp, writeFile, mkdir, rm } from "fs/promises";
-import path from "path";
-import { tmpdir } from "os";
+const CANIUSE_DIR = path.join(os.tmpdir(), "caniuse");
+
+/** Minimal valid ScraperOutput fixture */
+const FIXTURE = {
+  all: { chrome: [["100", ["y"]]], firefox: [["99", ["n"]]] },
+  summary: { chrome: [["100", ["y"]]] },
+};
+
+async function writeFixture(name, data = FIXTURE) {
+  await fs.mkdir(CANIUSE_DIR, { recursive: true });
+  await fs.writeFile(
+    path.join(CANIUSE_DIR, `${name}.json`),
+    JSON.stringify(data),
+    "utf8",
+  );
+}
+
+async function removeFixture(name) {
+  try {
+    await fs.unlink(path.join(CANIUSE_DIR, `${name}.json`));
+  } catch {
+    // ignore – file may not exist
+  }
+}
+
+describe("caniuse - getData", () => {
+  beforeEach(() => cache.clear());
+
+  it("returns null for empty feature string", async () => {
+    expect(await getData("")).toBeNull();
+  });
+
+  it("returns null for invalid characters (path traversal attempt)", async () => {
+    expect(await getData("../etc/passwd")).toBeNull();
+    expect(await getData("foo/bar")).toBeNull();
+    expect(await getData("feature name")).toBeNull();
+  });
+
+  it("returns null for non-existent feature", async () => {
+    expect(await getData("nonexistent-feature-xyz")).toBeNull();
+  });
+
+  it("returns data for a known feature", async () => {
+    await writeFixture("css-grid");
+    try {
+      const data = await getData("css-grid");
+      expect(data).toEqual(FIXTURE);
+    } finally {
+      await removeFixture("css-grid");
+    }
+  });
+
+  it("returns null for wf- edge case (exactly 'wf-')", async () => {
+    expect(await getData("wf-")).toBeNull();
+  });
+
+  it("returns null for wf- feature where stripped name also has no data", async () => {
+    expect(await getData("wf-no-such-feature-xyz")).toBeNull();
+  });
+
+  it("falls back from wf- prefixed key to the stripped feature name", async () => {
+    await writeFixture("css-grid");
+    try {
+      const data = await getData("wf-css-grid");
+      expect(data).toEqual(FIXTURE);
+    } finally {
+      await removeFixture("css-grid");
+    }
+  });
+
+  it("caches the result under the original wf- key after a successful fallback", async () => {
+    await writeFixture("css-grid");
+    try {
+      expect(cache.has("wf-css-grid")).toBeFalse();
+      await getData("wf-css-grid");
+      expect(cache.has("wf-css-grid")).toBeTrue();
+    } finally {
+      await removeFixture("css-grid");
+    }
+  });
+
+  it("serves subsequent wf- requests from cache without extra disk I/O", async () => {
+    await writeFixture("css-grid");
+    try {
+      await getData("wf-css-grid"); // warm up cache
+      await removeFixture("css-grid"); // remove file; only cache should serve it now
+      const data = await getData("wf-css-grid");
+      expect(data).toEqual(FIXTURE);
+    } finally {
+      await removeFixture("css-grid");
+    }
+  });
+});
 
 describe("caniuse - constants", () => {
   describe("BROWSERS", () => {
@@ -112,15 +212,9 @@ describe("caniuse - constants", () => {
 });
 
 describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
-  let tmpDir;
-  let caniuseDir;
-  let createResponseBody;
-  let origDataDir;
-
   beforeAll(async () => {
-    tmpDir = await mkdtemp(path.join(tmpdir(), "caniuse-test-"));
-    caniuseDir = path.join(tmpDir, "caniuse");
-    await mkdir(caniuseDir, { recursive: true });
+    // Write fixtures into the CANIUSE_DIR the module already resolved at load time.
+    await fs.mkdir(CANIUSE_DIR, { recursive: true });
 
     // Write a minimal fixture for a feature called "test-feature"
     const fixtureData = {
@@ -156,10 +250,7 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
         opera: [["100", ["n"]]],
       },
     };
-    await writeFile(
-      path.join(caniuseDir, "test-feature.json"),
-      JSON.stringify(fixtureData),
-    );
+    await writeFixture("test-feature", fixtureData);
 
     // Write a fixture with compound and unknown support keys for HTML tests
     const compoundFixture = {
@@ -172,29 +263,12 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
         firefox: [["121", ["z"]]],
       },
     };
-    await writeFile(
-      path.join(caniuseDir, "compound-feature.json"),
-      JSON.stringify(compoundFixture),
-    );
-
-    // Set DATA_DIR before importing the module that reads it at load time
-    origDataDir = process.env.DATA_DIR;
-    process.env.DATA_DIR = tmpDir;
-
-    // Dynamic import after env is set
-    const mod = await import(
-      "../../../../build/routes/caniuse/lib/index.js"
-    );
-    createResponseBody = mod.createResponseBody;
+    await writeFixture("compound-feature", compoundFixture);
   });
 
   afterAll(async () => {
-    if (origDataDir !== undefined) {
-      process.env.DATA_DIR = origDataDir;
-    }
-    if (tmpDir) {
-      await rm(tmpDir, { recursive: true, force: true });
-    }
+    await removeFixture("test-feature");
+    await removeFixture("compound-feature");
   });
 
   it("returns default browsers for undefined input", async () => {
@@ -203,8 +277,6 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       format: "json",
     });
     expect(result).not.toBeNull();
-    // Should include default browsers (chrome, firefox, safari, edge, etc.)
-    // but not all browsers. The defaults include "samsung", "and_chr", etc.
     expect(Object.keys(result)).toContain("chrome");
     expect(Object.keys(result)).toContain("firefox");
     expect(Object.keys(result)).toContain("safari");
@@ -217,7 +289,6 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       format: "json",
     });
     expect(result).not.toBeNull();
-    // Should return defaults since "invalid-string" is not "all"
     expect(Object.keys(result)).toContain("chrome");
   });
 
@@ -228,8 +299,6 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       format: "json",
     });
     expect(result).not.toBeNull();
-    // When "all" is passed, sanitizeBrowsersList returns [], which means
-    // createResponseBodyJSON pushes all keys from data.all
     expect(Object.keys(result)).toContain("chrome");
     expect(Object.keys(result)).toContain("firefox");
     expect(Object.keys(result)).toContain("safari");
@@ -246,7 +315,6 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
     expect(result).not.toBeNull();
     expect(Object.keys(result)).toContain("chrome");
     expect(Object.keys(result)).toContain("firefox");
-    // "invalid-browser" should be filtered out
     expect(Object.keys(result)).not.toContain("invalid-browser");
   });
 
@@ -257,7 +325,6 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       format: "json",
     });
     expect(result).not.toBeNull();
-    // Filtered array is empty, so defaults are used
     expect(Object.keys(result)).toContain("chrome");
     expect(Object.keys(result)).toContain("firefox");
   });
@@ -277,7 +344,6 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       format: "json",
     });
     expect(result).not.toBeNull();
-    // Chrome has 5 versions in fixture, should be capped at 4
     expect(result.chrome.length).toBe(4);
   });
 

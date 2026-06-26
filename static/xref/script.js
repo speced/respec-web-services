@@ -84,7 +84,7 @@ const specStatusType = {
 
 let metadata;
 const options = {
-  fields: ['shortname', 'spec', 'uri', 'type', 'for', 'status'],
+  fields: ['shortname', 'spec', 'uri', 'type', 'for', 'status', 'term'],
   spec_type: ['draft', 'snapshot'],
   all: true,
 };
@@ -146,17 +146,20 @@ function renderResults(entries, query) {
 
   let html = '';
   for (const entry of entries) {
+    // Use the canonical matched term when available (case-insensitive fallback
+    // hits); otherwise fall back to the user's query term (exact match).
+    const citeTerm = entry.term || term;
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
     const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(term, entry)
+      ? howToCiteIDL(citeTerm, entry)
       : metadata.types.markup.has(entry.type)
-        ? howToCiteMarkup(term, entry)
+        ? howToCiteMarkup(citeTerm, entry)
         : metadata.types.css.has(entry.type) ||
             metadata.types.http.has(entry.type)
-          ? howToCiteAnchor(term, entry)
-          : howToCiteTerm(term, entry);
+          ? howToCiteAnchor(citeTerm, entry)
+          : howToCiteTerm(citeTerm, entry);
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
@@ -171,33 +174,36 @@ function renderResults(entries, query) {
 
 function howToCiteIDL(term, entry) {
   const { type, for: forList } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
     return forList
       .map(f => {
-        const termPart = type === 'enum-value' ? `"${term}"` : term;
-        return `{{${f}/${term ? termPart : '""'}}}`;
+        const safeF = escapeHTML(f);
+        const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+        return `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
       })
       .join('<br>');
   }
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        return `{{"${term}"}}`;
+        return `{{"${safeTerm}"}}`;
       }
     default:
-      return `{{${term}}}`;
+      return `{{${safeTerm}}}`;
   }
 }
 
 function howToCiteMarkup(term, entry) {
   const { type, for: forList, shortname } = entry;
+  const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList.map(f => `[^${f}/${term}^]`).join('<br>');
+    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`).join('<br>');
   }
   if (type === 'element-attr') {
-    return `[^/${term}^]`;
+    return `[^/${safeTerm}^]`;
   }
-  return `[^${term}^]`;
+  return `[^${safeTerm}^]`;
 }
 
 function howToCiteAnchor(term, entry) {
@@ -217,9 +223,9 @@ function howToCiteAnchor(term, entry) {
 
 function howToCiteTerm(term, entry) {
   const { type, for: forList, shortname } = entry;
-  term = term.replace('/', '\\/');
+  term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
-    return forList.map(f => `[=${f}/${term}=]`).join('<br>');
+    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`).join('<br>');
   }
   return `[=${term}=]`;
 }
