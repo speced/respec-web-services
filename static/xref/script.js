@@ -150,7 +150,10 @@ function renderResults(entries, query) {
     // fallback hits and empty-term browsing both set entry.term); otherwise
     // fall back to the user's query term (exact match).
     const citeTerm = entry.term || searchTerm || '';
-    const specInfo = metadata.specs[entry.status][entry.spec];
+    // Browsing can surface entries whose spec isn't in the client metadata;
+    // skip those rather than throwing and blanking the whole results table.
+    const specInfo = metadata.specs[entry.status]?.[entry.spec];
+    if (!specInfo) continue;
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
     const cite = metadata.types.idl.has(entry.type)
