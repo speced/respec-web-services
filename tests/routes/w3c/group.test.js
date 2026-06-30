@@ -164,14 +164,44 @@ describe("w3c/group - getGroupMeta disambiguation", () => {
   // When a shortname exists in only one type, it should work without specifying type.
   // When it exists in multiple types, it should return 409.
 
-  it("does not return 409 for unambiguous shortname", async () => {
-    // If a shortname existed in multiple group types (wg + cg), it would
-    // return 409. Our fixture only has unique shortnames, so this tests
-    // the non-ambiguous path doesn't return 409.
+  let originalFetch;
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    // Stub the api.w3.org call so the test is deterministic and offline-safe.
+    // No "active-charter" link, so getPatentPolicy() makes no further request.
+    globalThis.fetch = jasmine.createSpy("fetch").and.resolveTo(
+      new Response(
+        JSON.stringify({
+          id: 32061,
+          name: "CSS Working Group",
+          _links: {
+            homepage: { href: "https://www.w3.org/groups/wg/css/" },
+            "pp-status": { href: "https://www.w3.org/groups/wg/css/ipr" },
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it("resolves an unambiguous shortname to its single group type", async () => {
+    // 'css' exists only as a wg in the fixture, so the type is inferred (no
+    // 409 ambiguity error) and the route returns that group's info.
     const req = mockReq({ shortname: "css" });
     const res = mockRes();
     await route(req, res);
     expect(res._status).not.toBe(409);
+    expect(res._jsonBody).toEqual(
+      jasmine.objectContaining({
+        shortname: "css",
+        type: "wg",
+        name: "CSS Working Group",
+      }),
+    );
   });
 });
 
