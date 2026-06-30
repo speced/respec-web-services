@@ -60,7 +60,7 @@ function searchTerms(query: string, limit: number): string[] {
 
 interface QueryParams {
   q?: string | string[];
-  limit?: string;
+  limit?: string | string[];
 }
 type IRequest = Request<never, any, never, QueryParams>;
 
@@ -71,7 +71,10 @@ export default function route(req: IRequest, res: Response) {
     return;
   }
 
-  const limit = Math.min(Math.max(parseInt(req.query.limit || "15", 10) || 15, 1), 50);
+  const limitParam = Array.isArray(req.query.limit)
+    ? req.query.limit[0]
+    : req.query.limit;
+  const limit = Math.min(Math.max(parseInt(limitParam || "15", 10) || 15, 1), 50);
   const results = searchTerms(q, limit);
 
   res.set("Cache-Control", `max-age=${seconds("24h")}`);
