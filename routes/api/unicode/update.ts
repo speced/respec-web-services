@@ -1,10 +1,9 @@
 import path from "path";
-import { legacyDirname } from "../../../utils/misc.js";
 import { BackgroundTaskQueue } from "../../../utils/background-task-queue.js";
 import { store } from "./lib/store-init.js";
 import type { Request, Response } from "express";
 
-const workerFile = path.join(legacyDirname(import.meta), "update.worker.js");
+const workerFile = path.join(import.meta.dirname, "update.worker.js");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.js")>(
   workerFile,
   "unicode_update",
