@@ -74,6 +74,9 @@ function parseLine(line: string) {
   }
 
   const parts = line.split(";");
+  if (parts.length < 2) {
+    return null; // blank or malformed line (no fields)
+  }
   const codepoint = parts[0];
   const name = parts[1].replace(/[<>]/g, s => (s === "<" ? "[" : "]"));
   return [codepoint, { name }] as const;
