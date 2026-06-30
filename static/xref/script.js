@@ -144,6 +144,10 @@ function renderResults(entries, query) {
     return;
   }
 
+  // Detect overloaded IDL entries that would produce identical citations.
+  // Build a set of "uri|forContext" pairs for entries that need disambiguation.
+  const overloadedPairs = detectOverloadedEntries(entries, term);
+
   let html = '';
   for (const entry of entries) {
     // Use the canonical matched term when available (case-insensitive fallback
@@ -153,7 +157,7 @@ function renderResults(entries, query) {
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
     const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(citeTerm, entry)
+      ? howToCiteIDL(citeTerm, entry, overloadedPairs)
       : metadata.types.markup.has(entry.type)
         ? howToCiteMarkup(citeTerm, entry)
         : metadata.types.css.has(entry.type) ||
@@ -172,26 +176,124 @@ function renderResults(entries, query) {
   output.innerHTML = html;
 }
 
-function howToCiteIDL(term, entry) {
+/**
+ * Detects IDL entries that would produce identical citations (overloaded
+ * methods/constructors). Returns a Set of "uri|forContext" keys for entries
+ * that need disambiguation. Entries without a `for` list use an empty string
+ * as the forContext part.
+ */
+function detectOverloadedEntries(entries, term) {
+  const citationGroups = new Map();
+  for (const entry of entries) {
+    if (!metadata.types.idl.has(entry.type)) continue;
+    const specKey = entry.spec || '';
+    const statusKey = entry.status || '';
+    const forList = entry.for || [];
+    // Group per individual rendered citation (one per `f`), so overlapping
+    // `for` contexts across entries are correctly detected as ambiguous.
+    if (forList.length > 0) {
+      for (const f of forList) {
+        const key = `${f}|${term}|${specKey}|${statusKey}`;
+        const group = citationGroups.get(key) ?? [];
+        if (!group.length) citationGroups.set(key, group);
+        group.push({ entry, f });
+      }
+    } else {
+      const key = `|${term}|${specKey}|${statusKey}`;
+      const group = citationGroups.get(key) ?? [];
+      if (!group.length) citationGroups.set(key, group);
+      group.push({ entry, f: '' });
+    }
+  }
+  // Build a Set of "uri|forContext" strings for ambiguous (entry, f) pairs.
+  const overloadedPairs = new Set();
+  for (const group of citationGroups.values()) {
+    if (group.length > 1) {
+      for (const { entry, f } of group) {
+        overloadedPairs.add(`${entry.uri}|${f}`);
+      }
+    }
+  }
+  return overloadedPairs;
+}
+
+function howToCiteIDL(term, entry, overloadedPairs = null) {
   const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
     return forList
       .map(f => {
         const safeF = escapeHTML(f);
-        const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
-        return `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
+        let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+        if (overloadedPairs?.has(`${entry.uri}|${f}`)) {
+          const hint = extractOverloadHint(entry.uri, f, term);
+          if (hint) {
+            displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
+          }
+        }
+        return `{{${safeF}/${displayTerm ? displayTerm : '""'}}}`;
       })
       .join('<br>');
   }
+  let cite;
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        return `{{"${safeTerm}"}}`;
+        cite = `{{"${safeTerm}"}}`;
+        break;
       }
     default:
-      return `{{${safeTerm}}}`;
+      cite = `{{${safeTerm}}}`;
   }
+  if (overloadedPairs?.has(`${entry.uri}|`)) {
+    const hint = extractOverloadHint(entry.uri, null, term);
+    if (hint) {
+      cite = cite.replace('()', `(${escapeHTML(hint)})`);
+    }
+  }
+  return cite;
+}
+
+/**
+ * Extracts a human-readable overload hint from a URI fragment.
+ *
+ * URI fragments for WebIDL definitions follow the pattern:
+ *   #dom-<interface>-<method>-<param1>-<param2>-...
+ *
+ * For example:
+ *   #dom-window-postmessage-message-targetorigin-transfer
+ *   #dom-window-postmessage-message-options
+ *
+ * This function strips the known prefix (interface + method) and returns
+ * the remaining parts as a parameter list, e.g. "message, targetorigin, transfer".
+ */
+function extractOverloadHint(uri, forContext, term) {
+  if (!uri) return '';
+  const hash = uri.includes('#') ? uri.split('#')[1] : uri;
+  if (!hash) return '';
+
+  const originalParts = hash.split('-');
+  const lowerParts = hash.toLowerCase().split('-');
+
+  // Build the prefix to strip: typically "dom", interface, method
+  const prefixParts = ['dom'];
+  if (forContext) {
+    prefixParts.push(...forContext.toLowerCase().split('-'));
+  }
+  const cleanTerm = term.replace(/\(.*\)$/, '').toLowerCase();
+  if (cleanTerm) {
+    prefixParts.push(...cleanTerm.split('-'));
+  }
+
+  const matches =
+    prefixParts.length <= lowerParts.length &&
+    prefixParts.every((p, i) => lowerParts[i] === p);
+
+  if (matches && prefixParts.length < lowerParts.length) {
+    return originalParts.slice(prefixParts.length).join(', ');
+  }
+
+  return '';
 }
 
 function howToCiteMarkup(term, entry) {
