@@ -1,9 +1,6 @@
-// Set env before importing the module (tokens.ts reads GH_TOKEN at import time)
-process.env.GH_TOKEN ||= "test-token-for-rest-tests";
-
-const { requestData } = await import(
-  "../../../../../build/routes/github/lib/utils/rest.js"
-);
+// GH_TOKEN (read by tokens.ts at import time) is set by tests/helpers/env.js
+// before any spec loads, so the module can be imported statically.
+import { requestData } from "../../../../../build/routes/github/lib/utils/rest.js";
 
 describe("github/lib/utils/rest - requestData", () => {
   let originalFetch;
