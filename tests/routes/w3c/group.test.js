@@ -51,13 +51,6 @@ afterAll(async () => {
 });
 
 /**
- * Create a mock Express request object.
- */
-function mockReq(params = {}, headers = {}) {
-  return { params, headers };
-}
-
-/**
  * Create a mock Express response object that tracks calls.
  */
 function mockRes() {
@@ -98,29 +91,32 @@ function mockRes() {
   return res;
 }
 
-describe("w3c/group - LEGACY_SHORTNAMES behavior", () => {
-  it("redirects 'wai-apa' to 'apa'", async () => {
-    const req = mockReq({ shortname: "wai-apa" });
-    const res = mockRes();
-    await route(req, res);
-    expect(res._redirectStatus).toBe(301);
-    expect(res._redirectUrl).toBe("/w3c/groups/apa");
-  });
+/**
+ * Invoke the route with a mock request/response and return the response for
+ * assertions.
+ */
+async function run(params = {}, headers = {}) {
+  const res = mockRes();
+  await route({ params, headers }, res);
+  return res;
+}
 
-  it("redirects 'i18n' to 'i18n-core'", async () => {
-    const req = mockReq({ shortname: "i18n" });
-    const res = mockRes();
-    await route(req, res);
-    expect(res._redirectStatus).toBe(301);
-    expect(res._redirectUrl).toBe("/w3c/groups/i18n-core");
+describe("w3c/group - LEGACY_SHORTNAMES behavior", () => {
+  it("redirects legacy shortnames with a 301", async () => {
+    for (const [shortname, target] of [
+      ["wai-apa", "/w3c/groups/apa"],
+      ["i18n", "/w3c/groups/i18n-core"],
+    ]) {
+      const res = await run({ shortname });
+      expect(res._redirectStatus).withContext(shortname).toBe(301);
+      expect(res._redirectUrl).withContext(shortname).toBe(target);
+    }
   });
 });
 
 describe("w3c/group - no shortname", () => {
   it("returns JSON of all groups when no shortname and no html accept", async () => {
-    const req = mockReq({}, { accept: "application/json" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({}, { accept: "application/json" });
     expect(res._jsonBody).toBeDefined();
     expect(res._jsonBody.wg).toBeDefined();
     expect(res._jsonBody.cg).toBeDefined();
@@ -128,32 +124,24 @@ describe("w3c/group - no shortname", () => {
   });
 
   it("renders HTML view when accept includes text/html", async () => {
-    const req = mockReq({}, { accept: "text/html" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({}, { accept: "text/html" });
     expect(res._rendered).toBeDefined();
     expect(res._rendered.view).toBe("w3c/groups.js");
     expect(res._rendered.data.groups).toBeDefined();
   });
 });
 
-describe("w3c/group - invalid group type", () => {
+describe("w3c/group - error handling", () => {
   it("returns 404 for invalid group type", async () => {
-    const req = mockReq({ shortname: "webapps", type: "invalid-type" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({ shortname: "webapps", type: "invalid-type" });
     expect(res._status).toBe(404);
     expect(res._body).toContain("Invalid group type");
     expect(res._body).toContain("invalid-type");
     expect(res._headers["Content-Type"]).toBe("text/plain");
   });
-});
 
-describe("w3c/group - error handling", () => {
   it("returns 404 for unknown shortname with no type", async () => {
-    const req = mockReq({ shortname: "totally-unknown-group" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({ shortname: "totally-unknown-group" });
     expect(res._status).toBe(404);
     expect(res._body).toContain("totally-unknown-group");
   });
@@ -191,9 +179,7 @@ describe("w3c/group - getGroupMeta disambiguation", () => {
   it("resolves an unambiguous shortname to its single group type", async () => {
     // 'css' exists only as a wg in the fixture, so the type is inferred (no
     // 409 ambiguity error) and the route returns that group's info.
-    const req = mockReq({ shortname: "css" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({ shortname: "css" });
     expect(res._status).not.toBe(409);
     expect(res._jsonBody).toEqual(
       jasmine.objectContaining({
@@ -224,9 +210,7 @@ describe("w3c/group - reloadGroups()", () => {
     await writeFile(groupsJsonPath, JSON.stringify(updated));
     expect(reloadGroups()).toBe(true);
 
-    const req = mockReq({}, { accept: "application/json" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({}, { accept: "application/json" });
     expect(res._jsonBody.wg.newgroup).toBeDefined();
     expect(res._jsonBody.wg.newgroup.id).toBe(99999);
     expect(res._jsonBody.wg.css).toBeUndefined();
@@ -236,9 +220,7 @@ describe("w3c/group - reloadGroups()", () => {
     await unlink(groupsJsonPath);
     expect(reloadGroups()).toBe(false);
 
-    const req = mockReq({}, { accept: "application/json" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({}, { accept: "application/json" });
     expect(res._jsonBody.wg.css).toBeDefined();
   });
 
@@ -246,10 +228,7 @@ describe("w3c/group - reloadGroups()", () => {
     await writeFile(groupsJsonPath, "{not valid json!!!");
     expect(reloadGroups()).toBe(false);
 
-    const req = mockReq({}, { accept: "application/json" });
-    const res = mockRes();
-    await route(req, res);
+    const res = await run({}, { accept: "application/json" });
     expect(res._jsonBody.wg.css).toBeDefined();
   });
-
 });

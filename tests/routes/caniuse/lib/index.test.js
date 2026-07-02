@@ -1,4 +1,3 @@
-import os from "node:os";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
@@ -14,7 +13,7 @@ import {
   SUPPORT_TITLES,
 } from "../../../../build/routes/caniuse/lib/constants.js";
 
-const CANIUSE_DIR = path.join(os.tmpdir(), "caniuse");
+const CANIUSE_DIR = path.join(process.env.DATA_DIR, "caniuse");
 
 /** Minimal valid ScraperOutput fixture */
 const FIXTURE = {
@@ -42,18 +41,22 @@ async function removeFixture(name) {
 describe("caniuse - getData", () => {
   beforeEach(() => cache.clear());
 
-  it("returns null for empty feature string", async () => {
-    expect(await getData("")).toBeNull();
-  });
-
-  it("returns null for invalid characters (path traversal attempt)", async () => {
-    expect(await getData("../etc/passwd")).toBeNull();
-    expect(await getData("foo/bar")).toBeNull();
-    expect(await getData("feature name")).toBeNull();
-  });
-
-  it("returns null for non-existent feature", async () => {
-    expect(await getData("nonexistent-feature-xyz")).toBeNull();
+  it("returns null for empty, malformed, non-existent, and bare wf- features", async () => {
+    // Empty, path-traversal/invalid chars, unknown names, and the exact "wf-"
+    // and unresolvable "wf-" cases all resolve to no data.
+    for (const feature of [
+      "",
+      "../etc/passwd",
+      "foo/bar",
+      "feature name",
+      "nonexistent-feature-xyz",
+      "wf-",
+      "wf-no-such-feature-xyz",
+    ]) {
+      expect(await getData(feature))
+        .withContext(`feature: "${feature}"`)
+        .toBeNull();
+    }
   });
 
   it("returns data for a known feature", async () => {
@@ -64,14 +67,6 @@ describe("caniuse - getData", () => {
     } finally {
       await removeFixture("css-grid");
     }
-  });
-
-  it("returns null for wf- edge case (exactly 'wf-')", async () => {
-    expect(await getData("wf-")).toBeNull();
-  });
-
-  it("returns null for wf- feature where stripped name also has no data", async () => {
-    expect(await getData("wf-no-such-feature-xyz")).toBeNull();
   });
 
   it("falls back from wf- prefixed key to the stripped feature name", async () => {
@@ -271,62 +266,52 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
     await removeFixture("compound-feature");
   });
 
-  it("returns default browsers for undefined input", async () => {
-    const result = await createResponseBody({
+  /** Build a json-format response body for the standard test-feature. */
+  function jsonBody(overrides = {}) {
+    return createResponseBody({
       feature: "test-feature",
       format: "json",
+      ...overrides,
     });
-    expect(result).not.toBeNull();
-    expect(Object.keys(result)).toContain("chrome");
-    expect(Object.keys(result)).toContain("firefox");
-    expect(Object.keys(result)).toContain("safari");
+  }
+
+  it("returns default browsers for undefined, non-array, and all-invalid input", async () => {
+    // undefined browsers, a non-array/non-"all" string, and an array whose
+    // entries are all invalid each fall back to DEFAULT_BROWSERS.
+    for (const browsers of [
+      undefined,
+      "invalid-string",
+      ["not-a-browser", "also-invalid"],
+    ]) {
+      const result = await jsonBody({ browsers });
+      expect(result).withContext(`browsers: ${JSON.stringify(browsers)}`).not.toBeNull();
+      const keys = Object.keys(result);
+      expect(keys).toContain("chrome");
+      expect(keys).toContain("firefox");
+      expect(keys).toContain("safari");
+    }
   });
 
-  it("returns default browsers for non-array, non-'all' input", async () => {
-    const result = await createResponseBody({
-      feature: "test-feature",
-      browsers: "invalid-string",
-      format: "json",
-    });
+  it("returns all browsers when 'all' is passed", async () => {
+    const result = await jsonBody({ browsers: "all" });
     expect(result).not.toBeNull();
-    expect(Object.keys(result)).toContain("chrome");
-  });
-
-  it("returns empty browsers list (all browsers) when 'all' is passed", async () => {
-    const result = await createResponseBody({
-      feature: "test-feature",
-      browsers: "all",
-      format: "json",
-    });
-    expect(result).not.toBeNull();
-    expect(Object.keys(result)).toContain("chrome");
-    expect(Object.keys(result)).toContain("firefox");
-    expect(Object.keys(result)).toContain("safari");
-    expect(Object.keys(result)).toContain("edge");
-    expect(Object.keys(result)).toContain("opera");
+    const keys = Object.keys(result);
+    expect(keys).toContain("chrome");
+    expect(keys).toContain("firefox");
+    expect(keys).toContain("safari");
+    expect(keys).toContain("edge");
+    expect(keys).toContain("opera");
   });
 
   it("filters invalid browser names from array input", async () => {
-    const result = await createResponseBody({
-      feature: "test-feature",
+    const result = await jsonBody({
       browsers: ["chrome", "invalid-browser", "firefox"],
-      format: "json",
     });
     expect(result).not.toBeNull();
-    expect(Object.keys(result)).toContain("chrome");
-    expect(Object.keys(result)).toContain("firefox");
-    expect(Object.keys(result)).not.toContain("invalid-browser");
-  });
-
-  it("returns defaults when all array entries are invalid", async () => {
-    const result = await createResponseBody({
-      feature: "test-feature",
-      browsers: ["not-a-browser", "also-invalid"],
-      format: "json",
-    });
-    expect(result).not.toBeNull();
-    expect(Object.keys(result)).toContain("chrome");
-    expect(Object.keys(result)).toContain("firefox");
+    const keys = Object.keys(result);
+    expect(keys).toContain("chrome");
+    expect(keys).toContain("firefox");
+    expect(keys).not.toContain("invalid-browser");
   });
 
   it("returns null for non-existent feature", async () => {
@@ -338,56 +323,38 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
   });
 
   it("defaults to 4 versions when none specified", async () => {
-    const result = await createResponseBody({
-      feature: "test-feature",
-      browsers: ["chrome"],
-      format: "json",
-    });
+    const result = await jsonBody({ browsers: ["chrome"] });
     expect(result).not.toBeNull();
     expect(result.chrome.length).toBe(4);
   });
 
   it("respects custom version count", async () => {
-    const result = await createResponseBody({
-      feature: "test-feature",
-      browsers: ["chrome"],
-      format: "json",
-      versions: 2,
-    });
+    const result = await jsonBody({ browsers: ["chrome"], versions: 2 });
     expect(result).not.toBeNull();
     expect(result.chrome.length).toBe(2);
   });
 
   describe("HTML title attributes (getSupportTitle via formatAsHTML)", () => {
+    /** Build an html-format response body. */
+    function htmlBody(feature, browsers) {
+      return createResponseBody({ feature, browsers, format: "html" });
+    }
+
     it("renders 'Supported.' title for a 'y' support key", async () => {
-      const html = await createResponseBody({
-        feature: "test-feature",
-        browsers: ["chrome"],
-        format: "html",
-      });
+      const html = await htmlBody("test-feature", ["chrome"]);
       expect(html).not.toBeNull();
       expect(html).toContain('title="Supported."');
     });
 
     it("renders compound title for ['y', 'x'] support keys", async () => {
-      const html = await createResponseBody({
-        feature: "compound-feature",
-        browsers: ["chrome"],
-        format: "html",
-      });
+      const html = await htmlBody("compound-feature", ["chrome"]);
       expect(html).not.toBeNull();
-      expect(html).toContain(
-        'title="Supported. Requires prefix to work."',
-      );
+      expect(html).toContain('title="Supported. Requires prefix to work."');
     });
 
     it("renders empty title for unknown support keys", async () => {
       // firefox has ["z"] (unknown) in the compound fixture
-      const html = await createResponseBody({
-        feature: "compound-feature",
-        browsers: ["firefox"],
-        format: "html",
-      });
+      const html = await htmlBody("compound-feature", ["firefox"]);
       expect(html).not.toBeNull();
       expect(html).toContain('title=""');
     });
