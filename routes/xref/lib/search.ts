@@ -126,18 +126,22 @@ function filter(query: Query, store: Store, options: Options) {
   const isIDL = types.some(t => IDL_TYPES.has(t));
   const allowCaseFallback = !isIDL;
 
-  let result: DataEntry[] = [];
   for (const term of getTermVariations(query)) {
-    const byTerm = filterByTerm(term, store, allowCaseFallback);
-    const bySpec = filterBySpec(byTerm, query);
-    const byType = filterByType(bySpec, query);
-    const byForContext = filterByForContext(byType, query, options);
-    if (byForContext.length) {
-      result = byForContext;
-      break;
+    // Try the exact-case bucket first (so `[=baseline=]` and `{{Baseline}}`
+    // stay distinct), then a case-insensitive fallback. The fallback is
+    // essential when an exact-case bucket exists but every entry is filtered
+    // out downstream — e.g. term "url" matches only the for-scoped basic URL
+    // parser variable, while the canonical URL concept lives under "URL".
+    for (const byTerm of termCandidates(term, store, allowCaseFallback)) {
+      const bySpec = filterBySpec(byTerm, query);
+      const byType = filterByType(bySpec, query);
+      const byForContext = filterByForContext(byType, query, options);
+      if (byForContext.length) {
+        return byForContext;
+      }
     }
   }
-  return result;
+  return [];
 }
 
 function getTermVariations(query: Query) {
@@ -161,20 +165,31 @@ function getTermVariations(query: Query) {
   }
 }
 
-function filterByTerm(term: Query["term"], store: Store, allowCaseFallback: boolean) {
-  if (term == null) return [];
+/**
+ * Yields candidate entry sets for a term in priority order: the exact-case
+ * bucket, then (non-IDL only) the case-insensitive fallback union, each
+ * fallback entry tagged with its canonical term. Two separate sets so the
+ * caller can prefer an exact match that survives filtering and reach for the
+ * fallback only when it doesn't.
+ */
+function* termCandidates(
+  term: Query["term"],
+  store: Store,
+  allowCaseFallback: boolean,
+) {
+  if (term == null) return;
   const direct = store.byTerm[term];
-  if (direct) return direct;
-  if (!allowCaseFallback) return [];
-  // Case-insensitive fallback: tag each entry with its canonical term so
-  // downstream consumers (e.g. the xref UI) can build correct cite syntax
-  // instead of using the user's potentially miscased input.
+  if (direct) yield direct;
+  if (!allowCaseFallback) return;
   const lower = term.toLowerCase();
   const variants = store.byTermLower.get(lower);
-  if (!variants) return [];
-  return variants.flatMap(v =>
-    (store.byTerm[v] || []).map(entry => ({ ...entry, term: v })),
-  );
+  if (!variants) return;
+  const fallback = variants
+    .filter(v => v !== term) // exclude the exact bucket already yielded above
+    .flatMap(v =>
+      (store.byTerm[v] || []).map(entry => ({ ...entry, term: v })),
+    );
+  if (fallback.length) yield fallback;
 }
 
 function filterBySpec(data: DataEntry[], query: Query) {
