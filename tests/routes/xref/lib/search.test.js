@@ -121,8 +121,6 @@ describe("xref - search", () => {
   });
 
   describe("filter@term", () => {
-    beforeEach(() => cache.clear());
-
     it("empty string", () => {
       const result = [{ uri: "#dom-referrerpolicy" }];
       expect(search({ term: "", for: "ReferrerPolicy" })).toEqual(result);
@@ -224,8 +222,6 @@ describe("xref - search", () => {
   });
 
   describe("filter@specs", () => {
-    beforeEach(() => cache.clear());
-
     it("skips filter if query.specs not provided", () => {
       const results = search({ term: "script" }).sort((a, b) =>
         a.uri.localeCompare(b.uri),
@@ -272,8 +268,6 @@ describe("xref - search", () => {
   });
 
   describe("filter@types", () => {
-    beforeEach(() => cache.clear());
-
     const resultMarker = [
       { uri: "#marker" },
       { uri: "painting.html#elementdef-marker" },
@@ -320,8 +314,6 @@ describe("xref - search", () => {
   });
 
   describe("filter@for", () => {
-    beforeEach(() => cache.clear());
-
     it("skips filter if for is not provided", () => {
       expect(search({ term: "[[context]]" })).toHaveSize(0);
 
@@ -361,8 +353,6 @@ describe("xref - search", () => {
   });
 
   describe("empty term with specs (browse all terms)", () => {
-    beforeEach(() => cache.clear());
-
     it("returns all entries for a spec when term is empty", () => {
       const results = search(
         { term: "", specs: [["dom"]], id: "" },
