@@ -156,7 +156,7 @@ function renderResults(entries, query) {
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
-    const cite = metadata.types.idl.has(entry.type)
+    const cites = metadata.types.idl.has(entry.type)
       ? howToCiteIDL(citeTerm, entry, overloadedPairs)
       : metadata.types.markup.has(entry.type)
         ? howToCiteMarkup(citeTerm, entry)
@@ -164,12 +164,14 @@ function renderResults(entries, query) {
             metadata.types.http.has(entry.type)
           ? howToCiteAnchor(citeTerm, entry)
           : howToCiteTerm(citeTerm, entry);
+    // Each citation is its own button: click/tap the citation to copy just it.
+    const citeCell = cites.map(citeButton).join('<br>');
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
         <td>${entry.shortname}</td>
         <td>${entry.type}</td>
-        <td>${cite}</td>
+        <td>${citeCell}</td>
       </tr>`;
     html += row;
   }
@@ -221,19 +223,17 @@ function howToCiteIDL(term, entry, overloadedPairs = null) {
   const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList
-      .map(f => {
-        const safeF = escapeHTML(f);
-        let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
-        if (overloadedPairs?.has(`${entry.uri}|${f}`)) {
-          const hint = extractOverloadHint(entry.uri, f, term);
-          if (hint) {
-            displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
-          }
+    return forList.map(f => {
+      const safeF = escapeHTML(f);
+      let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+      if (overloadedPairs?.has(`${entry.uri}|${f}`)) {
+        const hint = extractOverloadHint(entry.uri, f, term);
+        if (hint) {
+          displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
         }
-        return `{{${safeF}/${displayTerm ? displayTerm : '""'}}}`;
-      })
-      .join('<br>');
+      }
+      return `{{${safeF}/${displayTerm ? displayTerm : '""'}}}`;
+    });
   }
   let cite;
   switch (type) {
@@ -251,7 +251,7 @@ function howToCiteIDL(term, entry, overloadedPairs = null) {
       cite = cite.replace('()', `(${escapeHTML(hint)})`);
     }
   }
-  return cite;
+  return [cite];
 }
 
 /**
@@ -297,44 +297,95 @@ function extractOverloadHint(uri, forContext, term) {
 }
 
 function howToCiteMarkup(term, entry) {
-  const { type, for: forList, shortname } = entry;
+  const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`).join('<br>');
+    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`);
   }
   if (type === 'element-attr') {
-    return `[^/${safeTerm}^]`;
+    return [`[^/${safeTerm}^]`];
   }
-  return `[^${safeTerm}^]`;
+  return [`[^${safeTerm}^]`];
 }
 
 function howToCiteAnchor(term, entry) {
   const { type, for: forList } = entry;
   term = escapeHTML(term);
   if (!forList) {
-    return escapeHTML(`<a data-xref-type="${type}">${term}</a>`);
+    return [escapeHTML(`<a data-xref-type="${type}">${term}</a>`)];
   }
-  return forList
-    .map(f =>
-      escapeHTML(
-        `<a data-xref-type="${type}" data-xref-for="${f}">${term}</a>`,
-      ),
-    )
-    .join('<br>');
+  return forList.map(f =>
+    escapeHTML(`<a data-xref-type="${type}" data-xref-for="${f}">${term}</a>`),
+  );
 }
 
 function howToCiteTerm(term, entry) {
-  const { type, for: forList, shortname } = entry;
+  const { type, for: forList } = entry;
   term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
-    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`).join('<br>');
+    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`);
   }
-  return `[=${term}=]`;
+  return [`[=${term}=]`];
 }
 
 function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+// Render one citation as its own copy button. The accessible name conveys the
+// action + value; `cite` is already escaped for &<>, but an attribute value
+// also needs " escaped (e.g. exception citations like {{"DOMException"}}).
+function citeButton(cite) {
+  const label = `Copy citation ${cite.replace(/"/g, '&quot;')}`;
+  return `<button type="button" class="cite" aria-label="${label}">${cite}</button>`;
+}
+
+// A single reused live region. Reusing one element (rather than appending a
+// new toast per click) avoids stacking overlapping toasts and competing
+// announcements when copying several citations in quick succession.
+let copyToast;
+let copyToastTimer;
+function showCopyToast(message) {
+  if (!copyToast) {
+    copyToast = document.createElement('div');
+    copyToast.className = 'copy-toast';
+    copyToast.setAttribute('role', 'status');
+    document.body.appendChild(copyToast);
+  }
+  clearTimeout(copyToastTimer);
+  // Set the text on the next frame so the (already-attached) live region
+  // announces it as a change rather than as initial content.
+  requestAnimationFrame(() => {
+    copyToast.textContent = message;
+    copyToast.classList.add('is-visible');
+  });
+  copyToastTimer = setTimeout(() => {
+    copyToast.classList.remove('is-visible');
+  }, 1500);
+}
+
+async function copyCitation(text) {
+  if (!text) return;
+  if (!navigator.clipboard) {
+    showCopyToast('Clipboard unavailable');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopyToast(`Copied: ${text}`);
+  } catch (err) {
+    console.error(err);
+    showCopyToast('Copy failed');
+  }
+}
+
+// Click-to-copy: each citation is itself a <button>, so clicking/tapping the
+// citation copies just that one. Being a real button, keyboard activation
+// (Enter/Space) dispatches a click for free.
+output.addEventListener('click', e => {
+  const cite = e.target.closest('.cite');
+  if (cite) copyCitation(cite.textContent);
+});
 
 async function ready() {
   const updateInput = (el, values) => {
