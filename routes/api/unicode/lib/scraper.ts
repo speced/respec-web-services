@@ -68,7 +68,7 @@ async function updateInputSource() {
 // Parse a line based on https://www.unicode.org/Public/5.1.0/ucd/UCD.html#UnicodeData.txt
 // e.g. 0001;<control>;Cc;0;BN;;;;;N;START OF HEADING;;;;
 // -> 0001 -> {name: "[control]", generalCategory: "Cc", ...}
-function parseLine(line: string) {
+export function parseLine(line: string) {
   if (line.startsWith("#")) {
     return null; // comments
   }
