@@ -13,12 +13,12 @@ const FIXTURE_XREF = {
   "event handler": [{ type: "dfn", spec: "html", uri: "#event-handler" }],
   "event loop": [{ type: "dfn", spec: "html", uri: "#event-loop" }],
   element: [{ type: "dfn", spec: "dom", uri: "#concept-element" }],
-  "foreignObject": [{ type: "element", spec: "svg", uri: "#foreignObject" }],
+  foreignObject: [{ type: "element", spec: "svg", uri: "#foreignObject" }],
   fetch: [{ type: "dfn", spec: "fetch", uri: "#concept-fetch" }],
   "fire an event": [{ type: "dfn", spec: "dom", uri: "#concept-event-fire" }],
   "live event": [{ type: "dfn", spec: "html", uri: "#concept-live-event" }],
   URL: [{ type: "interface", spec: "url", uri: "#url" }],
-  "url": [{ type: "dfn", spec: "url", uri: "#concept-url" }],
+  url: [{ type: "dfn", spec: "url", uri: "#concept-url" }],
   AbortController: [{ type: "interface", spec: "dom", uri: "#abortcontroller" }],
   AbortSignal: [{ type: "interface", spec: "dom", uri: "#abortsignal" }],
   "abort signal": [{ type: "dfn", spec: "dom", uri: "#concept-abort-signal" }],
@@ -38,22 +38,15 @@ beforeAll(async () => {
   origDataDir = process.env.DATA_DIR;
   process.env.DATA_DIR = tmpDir;
 
-  const mod = await import("../../../build/routes/xref/terms.get.js");
-  route = mod.default;
+  route = (await import("../../../build/routes/xref/terms.get.js")).default;
 });
 
 afterAll(async () => {
-  if (origDataDir !== undefined) {
-    process.env.DATA_DIR = origDataDir;
-  }
-  if (tmpDir) {
-    await rm(tmpDir, { recursive: true, force: true });
-  }
+  if (origDataDir !== undefined) process.env.DATA_DIR = origDataDir;
+  if (tmpDir) await rm(tmpDir, { recursive: true, force: true });
 });
 
-function mockReq(query = {}) {
-  return { query };
-}
+const mockReq = (query = {}) => ({ query });
 
 function mockRes() {
   const res = {
@@ -68,102 +61,60 @@ function mockRes() {
   return res;
 }
 
+const search = query => {
+  const res = mockRes();
+  route(mockReq(query), res);
+  return res;
+};
+
 describe("xref/terms - server autocomplete", () => {
-  it("returns 400 when q is missing", () => {
-    const res = mockRes();
-    route(mockReq(), res);
-    expect(res._status).toBe(400);
-  });
-
-  it("returns 400 when q is too short", () => {
-    const res = mockRes();
-    route(mockReq({ q: "a" }), res);
-    expect(res._status).toBe(400);
-  });
-
-  it("returns prefix matches before infix-only matches", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ev" }), res);
-    const results = res._body;
-    const firstInfix = results.findIndex(t => !t.toLowerCase().startsWith("ev"));
-    const lastPrefix = results.findLastIndex(t => t.toLowerCase().startsWith("ev"));
-    if (firstInfix !== -1) {
-      expect(lastPrefix).toBeLessThan(firstInfix);
+  it("returns 400 for a missing or too-short query (including array first element)", () => {
+    for (const query of [undefined, { q: "a" }, { q: ["a", "event"] }]) {
+      expect(search(query)._status).withContext(JSON.stringify(query)).toBe(400);
     }
   });
 
-  it("returns prefix matches first", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ev" }), res);
-    expect(res._status).toBe(200);
-    expect(Array.isArray(res._body)).toBeTrue();
-    expect(res._body.length).toBeGreaterThan(0);
-    for (const term of res._body) {
-      expect(term.toLowerCase()).toMatch(/ev/);
+  it("returns prefix matches (all containing the query) before infix-only matches", () => {
+    const { _status, _body } = search({ q: "ev" });
+    expect(_status).toBe(200);
+    expect(_body.length).toBeGreaterThan(0);
+    for (const term of _body) expect(term.toLowerCase()).toContain("ev");
+    const firstInfix = _body.findIndex(t => !t.toLowerCase().startsWith("ev"));
+    const lastPrefix = _body.findLastIndex(t => t.toLowerCase().startsWith("ev"));
+    if (firstInfix !== -1) expect(lastPrefix).toBeLessThan(firstInfix);
+  });
+
+  it("matches case-insensitively but returns the original-case term", () => {
+    for (const [q, expected] of [["eventtarget", "EventTarget"], ["ForeignObj", "foreignObject"]]) {
+      expect(search({ q })._body).withContext(q).toContain(expected);
     }
   });
 
-  it("matches case-insensitively but preserves original case", () => {
-    const res = mockRes();
-    route(mockReq({ q: "eventtarget" }), res);
-    expect(res._body).toContain("EventTarget");
+  it("falls back to infix matches when prefix results are insufficient", () => {
+    const { _body } = search({ q: "signal" });
+    expect(_body).toContain("AbortSignal");
+    expect(_body).toContain("abort signal");
   });
 
-  it("returns infix matches when prefix results are insufficient", () => {
-    const res = mockRes();
-    route(mockReq({ q: "signal" }), res);
-    expect(res._body).toContain("AbortSignal");
-    expect(res._body).toContain("abort signal");
+  it("respects, caps (50), and defaults (15) the limit", () => {
+    for (const [limit, max] of [["3", 3], ["100", 50], [undefined, 15]]) {
+      expect(search({ q: "ev", limit })._body.length)
+        .withContext(`limit=${limit}`)
+        .toBeLessThanOrEqual(max);
+    }
   });
 
-  it("respects the limit parameter", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ev", limit: "3" }), res);
-    expect(res._body.length).toBeLessThanOrEqual(3);
+  it("sets a Cache-Control max-age header", () => {
+    expect(search({ q: "ev" })._headers["Cache-Control"]).toMatch(/max-age=/);
   });
 
-  it("caps limit at 50", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ev", limit: "100" }), res);
-    expect(res._body.length).toBeLessThanOrEqual(50);
+  it("normalizes an array query param to its first element", () => {
+    const { _status, _body } = search({ q: ["event", "ignored"] });
+    expect(_status).toBe(200);
+    expect(_body.length).toBeGreaterThan(0);
   });
 
-  it("defaults limit to 15", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ab" }), res);
-    expect(res._body.length).toBeLessThanOrEqual(15);
-  });
-
-  it("sets Cache-Control header", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ev" }), res);
-    expect(res._headers["Cache-Control"]).toBeDefined();
-    expect(res._headers["Cache-Control"]).toMatch(/max-age=/);
-  });
-
-  it("returns empty array for no matches", () => {
-    const res = mockRes();
-    route(mockReq({ q: "zzzzzzz" }), res);
-    expect(res._body).toEqual([]);
-  });
-
-  it("handles mixed case query preserving original", () => {
-    const res = mockRes();
-    route(mockReq({ q: "ForeignObj" }), res);
-    expect(res._body).toContain("foreignObject");
-  });
-
-  it("normalizes array query params to first element", () => {
-    const res = mockRes();
-    route(mockReq({ q: ["event", "ignored"] }), res);
-    expect(res._status).toBe(200);
-    expect(Array.isArray(res._body)).toBeTrue();
-    expect(res._body.length).toBeGreaterThan(0);
-  });
-
-  it("returns 400 when array query param has short first element", () => {
-    const res = mockRes();
-    route(mockReq({ q: ["a", "event"] }), res);
-    expect(res._status).toBe(400);
+  it("returns an empty array when nothing matches", () => {
+    expect(search({ q: "zzzzzzz" })._body).toEqual([]);
   });
 });
