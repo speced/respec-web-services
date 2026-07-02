@@ -126,6 +126,55 @@ table th {
   text-align: left;
 }
 
+.cite {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0.1rem 0.25rem;
+  margin: -0.1rem -0.25rem;
+  border-radius: 4px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cite:hover {
+  background: #dbeafe;
+}
+
+.cite:focus-visible {
+  outline: 2px solid #005a9c;
+  outline-offset: 1px;
+}
+
+.copy-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 90vw;
+  white-space: pre-line;
+  background: #1e293b;
+  color: white;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.copy-toast.is-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .copy-toast {
+    transition: none;
+  }
+}
+
 .autocomplete {
   background: white;
   z-index: 1000;
