@@ -52,8 +52,8 @@ class OptionSelector extends HTMLInputElement {
   }
 
   select(value) {
-    const { selectedValues, elSelections, options } = this;
-    if (value === '' || selectedValues.has(value) || !options.includes(value)) {
+    const { selectedValues, elSelections } = this;
+    if (value === '' || selectedValues.has(value)) {
       return;
     }
 
@@ -114,7 +114,7 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === '') return;
+  if (data.term === '' && !data.specs) return;
 
   const params = new URLSearchParams(Object.entries(data));
   history.replaceState(null, null, `?${params}`);
@@ -137,8 +137,8 @@ async function handleSubmit() {
 }
 
 function renderResults(entries, query) {
-  const { term } = query;
-  caption.innerText = `Searched for "${term}".`;
+  const { term: searchTerm } = query;
+  caption.innerText = searchTerm ? `Searched for "${searchTerm}".` : `Browsing spec definitions.`;
   if (!entries.length) {
     output.innerHTML = `<tr><td colspan="4">No results found.</td></tr>`;
     return;
@@ -150,10 +150,14 @@ function renderResults(entries, query) {
 
   let html = '';
   for (const entry of entries) {
-    // Use the canonical matched term when available (case-insensitive fallback
-    // hits); otherwise fall back to the user's query term (exact match).
-    const citeTerm = entry.term || term;
-    const specInfo = metadata.specs[entry.status][entry.spec];
+    // Prefer the canonical matched term when available (case-insensitive
+    // fallback hits and empty-term browsing both set entry.term); otherwise
+    // fall back to the user's query term (exact match).
+    const citeTerm = entry.term || searchTerm || '';
+    // Browsing can surface entries whose spec isn't in the client metadata;
+    // skip those rather than throwing and blanking the whole results table.
+    const specInfo = metadata.specs[entry.status]?.[entry.spec];
+    if (!specInfo) continue;
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
     const cites = metadata.types.idl.has(entry.type)
@@ -169,7 +173,7 @@ function renderResults(entries, query) {
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
-        <td>${entry.shortname}</td>
+        <td>${entry.shortname || entry.spec || ''}</td>
         <td>${entry.type}</td>
         <td>${citeCell}</td>
       </tr>`;
@@ -445,6 +449,7 @@ async function ready() {
   });
 
   const { searchParams } = new URL(window.location.href);
+  const hasAdvancedParams = searchParams.has('specs') || searchParams.has('types') || searchParams.has('for');
   for (const [field, value] of searchParams) {
     switch (field) {
       case 'term':
@@ -457,7 +462,12 @@ async function ready() {
         break;
     }
   }
-  if (searchParams.has('term')) {
+  if (hasAdvancedParams) {
+    form.advanced.checked = true;
+    form.querySelectorAll('.advanced').forEach(el => { el.hidden = false; });
+    localStorage.setItem('showAdvanced', 'yes');
+  }
+  if (searchParams.has('term') || hasAdvancedParams) {
     handleSubmit();
   }
 
