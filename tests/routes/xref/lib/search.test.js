@@ -21,7 +21,6 @@ describe("xref - search", () => {
   beforeEach(() => cache.clear());
 
   describe("options", () => {
-
     describe("query", () => {
       it("adds query back to response if requested", () => {
         expect(_search([], store, { query: true })).toEqual({
@@ -83,15 +82,15 @@ describe("xref - search", () => {
       });
 
       it("uses filter@for if options.all is set and for is provided", () => {
-        expect(
-          search({ term: "event", for: "Window" }, { all: true }),
-        ).toEqual([resultsAll[1]]);
+        expect(search({ term: "event", for: "Window" }, { all: true })).toEqual(
+          [resultsAll[1]],
+        );
       });
 
       it("uses filter@for if options.all is not set", () => {
-        expect(
-          search({ term: "event", for: "Window" }, { all: true }),
-        ).toEqual([resultsAll[1]]);
+        expect(search({ term: "event", for: "Window" })).toEqual([
+          resultsAll[1],
+        ]);
       });
     });
   });
@@ -169,7 +168,9 @@ describe("xref - search", () => {
 
       // Exact match: no term field (not a fallback hit)
       const exact = searchWithTerm({ term: "baseline" });
-      expect(exact).toEqual([{ uri: "text.html#TermBaseline", term: undefined }]);
+      expect(exact).toEqual([
+        { uri: "text.html#TermBaseline", term: undefined },
+      ]);
 
       // Case-insensitive fallback: term field present with canonical casing
       const fallback = searchWithTerm({ term: "baseLine" });
@@ -180,15 +181,13 @@ describe("xref - search", () => {
     });
 
     it("preserves case for element-type queries", () => {
-      const foreignObject = [
-        { uri: "embedded.html#elementdef-foreignObject" },
-      ];
-      expect(
-        search({ term: "foreignObject", types: ["element"] }),
-      ).toEqual(foreignObject);
-      expect(
-        search({ term: "foreignObject", types: ["_CONCEPT_"] }),
-      ).toEqual(foreignObject);
+      const foreignObject = [{ uri: "embedded.html#elementdef-foreignObject" }];
+      expect(search({ term: "foreignObject", types: ["element"] })).toEqual(
+        foreignObject,
+      );
+      expect(search({ term: "foreignObject", types: ["_CONCEPT_"] })).toEqual(
+        foreignObject,
+      );
       expect(
         search({ term: "foreignObject", types: ["element", "dfn"] }),
       ).toEqual(foreignObject);
@@ -200,9 +199,23 @@ describe("xref - search", () => {
       expect(search({ term: "clipPath", types: ["_CONCEPT_"] })).toEqual(
         clipPath,
       );
+      expect(search({ term: "clipPath", types: ["element", "dfn"] })).toEqual(
+        clipPath,
+      );
+    });
+
+    it("resolves a canonical concept shadowed by a for-scoped lowercase term", () => {
+      // Regression: [=URL=] sends term "url" (concepts are lowercased). The
+      // canonical URL concept is indexed under "URL"; a distinct for-scoped
+      // "url" (basic URL parser local variable) exists under the lowercase key.
+      // The lowercase direct hit must not shadow the canonical concept...
+      expect(search({ term: "url", types: ["_CONCEPT_"] })).toEqual([
+        { uri: "#concept-url" },
+      ]);
+      // ...but the for-scoped entry still wins when its for is given.
       expect(
-        search({ term: "clipPath", types: ["element", "dfn"] }),
-      ).toEqual(clipPath);
+        search({ term: "url", types: ["_CONCEPT_"], for: "basic URL parser" }),
+      ).toEqual([{ uri: "#basic-url-parser-url" }]);
     });
   });
 

@@ -144,6 +144,10 @@ function renderResults(entries, query) {
     return;
   }
 
+  // Detect overloaded IDL entries that would produce identical citations.
+  // Build a set of "uri|forContext" pairs for entries that need disambiguation.
+  const overloadedPairs = detectOverloadedEntries(entries, term);
+
   let html = '';
   for (const entry of entries) {
     // Use the canonical matched term when available (case-insensitive fallback
@@ -152,87 +156,236 @@ function renderResults(entries, query) {
     const specInfo = metadata.specs[entry.status][entry.spec];
     const link = new URL(entry.uri, specInfo.url).href;
     const title = escapeHTML(specInfo.title);
-    const cite = metadata.types.idl.has(entry.type)
-      ? howToCiteIDL(citeTerm, entry)
+    const cites = metadata.types.idl.has(entry.type)
+      ? howToCiteIDL(citeTerm, entry, overloadedPairs)
       : metadata.types.markup.has(entry.type)
         ? howToCiteMarkup(citeTerm, entry)
         : metadata.types.css.has(entry.type) ||
             metadata.types.http.has(entry.type)
           ? howToCiteAnchor(citeTerm, entry)
           : howToCiteTerm(citeTerm, entry);
+    // Each citation is its own button: click/tap the citation to copy just it.
+    const citeCell = cites.map(citeButton).join('<br>');
     let row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
         <td>${entry.shortname}</td>
         <td>${entry.type}</td>
-        <td>${cite}</td>
+        <td>${citeCell}</td>
       </tr>`;
     html += row;
   }
   output.innerHTML = html;
 }
 
-function howToCiteIDL(term, entry) {
+/**
+ * Detects IDL entries that would produce identical citations (overloaded
+ * methods/constructors). Returns a Set of "uri|forContext" keys for entries
+ * that need disambiguation. Entries without a `for` list use an empty string
+ * as the forContext part.
+ */
+function detectOverloadedEntries(entries, term) {
+  const citationGroups = new Map();
+  for (const entry of entries) {
+    if (!metadata.types.idl.has(entry.type)) continue;
+    const specKey = entry.spec || '';
+    const statusKey = entry.status || '';
+    const forList = entry.for || [];
+    // Group per individual rendered citation (one per `f`), so overlapping
+    // `for` contexts across entries are correctly detected as ambiguous.
+    if (forList.length > 0) {
+      for (const f of forList) {
+        const key = `${f}|${term}|${specKey}|${statusKey}`;
+        const group = citationGroups.get(key) ?? [];
+        if (!group.length) citationGroups.set(key, group);
+        group.push({ entry, f });
+      }
+    } else {
+      const key = `|${term}|${specKey}|${statusKey}`;
+      const group = citationGroups.get(key) ?? [];
+      if (!group.length) citationGroups.set(key, group);
+      group.push({ entry, f: '' });
+    }
+  }
+  // Build a Set of "uri|forContext" strings for ambiguous (entry, f) pairs.
+  const overloadedPairs = new Set();
+  for (const group of citationGroups.values()) {
+    if (group.length > 1) {
+      for (const { entry, f } of group) {
+        overloadedPairs.add(`${entry.uri}|${f}`);
+      }
+    }
+  }
+  return overloadedPairs;
+}
+
+function howToCiteIDL(term, entry, overloadedPairs = null) {
   const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList
-      .map(f => {
-        const safeF = escapeHTML(f);
-        const termPart = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
-        return `{{${safeF}/${safeTerm ? termPart : '""'}}}`;
-      })
-      .join('<br>');
+    return forList.map(f => {
+      const safeF = escapeHTML(f);
+      let displayTerm = type === 'enum-value' ? `"${safeTerm}"` : safeTerm;
+      if (overloadedPairs?.has(`${entry.uri}|${f}`)) {
+        const hint = extractOverloadHint(entry.uri, f, term);
+        if (hint) {
+          displayTerm = displayTerm.replace('()', `(${escapeHTML(hint)})`);
+        }
+      }
+      return `{{${safeF}/${displayTerm ? displayTerm : '""'}}}`;
+    });
   }
+  let cite;
   switch (type) {
     case 'exception':
       if (!exceptionExceptions.has(term)) {
-        return `{{"${safeTerm}"}}`;
+        cite = `{{"${safeTerm}"}}`;
+        break;
       }
     default:
-      return `{{${safeTerm}}}`;
+      cite = `{{${safeTerm}}}`;
   }
+  if (overloadedPairs?.has(`${entry.uri}|`)) {
+    const hint = extractOverloadHint(entry.uri, null, term);
+    if (hint) {
+      cite = cite.replace('()', `(${escapeHTML(hint)})`);
+    }
+  }
+  return [cite];
+}
+
+/**
+ * Extracts a human-readable overload hint from a URI fragment.
+ *
+ * URI fragments for WebIDL definitions follow the pattern:
+ *   #dom-<interface>-<method>-<param1>-<param2>-...
+ *
+ * For example:
+ *   #dom-window-postmessage-message-targetorigin-transfer
+ *   #dom-window-postmessage-message-options
+ *
+ * This function strips the known prefix (interface + method) and returns
+ * the remaining parts as a parameter list, e.g. "message, targetorigin, transfer".
+ */
+function extractOverloadHint(uri, forContext, term) {
+  if (!uri) return '';
+  const hash = uri.includes('#') ? uri.split('#')[1] : uri;
+  if (!hash) return '';
+
+  const originalParts = hash.split('-');
+  const lowerParts = hash.toLowerCase().split('-');
+
+  // Build the prefix to strip: typically "dom", interface, method
+  const prefixParts = ['dom'];
+  if (forContext) {
+    prefixParts.push(...forContext.toLowerCase().split('-'));
+  }
+  const cleanTerm = term.replace(/\(.*\)$/, '').toLowerCase();
+  if (cleanTerm) {
+    prefixParts.push(...cleanTerm.split('-'));
+  }
+
+  const matches =
+    prefixParts.length <= lowerParts.length &&
+    prefixParts.every((p, i) => lowerParts[i] === p);
+
+  if (matches && prefixParts.length < lowerParts.length) {
+    return originalParts.slice(prefixParts.length).join(', ');
+  }
+
+  return '';
 }
 
 function howToCiteMarkup(term, entry) {
-  const { type, for: forList, shortname } = entry;
+  const { type, for: forList } = entry;
   const safeTerm = escapeHTML(term);
   if (forList) {
-    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`).join('<br>');
+    return forList.map(f => `[^${escapeHTML(f)}/${safeTerm}^]`);
   }
   if (type === 'element-attr') {
-    return `[^/${safeTerm}^]`;
+    return [`[^/${safeTerm}^]`];
   }
-  return `[^${safeTerm}^]`;
+  return [`[^${safeTerm}^]`];
 }
 
 function howToCiteAnchor(term, entry) {
   const { type, for: forList } = entry;
   term = escapeHTML(term);
   if (!forList) {
-    return escapeHTML(`<a data-xref-type="${type}">${term}</a>`);
+    return [escapeHTML(`<a data-xref-type="${type}">${term}</a>`)];
   }
-  return forList
-    .map(f =>
-      escapeHTML(
-        `<a data-xref-type="${type}" data-xref-for="${f}">${term}</a>`,
-      ),
-    )
-    .join('<br>');
+  return forList.map(f =>
+    escapeHTML(`<a data-xref-type="${type}" data-xref-for="${f}">${term}</a>`),
+  );
 }
 
 function howToCiteTerm(term, entry) {
-  const { type, for: forList, shortname } = entry;
+  const { type, for: forList } = entry;
   term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
-    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`).join('<br>');
+    return forList.map(f => `[=${escapeHTML(f)}/${term}=]`);
   }
-  return `[=${term}=]`;
+  return [`[=${term}=]`];
 }
 
 function escapeHTML(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+
+// Render one citation as its own copy button. The accessible name conveys the
+// action + value; `cite` is already escaped for &<>, but an attribute value
+// also needs " escaped (e.g. exception citations like {{"DOMException"}}).
+function citeButton(cite) {
+  const label = `Copy citation ${cite.replace(/"/g, '&quot;')}`;
+  return `<button type="button" class="cite" aria-label="${label}">${cite}</button>`;
+}
+
+// A single reused live region. Reusing one element (rather than appending a
+// new toast per click) avoids stacking overlapping toasts and competing
+// announcements when copying several citations in quick succession.
+let copyToast;
+let copyToastTimer;
+function showCopyToast(message) {
+  if (!copyToast) {
+    copyToast = document.createElement('div');
+    copyToast.className = 'copy-toast';
+    copyToast.setAttribute('role', 'status');
+    document.body.appendChild(copyToast);
+  }
+  clearTimeout(copyToastTimer);
+  // Set the text on the next frame so the (already-attached) live region
+  // announces it as a change rather than as initial content.
+  requestAnimationFrame(() => {
+    copyToast.textContent = message;
+    copyToast.classList.add('is-visible');
+  });
+  copyToastTimer = setTimeout(() => {
+    copyToast.classList.remove('is-visible');
+  }, 1500);
+}
+
+async function copyCitation(text) {
+  if (!text) return;
+  if (!navigator.clipboard) {
+    showCopyToast('Clipboard unavailable');
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopyToast(`Copied: ${text}`);
+  } catch (err) {
+    console.error(err);
+    showCopyToast('Copy failed');
+  }
+}
+
+// Click-to-copy: each citation is itself a <button>, so clicking/tapping the
+// citation copies just that one. Being a real button, keyboard activation
+// (Enter/Space) dispatches a click for free.
+output.addEventListener('click', e => {
+  const cite = e.target.closest('.cite');
+  if (cite) copyCitation(cite.textContent);
+});
 
 async function ready() {
   const updateInput = (el, values) => {
