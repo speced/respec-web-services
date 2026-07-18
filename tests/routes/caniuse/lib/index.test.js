@@ -1,4 +1,3 @@
-import os from "node:os";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
@@ -7,7 +6,9 @@ import {
   cache,
 } from "../../../../build/routes/caniuse/lib/index.js";
 
-const CANIUSE_DIR = path.join(os.tmpdir(), "caniuse");
+// The caniuse module reads from DATA_DIR, set to an isolated temp dir by
+// tests/helpers/env.js. Write fixtures there so the module finds them.
+const CANIUSE_DIR = path.join(process.env.DATA_DIR, "caniuse");
 
 /** Minimal valid ScraperOutput fixture */
 const FIXTURE = {
