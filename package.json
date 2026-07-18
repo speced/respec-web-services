@@ -16,7 +16,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
-    "helmet": "^8.2.0",
+    "helmet": "^8.3.0",
     "morgan": "^1.11.0",
     "nanoid": "^5.1.16",
     "serialize-error": "^13.0.1",
