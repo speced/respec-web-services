@@ -33,8 +33,8 @@ importers:
         specifier: ^1.11.0
         version: 1.11.0
       nanoid:
-        specifier: ^6.0.0
-        version: 6.0.0
+        specifier: ^6.0.1
+        version: 6.0.1
       serialize-error:
         specifier: ^13.0.1
         version: 13.0.1
@@ -551,8 +551,8 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
-  nanoid@6.0.0:
-    resolution: {integrity: sha512-mkUH+rPkwU2qPadJ0oJZOjeZ5Mxn8Q1UhevwkTRWNuUZzyia3h4rhzK39hxaHTk0o2OxB8W2SQ6A8k23ZDi1pQ==}
+  nanoid@6.0.1:
+    resolution: {integrity: sha512-3wVS3i51pE2pi1k5FFL/95BGfVS0kSsvDVuGXHOtxox/TywUmtgq+3qiTOTbs9J7KfHaXPiN171k/A6dBnaXFw==}
     engines: {node: ^22 || ^24 || >=26}
     hasBin: true
 
@@ -699,8 +699,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  terser@5.49.0:
-    resolution: {integrity: sha512-SNiDnXyHSrxVcIOtVbULzcTmniUiwcV7Nwdyj1twVubeTmbjoa8p69KKDpfkdoOavuM4/GRm1+ykI8qqnavHoA==}
+  terser@5.49.2:
+    resolution: {integrity: sha512-rGbJiKeQ4WDe3EXlDAIaQcwftVfv2Q8o1awFNfvXolJYKkb1AuZY1RTOmqx4LJXZENbWZA7eIsYGHuEzHsi1nQ==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -1132,7 +1132,7 @@ snapshots:
       entities: 4.5.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.49.0
+      terser: 5.49.2
 
   http-errors@2.0.1:
     dependencies:
@@ -1202,7 +1202,7 @@ snapshots:
 
   ms@2.1.3: {}
 
-  nanoid@6.0.0: {}
+  nanoid@6.0.1: {}
 
   negotiator@0.6.4: {}
 
@@ -1367,7 +1367,7 @@ snapshots:
       source-map: 0.6.1
       source-map-support: 0.5.21
 
-  terser@5.49.0:
+  terser@5.49.2:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.18.0
