@@ -58,8 +58,8 @@ importers:
         specifier: ^1.9.10
         version: 1.9.10
       '@types/node':
-        specifier: ^26.1.2
-        version: 26.1.2
+        specifier: ^26.2.0
+        version: 26.2.0
       '@types/split2':
         specifier: ^4.2.3
         version: 4.2.3
@@ -118,8 +118,8 @@ packages:
   '@types/morgan@1.9.10':
     resolution: {integrity: sha512-sS4A1zheMvsADRVfT0lYbJ4S9lmsey8Zo2F7cnbYjWHP67Q0AwMYuuzLlkIM2N8gAbb9cubhIVFwcIN2XyYCkA==}
 
-  '@types/node@26.1.2':
-    resolution: {integrity: sha512-Vu4a5UFA9rIIFJ7rB/Vaafh9lrCQszopTCx6KjFboXTGQbPNasehVR5TEiithSDGyd1DEiUByggTZsg8jukeIg==}
+  '@types/node@26.2.0':
+    resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
 
   '@types/qs@6.15.0':
     resolution: {integrity: sha512-JawvT8iBVWpzTrz3EGw9BTQFg3BQNmwERdKE22vlTxawwtbyUSlMppvZYKLZzB5zgACXdXxbD3m1bXaMqP/9ow==}
@@ -699,8 +699,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  terser@5.49.2:
-    resolution: {integrity: sha512-rGbJiKeQ4WDe3EXlDAIaQcwftVfv2Q8o1awFNfvXolJYKkb1AuZY1RTOmqx4LJXZENbWZA7eIsYGHuEzHsi1nQ==}
+  terser@5.50.0:
+    resolution: {integrity: sha512-CN9BVxWhgS/hRxtUMjtC2uRWSTcSfQFHMDWma6sKKfIivCD91sM+FOPfvwoaRMqCSrUpe1nv3jDamd9eEQ4y+w==}
     engines: {node: '>=10'}
     hasBin: true
 
@@ -776,24 +776,24 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@types/compression@1.8.1':
     dependencies:
       '@types/express': 5.0.6
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
       '@types/qs': 6.15.0
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -808,9 +808,9 @@ snapshots:
 
   '@types/morgan@1.9.10':
     dependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
-  '@types/node@26.1.2':
+  '@types/node@26.2.0':
     dependencies:
       undici-types: 8.3.0
 
@@ -820,16 +820,16 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@types/split2@4.2.3':
     dependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true
@@ -1132,7 +1132,7 @@ snapshots:
       entities: 4.5.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 5.49.2
+      terser: 5.50.0
 
   http-errors@2.0.1:
     dependencies:
@@ -1367,7 +1367,7 @@ snapshots:
       source-map: 0.6.1
       source-map-support: 0.5.21
 
-  terser@5.49.2:
+  terser@5.50.0:
     dependencies:
       '@jridgewell/source-map': 0.3.11
       acorn: 8.18.0
