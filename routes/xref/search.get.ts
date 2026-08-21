@@ -5,7 +5,7 @@ import { searchOne, Query, Options } from "./lib/search.js";
 import { store } from "./lib/store-init.js";
 
 interface QueryParams {
-  term: string;
+  term?: string;
   specs?: string | string[];
   for?: string;
   type?: string | string[];
@@ -17,16 +17,17 @@ export default async function route(req: IRequest, res: Response) {
   const { term, for: forContext } = req.query;
   const specs = splitQueryParam(req.query.specs);
   const types = splitQueryParam(req.query.type)?.flat(2) as Query["types"];
-  if (typeof term === "undefined") {
-    const msg = "Missing required query parameter: term";
-    res.status(400);
-    res.json({
-      message: { type: "error", text: msg },
+  // Empty-term browsing requires specs to scope the results. Types alone would
+  // scan the entire store, so types-only requests without term or specs are
+  // rejected here.
+  if (typeof term === "undefined" && !specs?.length) {
+    res.status(400).json({
+      message: { type: "error", text: "Missing required query parameter: term (or provide specs to browse)" },
     });
     return;
   }
 
-  const query: Query = { term, specs, for: forContext, types, id: "" };
+  const query: Query = { term: term ?? "", specs, for: forContext, types, id: "" };
   const options: Partial<Options> = { fields: [], all: !types || !forContext };
 
   const result = searchOne(query, store, options);
