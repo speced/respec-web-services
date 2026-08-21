@@ -290,4 +290,29 @@ export default {
       normative: false,
     },
   ],
+  // The canonical URL concept is indexed under "URL" (case preserved), while a
+  // distinct for-scoped "url" (the basic URL parser's local variable) exists
+  // under the lowercase key. A lowercased query ("url") must still resolve the
+  // canonical concept and not be shadowed by the for-scoped lowercase entry.
+  URL: [
+    {
+      type: "dfn",
+      spec: "url",
+      shortname: "url",
+      status: "current",
+      uri: "#concept-url",
+      normative: true,
+    },
+  ],
+  url: [
+    {
+      type: "dfn",
+      spec: "url",
+      shortname: "url",
+      status: "current",
+      uri: "#basic-url-parser-url",
+      normative: true,
+      for: ["basic URL parser"],
+    },
+  ],
 };

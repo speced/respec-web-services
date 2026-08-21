@@ -1,0 +1,234 @@
+import { mkdtemp, writeFile, mkdir, rm, unlink } from "fs/promises";
+import path from "path";
+import { tmpdir } from "os";
+
+// Fixture data representing the groups.json structure
+const FIXTURE_GROUPS = {
+  wg: {
+    webapps: { id: 114929, name: "Web Applications Working Group", URI: "https://www.w3.org/groups/wg/webapps/" },
+    css: { id: 32061, name: "CSS Working Group", URI: "https://www.w3.org/groups/wg/css/" },
+    apa: { id: 83907, name: "Accessible Platform Architectures Working Group", URI: "https://www.w3.org/groups/wg/apa/" },
+  },
+  cg: {
+    wicg: { id: 80485, name: "Web Incubator CG", URI: "https://www.w3.org/community/wicg/" },
+  },
+  ig: {
+    wai: { id: 34520, name: "WAI Interest Group", URI: "https://www.w3.org/groups/ig/wai/" },
+  },
+  bg: {},
+  other: {},
+};
+
+let tmpDir;
+let groupsJsonPath;
+let route;
+let reloadGroups;
+let origDataDir;
+
+beforeAll(async () => {
+  tmpDir = await mkdtemp(path.join(tmpdir(), "w3c-group-test-"));
+  const w3cDir = path.join(tmpDir, "w3c");
+  groupsJsonPath = path.join(w3cDir, "groups.json");
+  await mkdir(w3cDir, { recursive: true });
+  await writeFile(groupsJsonPath, JSON.stringify(FIXTURE_GROUPS));
+
+  // Set DATA_DIR before importing the module
+  origDataDir = process.env.DATA_DIR;
+  process.env.DATA_DIR = tmpDir;
+
+  const mod = await import("../../../build/routes/w3c/group.js");
+  route = mod.default;
+  reloadGroups = mod.reloadGroups;
+});
+
+afterAll(async () => {
+  if (origDataDir !== undefined) {
+    process.env.DATA_DIR = origDataDir;
+  }
+  if (tmpDir) {
+    await rm(tmpDir, { recursive: true, force: true });
+  }
+});
+
+/**
+ * Create a mock Express response object that tracks calls.
+ */
+function mockRes() {
+  const res = {
+    _status: 200,
+    _body: undefined,
+    _headers: {},
+    _redirectUrl: undefined,
+    _redirectStatus: undefined,
+    _jsonBody: undefined,
+    _rendered: undefined,
+    status(code) {
+      res._status = code;
+      return res;
+    },
+    send(body) {
+      res._body = body;
+      return res;
+    },
+    json(body) {
+      res._jsonBody = body;
+      return res;
+    },
+    set(header, value) {
+      res._headers[header] = value;
+      return res;
+    },
+    redirect(status, url) {
+      res._redirectStatus = status;
+      res._redirectUrl = url;
+      return res;
+    },
+    render(view, data) {
+      res._rendered = { view, data };
+      return res;
+    },
+  };
+  return res;
+}
+
+/**
+ * Invoke the route with a mock request/response and return the response for
+ * assertions.
+ */
+async function run(params = {}, headers = {}) {
+  const res = mockRes();
+  await route({ params, headers }, res);
+  return res;
+}
+
+describe("w3c/group - LEGACY_SHORTNAMES behavior", () => {
+  it("redirects legacy shortnames with a 301", async () => {
+    for (const [shortname, target] of [
+      ["wai-apa", "/w3c/groups/apa"],
+      ["i18n", "/w3c/groups/i18n-core"],
+    ]) {
+      const res = await run({ shortname });
+      expect(res._redirectStatus).withContext(shortname).toBe(301);
+      expect(res._redirectUrl).withContext(shortname).toBe(target);
+    }
+  });
+});
+
+describe("w3c/group - no shortname", () => {
+  it("returns JSON of all groups when no shortname and no html accept", async () => {
+    const res = await run({}, { accept: "application/json" });
+    expect(res._jsonBody).toBeDefined();
+    expect(res._jsonBody.wg).toBeDefined();
+    expect(res._jsonBody.cg).toBeDefined();
+    expect(res._jsonBody.ig).toBeDefined();
+  });
+
+  it("renders HTML view when accept includes text/html", async () => {
+    const res = await run({}, { accept: "text/html" });
+    expect(res._rendered).toBeDefined();
+    expect(res._rendered.view).toBe("w3c/groups.js");
+    expect(res._rendered.data.groups).toBeDefined();
+  });
+});
+
+describe("w3c/group - error handling", () => {
+  it("returns 404 for invalid group type", async () => {
+    const res = await run({ shortname: "webapps", type: "invalid-type" });
+    expect(res._status).toBe(404);
+    expect(res._body).toContain("Invalid group type");
+    expect(res._body).toContain("invalid-type");
+    expect(res._headers["Content-Type"]).toBe("text/plain");
+  });
+
+  it("returns 404 for unknown shortname with no type", async () => {
+    const res = await run({ shortname: "totally-unknown-group" });
+    expect(res._status).toBe(404);
+    expect(res._body).toContain("totally-unknown-group");
+  });
+});
+
+describe("w3c/group - getGroupMeta disambiguation", () => {
+  // This tests the group type disambiguation indirectly through the route handler.
+  // When a shortname exists in only one type, it should work without specifying type.
+  // When it exists in multiple types, it should return 409.
+
+  let originalFetch;
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+    // Stub the api.w3.org call so the test is deterministic and offline-safe.
+    // No "active-charter" link, so getPatentPolicy() makes no further request.
+    globalThis.fetch = jasmine.createSpy("fetch").and.resolveTo(
+      new Response(
+        JSON.stringify({
+          id: 32061,
+          name: "CSS Working Group",
+          _links: {
+            homepage: { href: "https://www.w3.org/groups/wg/css/" },
+            "pp-status": { href: "https://www.w3.org/groups/wg/css/ipr" },
+          },
+        }),
+        { status: 200 },
+      ),
+    );
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it("resolves an unambiguous shortname to its single group type", async () => {
+    // 'css' exists only as a wg in the fixture, so the type is inferred (no
+    // 409 ambiguity error) and the route returns that group's info.
+    const res = await run({ shortname: "css" });
+    expect(res._status).not.toBe(409);
+    expect(res._jsonBody).toEqual(
+      jasmine.objectContaining({
+        shortname: "css",
+        type: "wg",
+        name: "CSS Working Group",
+      }),
+    );
+  });
+});
+
+describe("w3c/group - reloadGroups()", () => {
+  afterEach(async () => {
+    await writeFile(groupsJsonPath, JSON.stringify(FIXTURE_GROUPS));
+    reloadGroups();
+  });
+
+  it("returns true and updates in-memory groups from valid JSON", async () => {
+    const updated = {
+      wg: {
+        newgroup: { id: 99999, name: "New Group", URI: "https://example.com" },
+      },
+      cg: {},
+      ig: {},
+      bg: {},
+      other: {},
+    };
+    await writeFile(groupsJsonPath, JSON.stringify(updated));
+    expect(reloadGroups()).toBe(true);
+
+    const res = await run({}, { accept: "application/json" });
+    expect(res._jsonBody.wg.newgroup).toBeDefined();
+    expect(res._jsonBody.wg.newgroup.id).toBe(99999);
+    expect(res._jsonBody.wg.css).toBeUndefined();
+  });
+
+  it("returns false when groups.json is missing", async () => {
+    await unlink(groupsJsonPath);
+    expect(reloadGroups()).toBe(false);
+
+    const res = await run({}, { accept: "application/json" });
+    expect(res._jsonBody.wg.css).toBeDefined();
+  });
+
+  it("returns false when groups.json contains invalid JSON", async () => {
+    await writeFile(groupsJsonPath, "{not valid json!!!");
+    expect(reloadGroups()).toBe(false);
+
+    const res = await run({}, { accept: "application/json" });
+    expect(res._jsonBody.wg.css).toBeDefined();
+  });
+});

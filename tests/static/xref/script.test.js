@@ -11,12 +11,20 @@ const SRC = fileURLToPath(
 );
 const text = readFileSync(SRC, "utf8");
 
+// Stop before citeButton so the slice excludes the clipboard code (which
+// references the `output` DOM global and would throw in this context).
 const fnBlock = text.slice(
   text.indexOf("function howToCiteIDL"),
-  text.indexOf("async function ready"),
+  text.indexOf("function citeButton"),
 );
 const excStart = text.indexOf("const exceptionExceptions");
 const excBlock = text.slice(excStart, text.indexOf("]);", excStart) + 3);
+
+// Fail loudly if the helpers are renamed/reordered so the slices no longer
+// capture what we expect, rather than silently testing the wrong thing.
+if (!fnBlock.includes("function howToCiteTerm") || !excBlock.includes("URIError")) {
+  throw new Error("could not slice citation helpers out of script.js");
+}
 
 const sandbox = {};
 vm.createContext(sandbox);
@@ -33,45 +41,51 @@ const XSS = "<img src=x onerror=alert(1)>";
 
 describe("xref/script - citation HTML escaping", () => {
   it("escapes the term and for-context in IDL citations", () => {
-    expect(howToCiteIDL(XSS, { type: "attribute", for: ["Window"] })).not.toContain(
+    expect(
+      howToCiteIDL(XSS, { type: "attribute", for: ["Window"] }).join(""),
+    ).not.toContain("<img");
+    expect(
+      howToCiteIDL("postMessage", { type: "method", for: ["<f>"] }).join(""),
+    ).toContain("&lt;f&gt;");
+    expect(howToCiteIDL(XSS, { type: "interface" }).join("")).not.toContain(
       "<img",
     );
-    expect(
-      howToCiteIDL("postMessage", { type: "method", for: ["<f>"] }),
-    ).toContain("&lt;f&gt;");
-    expect(howToCiteIDL(XSS, { type: "interface" })).not.toContain("<img");
   });
 
   it("escapes the term and for-context in markup citations", () => {
     expect(
-      howToCiteMarkup(XSS, { type: "element", for: ["<f>"] }),
+      howToCiteMarkup(XSS, { type: "element", for: ["<f>"] }).join(""),
     ).not.toContain("<img");
-    expect(howToCiteMarkup(XSS, { type: "element-attr" })).not.toContain("<img");
-    expect(howToCiteMarkup(XSS, { type: "element" })).not.toContain("<img");
+    expect(
+      howToCiteMarkup(XSS, { type: "element-attr" }).join(""),
+    ).not.toContain("<img");
+    expect(howToCiteMarkup(XSS, { type: "element" }).join("")).not.toContain(
+      "<img",
+    );
   });
 
   it("escapes the term and for-context in dfn-term citations", () => {
-    expect(howToCiteTerm(XSS, { type: "dfn" })).not.toContain("<img");
-    expect(howToCiteTerm("x", { type: "dfn", for: ["<f>"] })).toContain(
-      "&lt;f&gt;",
-    );
+    expect(howToCiteTerm(XSS, { type: "dfn" }).join("")).not.toContain("<img");
+    expect(
+      howToCiteTerm("x", { type: "dfn", for: ["<f>"] }).join(""),
+    ).toContain("&lt;f&gt;");
   });
 
   it("leaves ordinary citations unchanged", () => {
     expect(
       howToCiteIDL("postMessage", { type: "method", for: ["Window"] }),
-    ).toBe("{{Window/postMessage}}");
+    ).toEqual(["{{Window/postMessage}}"]);
     expect(
       howToCiteIDL("classic", { type: "enum-value", for: ["WorkerType"] }),
-    ).toBe('{{WorkerType/"classic"}}');
-    expect(howToCiteTerm("a/b", { type: "dfn" })).toBe("[=a\\/b=]");
+    ).toEqual(['{{WorkerType/"classic"}}']);
+    expect(howToCiteTerm("a/b", { type: "dfn" })).toEqual(["[=a\\/b=]"]);
   });
 
   it("renders the empty-term fallback (the touched truthiness branch)", () => {
     // `escapeHTML("")` is still falsy, so the `safeTerm ? termPart : '""'`
     // branch must keep producing the empty-string placeholder.
-    expect(howToCiteIDL("", { type: "method", for: ["Window"] })).toBe(
+    expect(howToCiteIDL("", { type: "method", for: ["Window"] })).toEqual([
       '{{Window/""}}',
-    );
+    ]);
   });
 });
