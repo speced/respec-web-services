@@ -66,7 +66,10 @@ describe("github/lib/utils/rest - requestData", () => {
       let n = 0;
       globalThis.fetch = jasmine
         .createSpy("fetch")
-        .and.callFake(() => Promise.resolve(++n === 1 ? page({ page: 1 }, { next: 2 }) : page({ page: 2 })));
+        .and.callFake(() => {
+          const isFirstPage = ++n === 1;
+          return Promise.resolve(isFirstPage ? page({ page: 1 }, { next: 2 }) : page({ page: 2 }));
+        });
       const results = [];
       for await (const item of requestData("https://api.github.com/repos/w3c/respec/issues")) {
         results.push(item.result);
