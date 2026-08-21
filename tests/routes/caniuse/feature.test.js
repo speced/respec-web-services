@@ -1,11 +1,11 @@
-import os from "node:os";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
+import { env } from "../../../build/utils/misc.js";
 import route from "../../../build/routes/caniuse/feature.js";
 import { cache } from "../../../build/routes/caniuse/lib/index.js";
 
-const CANIUSE_DIR = path.join(os.tmpdir(), "caniuse");
+const CANIUSE_DIR = path.join(env("DATA_DIR"), "caniuse");
 
 const FIXTURE = {
   all: {
