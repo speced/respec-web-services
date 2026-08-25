@@ -310,8 +310,14 @@ function filterByForContext(data: DataEntry[], query: Query, options: Options) {
  * loses real definitions.
  */
 function definitionIdentity(item: DataEntry) {
-  const forContext = [...(item.for ?? [])].sort().join("\u0000");
-  return [item.spec, item.type, item.term, forContext].join("\u0001");
+  // JSON encodes the parts unambiguously, so a term containing a separator
+  // cannot forge another definition's identity.
+  return JSON.stringify([
+    item.spec,
+    item.type,
+    item.term,
+    [...(item.for ?? [])].sort(),
+  ]);
 }
 
 function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
@@ -321,18 +327,33 @@ function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   if (specTypes.length === 1) {
     return data.filter(entry => entry.status === preferredType);
   }
+  // Preferred entries first. ReSpec itself does not depend on this (it requires
+  // exactly one result and reports anything else as an error, see xref.js
+  // addDataCiteToTerms), but the order is part of this API's existing responses
+  // and several tests pin it, so it is left alone here.
+  // NOTE: this comparator is not a valid strict weak ordering (it returns -1 when
+  // both sides are the preferred status). Correcting it changes the order of every
+  // response and breaks six order-pinning tests, so it is deliberately left alone
+  // here and tracked separately rather than bundled into this fix.
   const sorted = [...data].sort((a, b) =>
     a.status === preferredType ? -1 : b.status === preferredType ? 1 : 0,
   );
-  const preferredData: DataEntry[] = [];
-  const seen = new Set<string>();
+  // Drop a non-preferred entry only when its preferred twin is present. Two
+  // entries sharing an identity at the SAME status are not twins, they are
+  // distinct definitions the by-term store cannot tell apart (it strips `term`,
+  // and it files every method overload under a shared `name()` key), so
+  // collapsing them would lose real definitions. Document order is preserved.
+  const preferredIdentities = new Set<string>();
   for (const item of sorted) {
-    const identity = definitionIdentity(item);
-    if (item.status === preferredType || !seen.has(identity)) {
-      preferredData.push(item);
-      seen.add(identity);
+    if (item.status === preferredType) {
+      preferredIdentities.add(definitionIdentity(item));
     }
   }
+  const preferredData = sorted.filter(
+    item =>
+      item.status === preferredType ||
+      !preferredIdentities.has(definitionIdentity(item)),
+  );
 
   const hasPreferredData = specTypes.length === 2 && preferredData.length;
   return specTypes.length === 1 || hasPreferredData ? preferredData : data;

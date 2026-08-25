@@ -349,6 +349,46 @@ describe("xref - search", () => {
         { term: "script", uri: "webappapis.html#concept-script" },
       ]);
     });
+
+    // Two method overloads share an identity because the by-term store strips
+    // `term` and files both under "get()". They are not draft/snapshot twins, so
+    // neither may be dropped.
+    it("keeps method overloads that share an identity at the same status", () => {
+      const result = search(
+        { term: "get()", types: ["method"] },
+        { fields: ["uri"], all: true },
+      );
+      expect(result).toEqual([
+        { uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get" },
+        {
+          uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get-jointname",
+        },
+      ]);
+    });
+
+    // A snapshot entry is only dropped when a current entry shares its identity,
+    // so these two pin the `term` and `for` parts of that identity. Remove either
+    // part and the snapshot entry is misread as a twin and dropped.
+    it("does not treat a different term as a twin of a current entry", () => {
+      const result = search(
+        { term: "", specs: [["identity-fixture"]], types: ["dfn"], id: "" },
+        { fields: ["term"], all: true },
+      );
+      expect(result).toEqual([{ term: "alpha" }, { term: "beta" }]);
+    });
+
+    it("does not treat a different for context as a twin of a current entry", () => {
+      const result = search(
+        {
+          term: "",
+          specs: [["identity-fixture"]],
+          types: ["dict-member"],
+          id: "",
+        },
+        { fields: ["for"], all: true },
+      );
+      expect(result).toEqual([{ for: ["OptionsA"] }, { for: ["OptionsB"] }]);
+    });
   });
 
   describe("filter@types", () => {

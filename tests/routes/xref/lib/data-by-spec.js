@@ -317,4 +317,49 @@ export default {
       for: ["CookieListItem"],
     },
   ],
+  // Synthetic spec whose entries pair a preferred (current) definition with a
+  // non-preferred (snapshot) one that is NOT its twin. Since a snapshot entry is
+  // only dropped when a current entry shares its identity, these pin the `term`
+  // and `for` parts of that identity: remove either and the snapshot entry is
+  // wrongly treated as a twin and dropped.
+  "identity-fixture": [
+    {
+      term: "alpha",
+      type: "dfn",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "current",
+      uri: "#alpha",
+      normative: true,
+    },
+    {
+      term: "beta",
+      type: "dfn",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/identity-fixture/#beta",
+      normative: true,
+    },
+    {
+      term: "gamma",
+      type: "dict-member",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "current",
+      uri: "#gamma-a",
+      normative: true,
+      for: ["OptionsA"],
+    },
+    {
+      term: "gamma",
+      type: "dict-member",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/identity-fixture/#gamma-b",
+      normative: true,
+      for: ["OptionsB"],
+    },
+  ],
 };

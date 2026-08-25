@@ -358,4 +358,28 @@ export default {
       for: ["CookieListItem"],
     },
   ],
+  // The by-term store strips `term` and files every method overload under a
+  // shared `name()` key (see updateDataByTerm), so these two distinct overloads
+  // are indistinguishable by spec, type, term and for. They are both snapshot,
+  // i.e. non-preferred by default, so they reach the dedup path. Production has
+  // 76 groups with more than one uri at the same status, 18 of them snapshot;
+  // only 6 of those also lack a preferred twin, which is the case this pins.
+  "get()": [
+    {
+      type: "method",
+      spec: "webxr-hand-input-1",
+      shortname: "webxr-hand-input",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get",
+      for: ["XRHand"],
+    },
+    {
+      type: "method",
+      spec: "webxr-hand-input-1",
+      shortname: "webxr-hand-input",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get-jointname",
+      for: ["XRHand"],
+    },
+  ],
 };
