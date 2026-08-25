@@ -296,6 +296,30 @@ function filterByForContext(data: DataEntry[], query: Query, options: Options) {
   });
 }
 
+/**
+ * Identity of a definition, independent of where it was published.
+ *
+ * The same definition appears twice in the store, once from the editor's draft
+ * and once from the published snapshot, and the two differ only in `status` and
+ * `uri` (a relative fragment versus an absolute URL). So `uri` cannot be part of
+ * the identity, or the pair never collapses and the term becomes ambiguous.
+ *
+ * `for` is part of the identity: production data has 2198 groups sharing a spec,
+ * type and term while differing only in `for` (e.g. `name` as a dict-member of
+ * four different Cookie Store dictionaries), and dropping all but one of those
+ * loses real definitions.
+ */
+function definitionIdentity(item: DataEntry) {
+  // JSON encodes the parts unambiguously, so a term containing a separator
+  // cannot forge another definition's identity.
+  return JSON.stringify([
+    item.spec,
+    item.type,
+    item.term,
+    [...(item.for ?? [])].sort(),
+  ]);
+}
+
 function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   if (!specTypes.length) return data;
 
@@ -303,18 +327,33 @@ function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   if (specTypes.length === 1) {
     return data.filter(entry => entry.status === preferredType);
   }
+  // Preferred entries first. ReSpec itself does not depend on this (it requires
+  // exactly one result and reports anything else as an error, see xref.js
+  // addDataCiteToTerms), but the order is part of this API's existing responses
+  // and several tests pin it, so it is left alone here.
+  // NOTE: this comparator is not a valid strict weak ordering (it returns -1 when
+  // both sides are the preferred status). Correcting it changes the order of every
+  // response and breaks six order-pinning tests, so it is deliberately left alone
+  // here and tracked separately rather than bundled into this fix.
   const sorted = [...data].sort((a, b) =>
     a.status === preferredType ? -1 : b.status === preferredType ? 1 : 0,
   );
-  const preferredData: DataEntry[] = [];
+  // Drop a non-preferred entry only when its preferred twin is present. Two
+  // entries sharing an identity at the SAME status are not twins, they are
+  // distinct definitions the by-term store cannot tell apart (it strips `term`,
+  // and it files every method overload under a shared `name()` key), so
+  // collapsing them would lose real definitions. Document order is preserved.
+  const preferredIdentities = new Set<string>();
   for (const item of sorted) {
-    if (
-      item.status === preferredType ||
-      !preferredData.find(it => item.spec === it.spec && item.type === it.type && item.uri === it.uri)
-    ) {
-      preferredData.push(item);
+    if (item.status === preferredType) {
+      preferredIdentities.add(definitionIdentity(item));
     }
   }
+  const preferredData = sorted.filter(
+    item =>
+      item.status === preferredType ||
+      !preferredIdentities.has(definitionIdentity(item)),
+  );
 
   const hasPreferredData = specTypes.length === 2 && preferredData.length;
   return specTypes.length === 1 || hasPreferredData ? preferredData : data;

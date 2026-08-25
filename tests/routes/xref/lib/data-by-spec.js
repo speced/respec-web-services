@@ -1,9 +1,13 @@
 // bySpec is keyed by spec series shortname (matching production specs.json shape),
 // mapping to all DataEntry items for that series. Each entry retains its versioned
 // spec id in the `spec` field to allow version-preference tests.
+//
+// Entries carry `term`, as production specs.json does. Without it, two distinct
+// definitions in one spec are indistinguishable by spec+type and get collapsed.
 export default {
   "referrer-policy": [
     {
+      term: "",
       type: "enum-value",
       spec: "referrer-policy-1",
       shortname: "referrer-policy",
@@ -12,8 +16,9 @@ export default {
       for: ["ReferrerPolicy"],
     },
   ],
-  fetch: [
+  "fetch": [
     {
+      term: "",
       type: "enum-value",
       spec: "fetch",
       shortname: "fetch",
@@ -22,6 +27,7 @@ export default {
       for: ["RequestDestination"],
     },
     {
+      term: "script",
       type: "enum-value",
       spec: "fetch",
       shortname: "fetch",
@@ -30,14 +36,17 @@ export default {
       for: ["RequestDestination"],
     },
     {
-      shortname: "fetch",
-      spec: "fetch",
-      uri: "#concept-body",
+      term: "body",
       type: "dfn",
+      spec: "fetch",
+      shortname: "fetch",
+      status: undefined,
+      uri: "#concept-body",
     },
   ],
-  xhr: [
+  "xhr": [
     {
+      term: "",
       type: "enum-value",
       spec: "xhr",
       shortname: "xhr",
@@ -48,17 +57,18 @@ export default {
   ],
   "font-metrics-api": [
     {
+      term: "Baseline",
       type: "interface",
       spec: "font-metrics-api-1",
       shortname: "font-metrics-api",
       status: "current",
       uri: "#baseline",
       normative: true,
-      htmlProse: "test html Prose",
     },
   ],
-  svg: [
+  "svg": [
     {
+      term: "baseline",
       type: "dfn",
       spec: "svg2",
       shortname: "svg",
@@ -66,6 +76,7 @@ export default {
       uri: "text.html#TermBaseline",
     },
     {
+      term: "baseline",
       type: "dfn",
       spec: "svg2",
       shortname: "svg",
@@ -73,6 +84,7 @@ export default {
       uri: "text.html#TermBaseline",
     },
     {
+      term: "script",
       type: "element",
       spec: "svg2",
       shortname: "svg",
@@ -80,6 +92,7 @@ export default {
       uri: "interact.html#elementdef-script",
     },
     {
+      term: "script",
       type: "element",
       spec: "svg2",
       shortname: "svg",
@@ -87,6 +100,7 @@ export default {
       uri: "interact.html#elementdef-script",
     },
     {
+      term: "marker",
       type: "element",
       spec: "svg2",
       shortname: "svg",
@@ -94,6 +108,7 @@ export default {
       uri: "painting.html#elementdef-marker",
     },
     {
+      term: "marker",
       type: "element",
       spec: "svg2",
       shortname: "svg",
@@ -101,6 +116,7 @@ export default {
       uri: "painting.html#elementdef-marker",
     },
     {
+      term: "script",
       type: "element",
       spec: "svg",
       shortname: "svg",
@@ -108,6 +124,7 @@ export default {
       uri: "script.html#ScriptElement",
     },
     {
+      term: "marker",
       type: "element",
       spec: "svg",
       shortname: "svg",
@@ -115,8 +132,9 @@ export default {
       uri: "painting.html#MarkerElement",
     },
   ],
-  html: [
+  "html": [
     {
+      term: "event handler",
       type: "dfn",
       spec: "html",
       shortname: "html",
@@ -124,6 +142,7 @@ export default {
       uri: "webappapis.html#event-handlers",
     },
     {
+      term: "script",
       type: "element",
       spec: "html",
       shortname: "html",
@@ -131,6 +150,7 @@ export default {
       uri: "scripting.html#script",
     },
     {
+      term: "script",
       type: "dfn",
       spec: "html",
       shortname: "html",
@@ -138,12 +158,15 @@ export default {
       uri: "webappapis.html#concept-script",
     },
     {
-      shortname: "html",
-      spec: "html",
-      uri: "sections.html#the-body-element",
+      term: "body",
       type: "element",
+      spec: "html",
+      shortname: "html",
+      status: undefined,
+      uri: "sections.html#the-body-element",
     },
     {
+      term: "event",
       type: "attribute",
       spec: "html",
       shortname: "html",
@@ -154,6 +177,7 @@ export default {
   ],
   "css-cascade": [
     {
+      term: "inherited value",
       type: "dfn",
       spec: "css-cascade-3",
       shortname: "css-cascade",
@@ -161,6 +185,7 @@ export default {
       uri: "#inherited-value",
     },
     {
+      term: "inherited value",
       type: "dfn",
       spec: "css-cascade-3",
       shortname: "css-cascade",
@@ -168,6 +193,7 @@ export default {
       uri: "#inherited-value",
     },
     {
+      term: "inherited value",
       type: "dfn",
       spec: "css-cascade-4",
       shortname: "css-cascade",
@@ -175,6 +201,7 @@ export default {
       uri: "#inherited-value",
     },
     {
+      term: "inherited value",
       type: "dfn",
       spec: "css-cascade-4",
       shortname: "css-cascade",
@@ -184,6 +211,7 @@ export default {
   ],
   "css-lists": [
     {
+      term: "marker",
       type: "dfn",
       spec: "css-lists-3",
       shortname: "css-lists",
@@ -191,8 +219,9 @@ export default {
       uri: "#marker",
     },
   ],
-  dom: [
+  "dom": [
     {
+      term: "EventInit",
       type: "dictionary",
       spec: "dom",
       shortname: "dom",
@@ -200,6 +229,7 @@ export default {
       uri: "#dictdef-eventinit",
     },
     {
+      term: "event",
       type: "dfn",
       spec: "dom",
       shortname: "dom",
@@ -207,6 +237,7 @@ export default {
       uri: "#concept-event",
     },
     {
+      term: "event",
       type: "attribute",
       spec: "dom",
       shortname: "dom",
@@ -215,6 +246,7 @@ export default {
       for: ["Window"],
     },
     {
+      term: "aborted",
       type: "attribute",
       spec: "dom",
       shortname: "dom",
@@ -225,6 +257,7 @@ export default {
   ],
   "web-bluetooth": [
     {
+      term: "[[context]]",
       type: "attribute",
       spec: "web-bluetooth-1",
       shortname: "web-bluetooth",
@@ -233,16 +266,18 @@ export default {
       for: ["BluetoothDevice"],
     },
   ],
-  infra: [
+  "infra": [
     {
+      term: "for each",
       type: "dfn",
       spec: "infra",
       shortname: "infra",
       status: "current",
       uri: "#list-iterate",
-      for: ["list", "set"],
+      for: ["list","set"],
     },
     {
+      term: "user agent",
       type: "dfn",
       spec: "infra",
       shortname: "infra",
@@ -253,12 +288,78 @@ export default {
   ],
   "wai-aria": [
     {
+      term: "user agents",
       type: "dfn",
       spec: "wai-aria-1.2",
       shortname: "wai-aria",
       status: "current",
       uri: "#dfn-user-agent",
       normative: false,
+    },
+  ],
+  cookiestore: [
+    {
+      term: "name",
+      type: "dict-member",
+      spec: "cookiestore",
+      shortname: "cookiestore",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/cookiestore/#dom-cookieinit-name",
+      for: ["CookieInit"],
+    },
+    {
+      term: "name",
+      type: "dict-member",
+      spec: "cookiestore",
+      shortname: "cookiestore",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/cookiestore/#dom-cookielistitem-name",
+      for: ["CookieListItem"],
+    },
+  ],
+  // Synthetic spec whose entries pair a preferred (current) definition with a
+  // non-preferred (snapshot) one that is NOT its twin. Since a snapshot entry is
+  // only dropped when a current entry shares its identity, these pin the `term`
+  // and `for` parts of that identity: remove either and the snapshot entry is
+  // wrongly treated as a twin and dropped.
+  "identity-fixture": [
+    {
+      term: "alpha",
+      type: "dfn",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "current",
+      uri: "#alpha",
+      normative: true,
+    },
+    {
+      term: "beta",
+      type: "dfn",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/identity-fixture/#beta",
+      normative: true,
+    },
+    {
+      term: "gamma",
+      type: "dict-member",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "current",
+      uri: "#gamma-a",
+      normative: true,
+      for: ["OptionsA"],
+    },
+    {
+      term: "gamma",
+      type: "dict-member",
+      spec: "identity-fixture",
+      shortname: "identity-fixture",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/identity-fixture/#gamma-b",
+      normative: true,
+      for: ["OptionsB"],
     },
   ],
 };

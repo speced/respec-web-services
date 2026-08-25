@@ -280,6 +280,117 @@ describe("xref - search", () => {
     });
   });
 
+  describe("filter@spec_type", () => {
+    // A dfn published in both the ED and the TR snapshot appears twice in the
+    // store, with the same spec and type but different uri forms. Only the
+    // preferred status may be returned, otherwise every such term becomes
+    // ambiguous and ReSpec reports "is ambiguous because it's defined in [...]".
+    it("collapses a current/snapshot pair whose uris differ", () => {
+      const result = search(
+        { term: "credential manager" },
+        { fields: ["status", "uri"] },
+      );
+      expect(result).toEqual([
+        { status: "current", uri: "#credential-manager" },
+      ]);
+    });
+
+    it("returns only the snapshot entry when snapshot is preferred", () => {
+      const result = search(
+        { term: "credential manager" },
+        { fields: ["status", "uri"], spec_type: ["official", "draft"] },
+      );
+      expect(result).toEqual([
+        {
+          status: "snapshot",
+          uri: "https://www.w3.org/TR/credential-management-1/#credential-manager",
+        },
+      ]);
+    });
+
+    it("keeps definitions that differ only by for context", () => {
+      const result = search(
+        { term: "name" },
+        { fields: ["for", "uri"], all: true },
+      );
+      expect(result).toEqual([
+        {
+          for: ["CookieInit"],
+          uri: "https://www.w3.org/TR/cookiestore/#dom-cookieinit-name",
+        },
+        {
+          for: ["CookieListItem"],
+          uri: "https://www.w3.org/TR/cookiestore/#dom-cookielistitem-name",
+        },
+      ]);
+    });
+
+    it("keeps browse entries in one spec that differ only by for context", () => {
+      const result = search(
+        { term: "", specs: [["cookiestore"]], id: "" },
+        { fields: ["for"], all: true },
+      );
+      expect(result).toEqual([
+        { for: ["CookieInit"] },
+        { for: ["CookieListItem"] },
+      ]);
+    });
+
+    // Both entries are non-preferred, so they reach the dedup path rather than
+    // being waved through by the preferred-status branch. They share a spec and
+    // type and have no `for`, so only `term` tells them apart.
+    it("keeps browse entries that differ only by term", () => {
+      const result = search(
+        { term: "", specs: [["html"]], types: ["dfn"], id: "" },
+        { fields: ["term", "uri"], all: true },
+      );
+      expect(result).toEqual([
+        { term: "event handler", uri: "webappapis.html#event-handlers" },
+        { term: "script", uri: "webappapis.html#concept-script" },
+      ]);
+    });
+
+    // Two method overloads share an identity because the by-term store strips
+    // `term` and files both under "get()". They are not draft/snapshot twins, so
+    // neither may be dropped.
+    it("keeps method overloads that share an identity at the same status", () => {
+      const result = search(
+        { term: "get()", types: ["method"] },
+        { fields: ["uri"], all: true },
+      );
+      expect(result).toEqual([
+        { uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get" },
+        {
+          uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get-jointname",
+        },
+      ]);
+    });
+
+    // A snapshot entry is only dropped when a current entry shares its identity,
+    // so these two pin the `term` and `for` parts of that identity. Remove either
+    // part and the snapshot entry is misread as a twin and dropped.
+    it("does not treat a different term as a twin of a current entry", () => {
+      const result = search(
+        { term: "", specs: [["identity-fixture"]], types: ["dfn"], id: "" },
+        { fields: ["term"], all: true },
+      );
+      expect(result).toEqual([{ term: "alpha" }, { term: "beta" }]);
+    });
+
+    it("does not treat a different for context as a twin of a current entry", () => {
+      const result = search(
+        {
+          term: "",
+          specs: [["identity-fixture"]],
+          types: ["dict-member"],
+          id: "",
+        },
+        { fields: ["for"], all: true },
+      );
+      expect(result).toEqual([{ for: ["OptionsA"] }, { for: ["OptionsB"] }]);
+    });
+  });
+
   describe("filter@types", () => {
     const resultMarker = [
       { uri: "#marker" },

@@ -315,4 +315,71 @@ export default {
       for: ["basic URL parser"],
     },
   ],
+  // Production shape for a current/snapshot pair: the current entry's uri is a
+  // relative fragment, the snapshot entry's is an absolute TR URL. Every other
+  // pair in this fixture shares one uri, which is why a dedup keyed on uri
+  // looked correct locally while duplicating every term in production.
+  "credential manager": [
+    {
+      type: "dfn",
+      spec: "credential-management-1",
+      shortname: "credential-management",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/credential-management-1/#credential-manager",
+      normative: true,
+    },
+    {
+      type: "dfn",
+      spec: "credential-management-1",
+      shortname: "credential-management",
+      status: "current",
+      uri: "#credential-manager",
+      normative: true,
+    },
+  ],
+  // Two distinct dict-members sharing a spec, type and term, told apart only by
+  // `for`. Production has 2198 such groups (e.g. Cookie Store's `name` across
+  // four dictionaries), so an identity that ignores `for` silently drops them.
+  name: [
+    {
+      type: "dict-member",
+      spec: "cookiestore",
+      shortname: "cookiestore",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/cookiestore/#dom-cookieinit-name",
+      for: ["CookieInit"],
+    },
+    {
+      type: "dict-member",
+      spec: "cookiestore",
+      shortname: "cookiestore",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/cookiestore/#dom-cookielistitem-name",
+      for: ["CookieListItem"],
+    },
+  ],
+  // The by-term store strips `term` and files every method overload under a
+  // shared `name()` key (see updateDataByTerm), so these two distinct overloads
+  // are indistinguishable by spec, type, term and for. They are both snapshot,
+  // i.e. non-preferred by default, so they reach the dedup path. Production has
+  // 76 groups with more than one uri at the same status, 18 of them snapshot;
+  // only 6 of those also lack a preferred twin, which is the case this pins.
+  "get()": [
+    {
+      type: "method",
+      spec: "webxr-hand-input-1",
+      shortname: "webxr-hand-input",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get",
+      for: ["XRHand"],
+    },
+    {
+      type: "method",
+      spec: "webxr-hand-input-1",
+      shortname: "webxr-hand-input",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/webxr-hand-input-1/#dom-xrhand-get-jointname",
+      for: ["XRHand"],
+    },
+  ],
 };
