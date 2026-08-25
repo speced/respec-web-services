@@ -1,6 +1,7 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
+import { env } from "../../../../build/utils/misc.js";
 import {
   getData,
   cache,
@@ -13,7 +14,7 @@ import {
   SUPPORT_TITLES,
 } from "../../../../build/routes/caniuse/lib/constants.js";
 
-const CANIUSE_DIR = path.join(process.env.DATA_DIR, "caniuse");
+const CANIUSE_DIR = path.join(env("DATA_DIR"), "caniuse");
 
 /** Minimal valid ScraperOutput fixture */
 const FIXTURE = {
