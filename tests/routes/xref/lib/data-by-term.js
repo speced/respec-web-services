@@ -315,4 +315,47 @@ export default {
       for: ["basic URL parser"],
     },
   ],
+  // Production shape for a current/snapshot pair: the current entry's uri is a
+  // relative fragment, the snapshot entry's is an absolute TR URL. Every other
+  // pair in this fixture shares one uri, which is why a dedup keyed on uri
+  // looked correct locally while duplicating every term in production.
+  "credential manager": [
+    {
+      type: "dfn",
+      spec: "credential-management-1",
+      shortname: "credential-management",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/credential-management-1/#credential-manager",
+      normative: true,
+    },
+    {
+      type: "dfn",
+      spec: "credential-management-1",
+      shortname: "credential-management",
+      status: "current",
+      uri: "#credential-manager",
+      normative: true,
+    },
+  ],
+  // Two distinct dict-members sharing a spec, type and term, told apart only by
+  // `for`. Production has 2198 such groups (e.g. Cookie Store's `name` across
+  // four dictionaries), so an identity that ignores `for` silently drops them.
+  name: [
+    {
+      type: "dict-member",
+      spec: "cookiestore",
+      shortname: "cookiestore",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/cookiestore/#dom-cookieinit-name",
+      for: ["CookieInit"],
+    },
+    {
+      type: "dict-member",
+      spec: "cookiestore",
+      shortname: "cookiestore",
+      status: "snapshot",
+      uri: "https://www.w3.org/TR/cookiestore/#dom-cookielistitem-name",
+      for: ["CookieListItem"],
+    },
+  ],
 };

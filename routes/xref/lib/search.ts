@@ -296,6 +296,24 @@ function filterByForContext(data: DataEntry[], query: Query, options: Options) {
   });
 }
 
+/**
+ * Identity of a definition, independent of where it was published.
+ *
+ * The same definition appears twice in the store, once from the editor's draft
+ * and once from the published snapshot, and the two differ only in `status` and
+ * `uri` (a relative fragment versus an absolute URL). So `uri` cannot be part of
+ * the identity, or the pair never collapses and the term becomes ambiguous.
+ *
+ * `for` is part of the identity: production data has 2198 groups sharing a spec,
+ * type and term while differing only in `for` (e.g. `name` as a dict-member of
+ * four different Cookie Store dictionaries), and dropping all but one of those
+ * loses real definitions.
+ */
+function definitionIdentity(item: DataEntry) {
+  const forContext = [...(item.for ?? [])].sort().join("\u0000");
+  return [item.spec, item.type, item.term, forContext].join("\u0001");
+}
+
 function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
   if (!specTypes.length) return data;
 
@@ -307,12 +325,12 @@ function filterBySpecType(data: DataEntry[], specTypes: SpecType[]) {
     a.status === preferredType ? -1 : b.status === preferredType ? 1 : 0,
   );
   const preferredData: DataEntry[] = [];
+  const seen = new Set<string>();
   for (const item of sorted) {
-    if (
-      item.status === preferredType ||
-      !preferredData.find(it => item.spec === it.spec && item.type === it.type && item.uri === it.uri)
-    ) {
+    const identity = definitionIdentity(item);
+    if (item.status === preferredType || !seen.has(identity)) {
       preferredData.push(item);
+      seen.add(identity);
     }
   }
 
