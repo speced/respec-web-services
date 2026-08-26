@@ -1,8 +1,8 @@
-import { exec, ExecOptions } from "child_process";
+import { execFile, ExecFileOptions } from "child_process";
 import split from "split2";
 
 type Logger = (line?: string) => void;
-interface Options extends ExecOptions {
+interface Options extends ExecFileOptions {
   output: "buffer" | "stream" | "silent";
   log: { out: Logger; err: Logger };
 }
@@ -34,10 +34,9 @@ export default async function sh(
     const { promise, resolve, reject } = Promise.withResolvers<string>();
     let stdout: string[] = [];
     let stderr: string[] = [];
-    const child = exec(command, {
+    const child = execFile("/bin/sh", ["-c", command], {
       ...execOptions,
       env: { ...process.env, ...execOptions.env },
-      encoding: "utf-8",
     });
     child.stdout!.pipe(split()).on("data", (line: string) => {
       if (shouldStream) log.out(line);
