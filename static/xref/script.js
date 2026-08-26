@@ -105,7 +105,10 @@ function getFormData() {
   const { values: types } = form.types;
   const { value: forContext } = form.for;
   return {
-    term,
+    // A blank input means "browse these specs", so omit `term` entirely: an
+    // explicit empty string is a real term now (the empty-string enum value).
+    // To search for that term, type "" in the box; normalizeQuery maps it.
+    ...(term !== '' && { term }),
     ...(specs.length && { specs }),
     ...(types.length && { types }),
     ...(forContext && { for: forContext }),
@@ -114,7 +117,7 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === '' && !data.specs) return;
+  if (data.term === undefined && !data.specs) return;
 
   const params = new URLSearchParams(Object.entries(data));
   history.replaceState(null, null, `?${params}`);

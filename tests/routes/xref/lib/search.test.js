@@ -327,7 +327,7 @@ describe("xref - search", () => {
 
     it("keeps browse entries in one spec that differ only by for context", () => {
       const result = search(
-        { term: "", specs: [["cookiestore"]], id: "" },
+        { specs: [["cookiestore"]], id: "" },
         { fields: ["for"], all: true },
       );
       expect(result).toEqual([
@@ -341,7 +341,7 @@ describe("xref - search", () => {
     // type and have no `for`, so only `term` tells them apart.
     it("keeps browse entries that differ only by term", () => {
       const result = search(
-        { term: "", specs: [["html"]], types: ["dfn"], id: "" },
+        { specs: [["html"]], types: ["dfn"], id: "" },
         { fields: ["term", "uri"], all: true },
       );
       expect(result).toEqual([
@@ -371,7 +371,7 @@ describe("xref - search", () => {
     // part and the snapshot entry is misread as a twin and dropped.
     it("does not treat a different term as a twin of a current entry", () => {
       const result = search(
-        { term: "", specs: [["identity-fixture"]], types: ["dfn"], id: "" },
+        { specs: [["identity-fixture"]], types: ["dfn"], id: "" },
         { fields: ["term"], all: true },
       );
       expect(result).toEqual([{ term: "alpha" }, { term: "beta" }]);
@@ -380,7 +380,6 @@ describe("xref - search", () => {
     it("does not treat a different for context as a twin of a current entry", () => {
       const result = search(
         {
-          term: "",
           specs: [["identity-fixture"]],
           types: ["dict-member"],
           id: "",
@@ -479,7 +478,7 @@ describe("xref - search", () => {
   describe("empty term with specs (browse all terms)", () => {
     it("returns all entries for a spec when term is empty", () => {
       const results = search(
-        { term: "", specs: [["dom"]], id: "" },
+        { specs: [["dom"]], id: "" },
         { all: true },
       );
       // dom has: EventInit (dictionary), event (dfn), event (attr for Window),
@@ -489,7 +488,7 @@ describe("xref - search", () => {
 
     it("returns all entries for a spec filtered by type", () => {
       const results = search(
-        { term: "", specs: [["dom"]], types: ["attribute"], id: "" },
+        { specs: [["dom"]], types: ["attribute"], id: "" },
         { all: true },
       );
       expect(results).toEqual([
@@ -500,7 +499,7 @@ describe("xref - search", () => {
 
     it("returns all entries for a spec filtered by aggregate type", () => {
       const results = search(
-        { term: "", specs: [["dom"]], types: ["_IDL_"], id: "" },
+        { specs: [["dom"]], types: ["_IDL_"], id: "" },
         { all: true },
       );
       // _IDL_ includes: dictionary, attribute
@@ -514,7 +513,7 @@ describe("xref - search", () => {
 
     it("returns all enum-values for a spec (issue #278)", () => {
       const results = search(
-        { term: "", specs: [["fetch"]], types: ["enum-value"], id: "" },
+        { specs: [["fetch"]], types: ["enum-value"], id: "" },
         { all: true },
       );
       const sorted = results.sort((a, b) => a.uri.localeCompare(b.uri));
@@ -530,9 +529,26 @@ describe("xref - search", () => {
       expect(results).toEqual([]);
     });
 
+    // `{{ ReferrerPolicy[""] }}` in ReSpec is a lookup of the enum value whose
+    // name is the empty string, and ReSpec sends it as term: "" plus the spec.
+    // It must not be read as "browse this whole spec": ReSpec treats anything
+    // other than exactly one result as an error and leaves the term unlinked.
+    it("treats an explicit empty-string term as a lookup, not a browse", () => {
+      const results = search(
+        {
+          term: "",
+          types: ["enum-value"],
+          for: "ReferrerPolicy",
+          specs: [["referrer-policy"]],
+          id: "",
+        },
+        { fields: ["uri"] },
+      );
+      expect(results).toEqual([{ uri: "#dom-referrerpolicy" }]);
+    });
+
     it("filters by for context when browsing a spec", () => {
       const results = search({
-        term: "",
         specs: [["dom"]],
         for: "Window",
         id: "",
@@ -542,7 +558,7 @@ describe("xref - search", () => {
 
     it("combines multiple specs in a single fallback list", () => {
       const results = search(
-        { term: "", specs: [["css-lists", "web-bluetooth"]], id: "" },
+        { specs: [["css-lists", "web-bluetooth"]], id: "" },
         { all: true },
       );
       expect(results.length).toBeGreaterThan(0);
@@ -553,7 +569,7 @@ describe("xref - search", () => {
       // by series shortname (css-lists, web-bluetooth), so collectBySpecs() must
       // resolve them via specmap to return results.
       const results = search(
-        { term: "", specs: [["css-lists-3", "web-bluetooth-1"]], id: "" },
+        { specs: [["css-lists-3", "web-bluetooth-1"]], id: "" },
         { all: true },
       );
       expect(results.length).toBeGreaterThan(0);

@@ -15,6 +15,18 @@ export default {
       uri: "#dom-referrerpolicy",
       for: ["ReferrerPolicy"],
     },
+    // A sibling enum-value, as production has (nine of them). Without one, a
+    // browse of this spec and a lookup of the empty-string term both return a
+    // single entry, so a test cannot tell the two code paths apart.
+    {
+      term: "no-referrer",
+      type: "enum-value",
+      spec: "referrer-policy-1",
+      shortname: "referrer-policy",
+      status: "current",
+      uri: "#dom-referrerpolicy-no-referrer",
+      for: ["ReferrerPolicy"],
+    },
   ],
   "fetch": [
     {
