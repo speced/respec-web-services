@@ -43,7 +43,12 @@ export interface Options {
 }
 
 export interface Query {
-  term: string;
+  /**
+   * The term to look up. An explicit empty string is a real term (the
+   * empty-string enum value, which ReSpec writes as `Foo[""]`), so it is NOT
+   * the browse signal. Browsing a whole spec is requested by omitting `term`.
+   */
+  term?: string;
   id: string;
   types?: (Type | "_IDL_" | "_CONCEPT_")[];
   specs?: string[][];
@@ -103,7 +108,7 @@ export function searchOne(
   prefereredData = filterPreferLatestVersion(prefereredData);
   // Cap empty-term browsing results after preference filters have run so that
   // preferred entries (e.g. current over snapshot, latest version) are retained.
-  if (!query.term && prefereredData.length > BROWSE_LIMIT) {
+  if (query.term == null && prefereredData.length > BROWSE_LIMIT) {
     prefereredData = prefereredData.slice(0, BROWSE_LIMIT);
   }
   const result = prefereredData.map(item => pickFields(item, options.fields));
@@ -130,14 +135,17 @@ function normalizeQuery(query: Query, options: Options) {
 const BROWSE_LIMIT = 1000;
 
 function filter(query: Query, store: Store, options: Options) {
-  // When no term is provided but specs are, return all entries from those specs.
-  // Types-only browsing (no term, no specs) is deliberately unsupported as it
-  // would require scanning the entire store. The route layer rejects such
-  // requests with a 400. The result limit (BROWSE_LIMIT) is applied after
-  // preference filtering in searchOne() so that filterBySpecType and
-  // filterPreferLatestVersion can properly select preferred entries before
-  // the cap is enforced.
-  if (!query.term && query.specs?.length) {
+  const searchTerm = query.term;
+  // `== null` on purpose: a JSON body can carry {"term": null}, and the POST route
+  // passes req.body.queries to searchOne unvalidated. An explicit "" is NOT caught
+  // here, which is the whole point of this function.
+  if (searchTerm == null) {
+    // No term at all means "browse everything in these specs". An explicit
+    // empty string is NOT this case: it is a real term, so it falls through to
+    // the lookup below. Types-only browsing is unsupported (it would scan the
+    // whole store) and the route rejects it with a 400. BROWSE_LIMIT is applied
+    // in searchOne(), after the preference filters have chosen entries.
+    if (!query.specs?.length) return [];
     const entries = collectBySpecs(query.specs, store);
     const byType = filterByType(entries, query);
     return filterByForContext(byType, query, options);
@@ -147,7 +155,7 @@ function filter(query: Query, store: Store, options: Options) {
   const isIDL = types.some(t => IDL_TYPES.has(t));
   const allowCaseFallback = !isIDL;
 
-  for (const term of getTermVariations(query)) {
+  for (const term of getTermVariations(searchTerm, query)) {
     // Try the exact-case bucket first (so `[=baseline=]` and `{{Baseline}}`
     // stay distinct), then a case-insensitive fallback. The fallback is
     // essential when an exact-case bucket exists but every entry is filtered
@@ -206,8 +214,8 @@ function collectBySpecs(specsLists: string[][], store: Store) {
   );
 }
 
-function getTermVariations(query: Query) {
-  const { term: inputTerm, types = [] } = query;
+function getTermVariations(inputTerm: string, query: Query) {
+  const { types = [] } = query;
 
   const isConcept = types.some(t => CONCEPT_TYPES.has(t));
   const isIDL = types.some(t => IDL_TYPES.has(t));

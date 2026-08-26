@@ -27,7 +27,8 @@ export default async function route(req: IRequest, res: Response) {
     return;
   }
 
-  const query: Query = { term: term ?? "", specs, for: forContext, types, id: "" };
+  // `term` is passed through as-is: undefined means browse, "" is a real term.
+  const query: Query = { term, specs, for: forContext, types, id: "" };
   const options: Partial<Options> = { fields: [], all: !types || !forContext };
 
   const result = searchOne(query, store, options);

@@ -105,7 +105,10 @@ function getFormData() {
   const { values: types } = form.types;
   const { value: forContext } = form.for;
   return {
-    term,
+    // A blank input means "browse these specs", so omit `term` entirely: an
+    // explicit empty string is a real term now (the empty-string enum value).
+    // To search for that term, type "" in the box; normalizeQuery maps it.
+    ...(term !== '' && { term }),
     ...(specs.length && { specs }),
     ...(types.length && { types }),
     ...(forContext && { for: forContext }),
@@ -114,7 +117,7 @@ function getFormData() {
 
 async function handleSubmit() {
   const data = getFormData();
-  if (data.term === '' && !data.specs) return;
+  if (data.term === undefined && !data.specs) return;
 
   const params = new URLSearchParams(Object.entries(data));
   history.replaceState(null, null, `?${params}`);
@@ -137,8 +140,15 @@ async function handleSubmit() {
 }
 
 function renderResults(entries, query) {
-  const { term: searchTerm } = query;
-  caption.innerText = searchTerm ? `Searched for "${searchTerm}".` : `Browsing spec definitions.`;
+  // Mirror the service's normalizeQuery: `""` typed in the box means the
+  // empty-string term, so citations and the caption must show "" and not the
+  // two raw quote characters. Browsing is signalled by an omitted term, which is
+  // why this tests for undefined rather than for falsiness.
+  const searchTerm = query.term === '""' ? '' : query.term;
+  caption.innerText =
+    query.term === undefined
+      ? `Browsing spec definitions.`
+      : `Searched for "${searchTerm}".`;
   if (!entries.length) {
     output.innerHTML = `<tr><td colspan="4">No results found.</td></tr>`;
     return;
@@ -146,7 +156,7 @@ function renderResults(entries, query) {
 
   // Detect overloaded IDL entries that would produce identical citations.
   // Build a set of "uri|forContext" pairs for entries that need disambiguation.
-  const overloadedPairs = detectOverloadedEntries(entries, term);
+  const overloadedPairs = detectOverloadedEntries(entries, searchTerm);
 
   let html = '';
   for (const entry of entries) {
