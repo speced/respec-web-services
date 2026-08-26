@@ -108,7 +108,7 @@ export function searchOne(
   prefereredData = filterPreferLatestVersion(prefereredData);
   // Cap empty-term browsing results after preference filters have run so that
   // preferred entries (e.g. current over snapshot, latest version) are retained.
-  if (query.term === undefined && prefereredData.length > BROWSE_LIMIT) {
+  if (query.term == null && prefereredData.length > BROWSE_LIMIT) {
     prefereredData = prefereredData.slice(0, BROWSE_LIMIT);
   }
   const result = prefereredData.map(item => pickFields(item, options.fields));
@@ -136,7 +136,10 @@ const BROWSE_LIMIT = 1000;
 
 function filter(query: Query, store: Store, options: Options) {
   const searchTerm = query.term;
-  if (searchTerm === undefined) {
+  // `== null` on purpose: a JSON body can carry {"term": null}, and the POST route
+  // passes req.body.queries to searchOne unvalidated. An explicit "" is NOT caught
+  // here, which is the whole point of this function.
+  if (searchTerm == null) {
     // No term at all means "browse everything in these specs". An explicit
     // empty string is NOT this case: it is a real term, so it falls through to
     // the lookup below. Types-only browsing is unsupported (it would scan the

@@ -475,8 +475,8 @@ describe("xref - search", () => {
     });
   });
 
-  describe("empty term with specs (browse all terms)", () => {
-    it("returns all entries for a spec when term is empty", () => {
+  describe("browsing a spec (term omitted)", () => {
+    it("returns all entries for a spec when term is omitted", () => {
       const results = search(
         { specs: [["dom"]], id: "" },
         { all: true },
@@ -523,8 +523,9 @@ describe("xref - search", () => {
       ]);
     });
 
-    it("returns empty when term is empty and no specs are given", () => {
-      // Without specs, empty term should use the normal byTerm[""] path
+    it("returns empty for an empty-string term with no specs", () => {
+      // Without specs an empty-string term is a lookup in byTerm[""], and the
+      // for-scoped entries there are filtered out, so nothing matches.
       const results = search({ term: "", id: "" });
       expect(results).toEqual([]);
     });
@@ -545,6 +546,35 @@ describe("xref - search", () => {
         { fields: ["uri"] },
       );
       expect(results).toEqual([{ uri: "#dom-referrerpolicy" }]);
+    });
+
+    // The lookup must not silently fall back to browsing when the spec has no
+    // empty-string term, or the caller gets the whole spec instead of nothing.
+    it("returns nothing for an empty-string term in a spec that lacks one", () => {
+      const results = search(
+        { term: "", specs: [["dom"]], id: "" },
+        { fields: ["uri"], all: true },
+      );
+      expect(results).toEqual([]);
+    });
+
+    // A null term is reachable: the POST route passes req.body.queries straight
+    // to searchOne with no validation, so it must not throw.
+    it("treats a null term as a browse rather than throwing", () => {
+      expect(() =>
+        search(
+          { term: null, types: ["dfn"], specs: [["dom"]], id: "" },
+          { fields: ["uri"], all: true },
+        ),
+      ).not.toThrow();
+    });
+
+    it("treats a null term with no specs as no results", () => {
+      let results;
+      expect(() => {
+        results = search({ term: null, types: ["dfn"], id: "" }, { all: true });
+      }).not.toThrow();
+      expect(results).toEqual([]);
     });
 
     it("filters by for context when browsing a spec", () => {
