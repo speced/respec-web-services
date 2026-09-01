@@ -4,6 +4,7 @@ import caniuse from "../routes/caniuse/lib/scraper.js";
 import xref from "../routes/xref/lib/scraper.js";
 import baseline from "../routes/api/baseline/lib/scraper.js";
 import unicode from "../routes/api/unicode/lib/scraper.js";
+import bibrefs from "../routes/bibrefs/lib/scraper.js";
 import { pullRelease } from "../routes/respec/builds/update.js";
 import w3cGroupsList from "./update-w3c-groups-list.js";
 
@@ -24,6 +25,10 @@ console.groupEnd();
 
 console.group("unicode");
 await unicode({ forceUpdate: true });
+console.groupEnd();
+
+console.group("bibrefs");
+await bibrefs({ forceUpdate: true });
 console.groupEnd();
 
 console.group("W3C Groups List");
