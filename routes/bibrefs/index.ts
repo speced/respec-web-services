@@ -12,11 +12,9 @@ const MAX_REFERENCES_PER_REQUEST = 500;
 const CACHE_SECONDS = seconds("1h");
 
 /**
- * Two limits, because the two answers are wildly different sizes.
- *
- * A lookup replies with tens of kilobytes, so it can be generous. The whole
- * store is 26 MB, and its URL never varies, so a cache in front should absorb
- * nearly all of it; anything reaching us at volume is abuse, not a spec build.
+ * Two limits: a lookup answers with tens of kilobytes, the whole store with
+ * 26 MB. That URL never varies, so a cache in front should absorb almost all of
+ * it and volume reaching us is abuse rather than spec builds.
  */
 const lookupRateLimit = rateLimit({
   windowMs: ms("1m"),
@@ -76,15 +74,17 @@ export function route(req: Request, res: Response) {
   });
 
   setCacheHeaders(res);
-  // jsonp, not json: the service this replaces answered `?callback=` with
-  // JSONP, and Express falls back to plain JSON when no callback is named.
+  // jsonp, not json: keeps `?callback=` working, and is plain JSON without it.
   res.jsonp(body);
 }
 
-/** Only a request with no query string. `?refs=` and `?refs[]=a` leave
- * `req.query.refs` empty, so testing that instead gives the store away. */
+/**
+ * Only a request naming nothing to look up. `?refs=` and `?refs[]=a` leave
+ * `req.query.refs` empty, so testing that instead gives the store away.
+ * `callback` picks a format rather than content, so it does not count.
+ */
 function wantsWholeStore(req: Request) {
-  return Object.keys(req.query).length === 0;
+  return Object.keys(req.query).every(key => key === "callback");
 }
 
 /** `?refs=A,B&refs=C` becomes ["A", "B", "C"]. */

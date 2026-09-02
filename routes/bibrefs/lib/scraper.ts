@@ -16,18 +16,15 @@ const CLONE_DIRECTORY = path.resolve(env("DATA_DIR"), "specref");
 const GIT_TIMEOUT = ms("10m");
 const BUILD_TIMEOUT = ms("2m");
 // Keep this. A smaller old-generation budget makes V8 collect sooner, which
-// measurably lowers the peak resident memory of a build that runs beside the
-// server on a host with about a gigabyte.
+// lowers peak resident memory on a host the server is also using.
 const BUILD_HEAP_MB = 512;
 const defaultOptions = { forceUpdate: false };
 type Options = typeof defaultOptions;
 
 /**
- * The commit whose data we last wrote out successfully.
- *
- * Compared against, rather than "did the clone move", so a build that fails
- * after the clone has already advanced gets retried instead of being treated as
- * up to date until upstream happens to commit again.
+ * The commit whose data we last wrote out successfully. Set only after a build
+ * succeeds, so a build that fails once the clone has already advanced is
+ * retried rather than treated as up to date.
  */
 let lastPublishedCommit: string | null = null;
 
@@ -84,9 +81,8 @@ async function updateInputSource() {
     await git(["clean", "-fd"], CLONE_DIRECTORY);
     return await head();
   } catch (error) {
-    // An interrupted fetch leaves an index.lock that fails every later run, and
+    // An interrupted fetch leaves an index.lock that fails every later run;
     // an interrupted clone leaves a directory that is not a repository at all.
-    // Reading the commit inside this block is what lets the second case recover.
     console.warn(
       "specref: git failed, discarding the clone and starting over.",
       error,
@@ -97,9 +93,10 @@ async function updateInputSource() {
   }
 }
 
-/** Its own process: a worker thread shares this process's resident memory, and the transform peaks near 560 MB. */
+/** Its own process: a worker thread would share this process's memory. */
 async function buildData() {
   const script = path.join(import.meta.dirname, "build-data.js");
+  const { PATH, HOME } = process.env;
   const { stdout } = await run(
     process.execPath,
     [
@@ -108,7 +105,9 @@ async function buildData() {
       CLONE_DIRECTORY,
       DATA_FILE,
     ],
-    { timeout: BUILD_TIMEOUT },
+    // Same allowlist as git: this child runs third-party code over third-party
+    // data, so it must not inherit GH_TOKEN or the webhook secrets.
+    { timeout: BUILD_TIMEOUT, env: { PATH, HOME } },
   );
   console.log(stdout.trim());
 }

@@ -16,7 +16,12 @@ async function tick() {
   }
 }
 
-/** setTimeout, not setInterval: a slow run must not overlap the next one. */
+/**
+ * setTimeout, not setInterval: a slow run must not overlap the next one.
+ *
+ * Schedule only, never fetch here: this runs when the route is imported, so a
+ * fetch clones specref on every test run.
+ */
 export function startRefreshing() {
   setTimeout(tick, ms("1h")).unref();
 }

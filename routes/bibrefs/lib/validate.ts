@@ -19,12 +19,9 @@ export type References = Record<string, Reference>;
 export const SMALLEST_PLAUSIBLE_DATABASE = 80_000;
 
 /**
- * Reference identifiers we refuse to look up or to answer with.
- *
- * Assigning one of these onto a response object either re-points its prototype
- * or, on a null-prototype object, becomes a real key the client receives. The
- * upstream data could carry `aliasOf: "__proto__"` as easily as a caller could
- * ask for it, so this is checked at both ends.
+ * Reference identifiers we refuse to look up or to answer with. Checked at both
+ * ends, because the data can carry `aliasOf: "__proto__"` as easily as a caller
+ * can ask for it.
  */
 const UNSAFE_KEY = /^(?:__proto__|constructor|prototype)$/i;
 
