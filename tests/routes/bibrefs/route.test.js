@@ -124,6 +124,12 @@ describe("routes/bibrefs - route", () => {
     });
   }
 
+  it("still sends the whole database when only a jsonp callback is named", () => {
+    // Answering callback({}) to a request for everything is a wrong answer
+    // dressed as a valid one.
+    expect(call({ callback: "myFunc" })._sentFile).toBe(DATA_FILE);
+  });
+
   it("sends the whole database only for a bare GET, as Bikeshed expects", () => {
     // The exact path: a tail-anchored match passes for the wrong directory.
     expect(call({})._sentFile).toBe(DATA_FILE);

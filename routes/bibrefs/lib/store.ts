@@ -53,9 +53,8 @@ export class Store {
  * `[[webidl]]` finds the entry stored under `WEBIDL`. Unknown keys are left out.
  */
 export function getRefs(references: References, keys: string[]): References {
-  // No prototype while it is being filled, so assigning a key can never
-  // re-point one. Safe only because collect refuses the keys that would
-  // otherwise land here as real properties.
+  // No prototype while filling, so assigning a key cannot re-point one. Safe
+  // only because collect refuses the keys that would become real properties.
   const output: References = Object.create(null);
   for (const key of keys) collect(references, key, output);
   // Copy before returning. An object built by assigning keys one at a time ends
