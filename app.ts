@@ -9,6 +9,7 @@ import { register as registerViewEngine } from "./utils/view-engine.js";
 import { PROJECT_ROOT } from "./utils/constants.js";
 
 import xrefRouter from "./routes/xref/index.js";
+import bibrefsRouter from "./routes/bibrefs/index.js";
 import caniuseRouter from "./routes/caniuse/index.js";
 import githubRouter from "./routes/github/index.js";
 import respecRouter from "./routes/respec/index.js";
@@ -47,6 +48,7 @@ app.use(
 );
 
 app.use("/xref", xrefRouter);
+app.use("/bibrefs", bibrefsRouter);
 app.use("/caniuse", caniuseRouter);
 app.use("/api/baseline", baselineRouter);
 app.use("/github/:org/:repo", githubRouter);

@@ -3,6 +3,7 @@ import { readFileSync } from "fs";
 import path from "path";
 
 import { PROJECT_ROOT } from "../../utils/constants.js";
+import { store as bibrefs } from "../bibrefs/lib/store-init.js";
 
 let version = "unknown";
 try {
@@ -25,5 +26,10 @@ export default function route(_req: Request, res: Response) {
     uptime: process.uptime(),
     heapUsed,
     heapTotal,
+    bibrefs: {
+      updatedAt: bibrefs.dataWrittenAt?.toISOString() ?? null,
+      entries: bibrefs.entries,
+      degraded: bibrefs.degraded,
+    },
   });
 }
