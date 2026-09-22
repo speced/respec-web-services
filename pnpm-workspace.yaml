@@ -1,0 +1,2 @@
+overrides:
+  'html-minifier': 'npm:html-minifier-terser@^7.2.0'
