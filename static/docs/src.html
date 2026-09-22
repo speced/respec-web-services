@@ -104,10 +104,11 @@
         // them. Ugly, but  other way is upstream changes for an extreme edge case.
         content = content
           .replace(/\[\[/g, `[${ZERO_WIDTH_SPACE}[${ZERO_WIDTH_SPACE}`)
-          // Similarly for [= term =], {{ term }}, [^elem^]
+          // Similarly for [= term =], {{ term }}, [^elem^], {^cddl^}
           .replace(/\[=/g, `[${ZERO_WIDTH_SPACE}=`)
           .replace(/{{/g, `{${ZERO_WIDTH_SPACE}{`)
           .replace(/\[\^/g, `[${ZERO_WIDTH_SPACE}^`)
+          .replace(/{\^/g, `{${ZERO_WIDTH_SPACE}^`)
           // and also escape | used for inline variables
           .replace(/\`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
           .replace(/(\w+)\\\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
@@ -224,6 +225,7 @@
         data-include-replace="true"
       ></section>
       <section data-max-toc="1" data-include="WebIDL-Guide"></section>
+      <section data-max-toc="1" data-include="CDDL"></section>
     </section>
     <section data-max-toc="2" data-include="static-snapshots"></section>
     <section data-max-toc="2" data-include="Shorthands-Guide"></section>
