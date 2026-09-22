@@ -16,27 +16,37 @@ export default async function route(_req: Request, res: Response) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const statusCode = error instanceof HTTPError ? error.statusCode : 500;
-    console.error(`Failed to regenerate docs: ${message.slice(0, 400)}...`);
+    const logged =
+      message.length > 400 ? `${message.slice(0, 400)}...` : message;
+    console.error(`Failed to regenerate docs: ${logged}`);
     res.status(statusCode);
     res.send(message);
   }
 }
 
+const DOCS_SOURCE = "https://respec.org/docs/src.html";
+
 export async function regenerateDocs() {
   const url = new URL("https://www.w3.org/publications/spec-generator/");
   url.searchParams.set("type", "respec");
-  url.searchParams.set("url", "https://respec.org/docs/src.html");
+  url.searchParams.set("url", DOCS_SOURCE);
 
   const res = await fetch(url.href);
 
   if (!res.ok) {
-    const { error = "" } = await res.json() as { "error"?: string };
+    const { error = "" } = (await res.json()) as { error?: string };
     throw new HTTPError(res.status, error);
   }
 
   const errorCount = parseInt(res.headers.get("x-errors-count") || "0");
   if (errorCount > 0) {
-    throw new Error(`There were ${errorCount} errors in processing.`);
+    const warningCount = res.headers.get("x-warnings-count") ?? "0";
+    // The generator returns counts only, never the messages, so name the
+    // command that prints them.
+    throw new Error(
+      `ReSpec found ${errorCount} errors and ${warningCount} warnings in ${DOCS_SOURCE}. ` +
+        `Run "npx respec -s ${DOCS_SOURCE} -o /dev/null" to see them.`,
+    );
   }
 
   const html = await res.text();
