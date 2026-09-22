@@ -1,4 +1,5 @@
 let regenerateDocs;
+let route;
 let origFetch;
 
 const SPEC_GENERATOR = "https://www.w3.org/publications/spec-generator/";
@@ -8,9 +9,51 @@ function generatorResponse(headers) {
   return new Response("<html></html>", { status: 200, headers });
 }
 
+/** A generator refusal, which route() turns into a logged line and a response. */
+function generatorRefusal(error) {
+  return new Response(JSON.stringify({ error }), {
+    status: 500,
+    headers: { "content-type": "application/json" },
+  });
+}
+
+/** Records what route() puts on the response, which is otherwise unobservable. */
+function fakeExpressResponse() {
+  return {
+    statusCode: 0,
+    body: "",
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    send(body) {
+      this.body = body;
+      return this;
+    },
+    sendStatus(code) {
+      this.statusCode = code;
+      return this;
+    },
+  };
+}
+
+/** Runs route() and returns every line it passed to console.error. */
+async function logsFromRoute() {
+  const lines = [];
+  const original = console.error;
+  console.error = line => lines.push(line);
+  try {
+    await route({}, fakeExpressResponse());
+  } finally {
+    console.error = original;
+  }
+  return lines;
+}
+
 beforeAll(async () => {
   const mod = await import("../../../build/routes/docs/update.js");
   regenerateDocs = mod.regenerateDocs;
+  route = mod.default;
 });
 
 beforeEach(() => {
@@ -102,5 +145,41 @@ describe("routes/docs/update regenerateDocs()", () => {
 
     expect(caught.statusCode).toBe(502);
     expect(caught.message).toBe("unknown spec generator type");
+  });
+
+  it("writes singular nouns for a single error and a single warning", async () => {
+    globalThis.fetch = async () =>
+      generatorResponse({ "x-errors-count": "1", "x-warnings-count": "1" });
+
+    let message = "";
+    try {
+      await regenerateDocs();
+    } catch (error) {
+      message = error.message;
+    }
+
+    expect(message).toContain("1 error and 1 warning in");
+    expect(message).not.toContain("1 errors");
+    expect(message).not.toContain("1 warnings");
+  });
+});
+
+describe("routes/docs/update route()", () => {
+  it("logs a short failure whole, with no trailing ellipsis", async () => {
+    globalThis.fetch = async () => generatorRefusal("spec generator is down");
+
+    const [line] = await logsFromRoute();
+
+    expect(line).toBe("Failed to regenerate docs: spec generator is down");
+  });
+
+  it("truncates a failure longer than 400 characters and marks it with one ellipsis", async () => {
+    globalThis.fetch = async () => generatorRefusal("x".repeat(500));
+
+    const [line] = await logsFromRoute();
+
+    expect(line.endsWith("...")).toBe(true);
+    expect(line).toContain("x".repeat(400));
+    expect(line).not.toContain("x".repeat(401));
   });
 });

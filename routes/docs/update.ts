@@ -26,6 +26,8 @@ export default async function route(_req: Request, res: Response) {
 
 const DOCS_SOURCE = "https://respec.org/docs/src.html";
 
+const plural = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
+
 export async function regenerateDocs() {
   const url = new URL("https://www.w3.org/publications/spec-generator/");
   url.searchParams.set("type", "respec");
@@ -40,10 +42,11 @@ export async function regenerateDocs() {
 
   const errorCount = parseInt(res.headers.get("x-errors-count") || "0");
   if (errorCount > 0) {
-    const warningCount = res.headers.get("x-warnings-count") ?? "0";
+    const warningCount = parseInt(res.headers.get("x-warnings-count") || "0");
     // The generator returns counts only, never the messages themselves.
     throw new Error(
-      `ReSpec found ${errorCount} errors and ${warningCount} warnings in ${DOCS_SOURCE}. ` +
+      `ReSpec found ${plural(errorCount, "error")} and ` +
+        `${plural(warningCount, "warning")} in ${DOCS_SOURCE}. ` +
         `Run "npx respec -s ${DOCS_SOURCE} -o /dev/null" to see them.`,
     );
   }
