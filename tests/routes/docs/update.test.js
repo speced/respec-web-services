@@ -9,10 +9,10 @@ function generatorResponse(headers) {
   return new Response("<html></html>", { status: 200, headers });
 }
 
-/** A generator refusal, which route() turns into a logged line and a response. */
-function generatorRefusal(error) {
+/** A generator refusal: a non-200 whose JSON body carries the reason. */
+function generatorRefusal(error, status = 500) {
   return new Response(JSON.stringify({ error }), {
-    status: 500,
+    status,
     headers: { "content-type": "application/json" },
   });
 }
@@ -131,10 +131,7 @@ describe("routes/docs/update regenerateDocs()", () => {
 
   it("surfaces the generator's own status and error when it refuses the request", async () => {
     globalThis.fetch = async () =>
-      new Response(JSON.stringify({ error: "unknown spec generator type" }), {
-        status: 502,
-        headers: { "content-type": "application/json" },
-      });
+      generatorRefusal("unknown spec generator type", 502);
 
     let caught;
     try {
