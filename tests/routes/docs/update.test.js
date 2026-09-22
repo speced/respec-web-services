@@ -1,6 +1,5 @@
 let regenerateDocs;
 let route;
-let origFetch;
 
 const SPEC_GENERATOR = "https://www.w3.org/publications/spec-generator/";
 
@@ -9,7 +8,6 @@ function generatorResponse(headers) {
   return new Response("<html></html>", { status: 200, headers });
 }
 
-/** A generator refusal: a non-200 whose JSON body carries the reason. */
 function generatorRefusal(error, status = 500) {
   return new Response(JSON.stringify({ error }), {
     status,
@@ -17,37 +15,32 @@ function generatorRefusal(error, status = 500) {
   });
 }
 
-/** Records what route() puts on the response, which is otherwise unobservable. */
 function fakeExpressResponse() {
   return {
-    statusCode: 0,
-    body: "",
-    status(code) {
-      this.statusCode = code;
+    status() {
       return this;
     },
-    send(body) {
-      this.body = body;
+    send() {
       return this;
     },
-    sendStatus(code) {
-      this.statusCode = code;
+    sendStatus() {
       return this;
     },
   };
 }
 
-/** Runs route() and returns every line it passed to console.error. */
-async function logsFromRoute() {
-  const lines = [];
-  const original = console.error;
-  console.error = line => lines.push(line);
+/** Returns the error a promise rejects with, and fails the spec if it resolves. */
+async function catchError(promise) {
   try {
-    await route({}, fakeExpressResponse());
-  } finally {
-    console.error = original;
+    await promise;
+  } catch (error) {
+    return error;
   }
-  return lines;
+  throw new Error("Expected regenerateDocs to reject, but it resolved.");
+}
+
+function answerWith(response) {
+  spyOn(globalThis, "fetch").and.resolveTo(response);
 }
 
 beforeAll(async () => {
@@ -56,125 +49,91 @@ beforeAll(async () => {
   route = mod.default;
 });
 
-beforeEach(() => {
-  origFetch = globalThis.fetch;
-});
-
-afterEach(() => {
-  globalThis.fetch = origFetch;
-});
-
 describe("routes/docs/update regenerateDocs()", () => {
   it("reports the error and warning counts the generator actually returned", async () => {
-    globalThis.fetch = async () =>
-      generatorResponse({ "x-errors-count": "3", "x-warnings-count": "7" });
+    answerWith(
+      generatorResponse({ "x-errors-count": "3", "x-warnings-count": "7" }),
+    );
 
-    let message = "";
-    try {
-      await regenerateDocs();
-    } catch (error) {
-      message = error.message;
-    }
+    const error = await catchError(regenerateDocs());
 
-    expect(message).toContain("3 errors");
-    expect(message).toContain("7 warnings");
+    expect(error.message).toContain("3 errors");
+    expect(error.message).toContain("7 warnings");
   });
 
   it("names the document that failed, so the log identifies it without reading the source", async () => {
-    globalThis.fetch = async () =>
-      generatorResponse({ "x-errors-count": "1", "x-warnings-count": "0" });
+    answerWith(
+      generatorResponse({ "x-errors-count": "1", "x-warnings-count": "0" }),
+    );
 
-    let message = "";
-    try {
-      await regenerateDocs();
-    } catch (error) {
-      message = error.message;
-    }
+    const error = await catchError(regenerateDocs());
 
-    expect(message).toContain("https://respec.org/docs/src.html");
-    expect(message).toContain("npx respec");
+    expect(error.message).toContain("https://respec.org/docs/src.html");
+    expect(error.message).toContain("npx respec");
   });
 
   it("says zero warnings when the generator omits that header", async () => {
-    globalThis.fetch = async () => generatorResponse({ "x-errors-count": "2" });
+    answerWith(generatorResponse({ "x-errors-count": "2" }));
 
-    let message = "";
-    try {
-      await regenerateDocs();
-    } catch (error) {
-      message = error.message;
-    }
+    const error = await catchError(regenerateDocs());
 
-    expect(message).toContain("0 warnings");
+    expect(error.message).toContain("0 warnings");
+  });
+
+  it("writes singular nouns for a single error and a single warning", async () => {
+    answerWith(
+      generatorResponse({ "x-errors-count": "1", "x-warnings-count": "1" }),
+    );
+
+    const error = await catchError(regenerateDocs());
+
+    expect(error.message).toContain("1 error and 1 warning in");
+    expect(error.message).not.toContain("1 errors");
+    expect(error.message).not.toContain("1 warnings");
+  });
+
+  it("surfaces the generator's own status and error when it refuses the request", async () => {
+    answerWith(generatorRefusal("unknown spec generator type", 502));
+
+    const error = await catchError(regenerateDocs());
+
+    expect(error.statusCode).toBe(502);
+    expect(error.message).toBe("unknown spec generator type");
   });
 
   it("asks the generator for the docs source as respec", async () => {
-    let requested = "";
-    globalThis.fetch = async href => {
-      requested = href;
-      return generatorResponse({ "x-errors-count": "1" });
-    };
+    answerWith(generatorResponse({ "x-errors-count": "1" }));
 
-    try {
-      await regenerateDocs();
-    } catch {
-      // the specs above cover the throw; this one only inspects the request
-    }
+    await catchError(regenerateDocs());
 
-    const url = new URL(requested);
+    const url = new URL(globalThis.fetch.calls.mostRecent().args[0]);
     expect(url.origin + url.pathname).toBe(SPEC_GENERATOR);
     expect(url.searchParams.get("type")).toBe("respec");
     expect(url.searchParams.get("url")).toBe(
       "https://respec.org/docs/src.html",
     );
   });
-
-  it("surfaces the generator's own status and error when it refuses the request", async () => {
-    globalThis.fetch = async () =>
-      generatorRefusal("unknown spec generator type", 502);
-
-    let caught;
-    try {
-      await regenerateDocs();
-    } catch (error) {
-      caught = error;
-    }
-
-    expect(caught.statusCode).toBe(502);
-    expect(caught.message).toBe("unknown spec generator type");
-  });
-
-  it("writes singular nouns for a single error and a single warning", async () => {
-    globalThis.fetch = async () =>
-      generatorResponse({ "x-errors-count": "1", "x-warnings-count": "1" });
-
-    let message = "";
-    try {
-      await regenerateDocs();
-    } catch (error) {
-      message = error.message;
-    }
-
-    expect(message).toContain("1 error and 1 warning in");
-    expect(message).not.toContain("1 errors");
-    expect(message).not.toContain("1 warnings");
-  });
 });
 
 describe("routes/docs/update route()", () => {
   it("logs a short failure whole, with no trailing ellipsis", async () => {
-    globalThis.fetch = async () => generatorRefusal("spec generator is down");
+    answerWith(generatorRefusal("spec generator is down"));
+    spyOn(console, "error");
 
-    const [line] = await logsFromRoute();
+    await route({}, fakeExpressResponse());
 
-    expect(line).toBe("Failed to regenerate docs: spec generator is down");
+    expect(console.error).toHaveBeenCalledWith(
+      "Failed to regenerate docs: spec generator is down",
+    );
   });
 
   it("truncates a failure longer than 400 characters and marks it with one ellipsis", async () => {
-    globalThis.fetch = async () => generatorRefusal("x".repeat(500));
+    answerWith(generatorRefusal("x".repeat(500)));
+    spyOn(console, "error");
 
-    const [line] = await logsFromRoute();
+    await route({}, fakeExpressResponse());
 
+    const line = console.error.calls.mostRecent().args[0];
     expect(line.endsWith("...")).toBe(true);
     expect(line).toContain("x".repeat(400));
     expect(line).not.toContain("x".repeat(401));
