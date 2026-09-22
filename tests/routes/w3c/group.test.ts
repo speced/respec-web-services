@@ -36,7 +36,7 @@ beforeAll(async () => {
   origDataDir = process.env.DATA_DIR;
   process.env.DATA_DIR = tmpDir;
 
-  const mod = await import("../../../build/routes/w3c/group.js");
+  const mod = await import("#routes/w3c/group.ts");
   route = mod.default;
   reloadGroups = mod.reloadGroups;
 });
@@ -126,7 +126,7 @@ describe("w3c/group - no shortname", () => {
   it("renders HTML view when accept includes text/html", async () => {
     const res = await run({}, { accept: "text/html" });
     expect(res._rendered).toBeDefined();
-    expect(res._rendered.view).toBe("w3c/groups.js");
+    expect(res._rendered.view).toBe("w3c/groups.ts");
     expect(res._rendered.data.groups).toBeDefined();
   });
 });

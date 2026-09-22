@@ -10,8 +10,8 @@
     "strictNullChecks": true,
     "noImplicitAny": true,
     "module": "nodenext",
-    "outDir": "build",
-    "sourceMap": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "resolveJsonModule": true

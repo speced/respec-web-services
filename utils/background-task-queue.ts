@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 import split2 from "split2";
 import { serializeError, deserializeError } from "serialize-error";
 
-import { env } from "./misc.js";
+import { env } from "./misc.ts";
 
 type Message = { id: string };
 
@@ -129,11 +129,11 @@ type TaskModule = { default(input?: unknown): unknown };
  *
  * @example
  * ```js
- * // file: worker.js
+ * // file: worker.ts
  * export default async function task(a, b) { return a + b; }
  *
- * // file: jobs-queue.js
- * const queue = new BackgroundTaskQueue("worker.js");
+ * // file: jobs-queue.ts
+ * const queue = new BackgroundTaskQueue("worker.ts");
  * const a1 = queue.add(1, 2);
  * const a2 = queue.add(5, 10);
  * a1.run().then((result) => console.assert(result === 3));

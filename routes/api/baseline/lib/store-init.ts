@@ -1,3 +1,3 @@
-import { BaselineStore } from "./store.js";
+import { BaselineStore } from "./store.ts";
 
 export const store = new BaselineStore();

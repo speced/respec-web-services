@@ -1,5 +1,5 @@
 const { default: route } = await import(
-  "../../../build/routes/monitor/usage.js"
+  "#routes/monitor/usage.ts"
 );
 
 function mockRes() {

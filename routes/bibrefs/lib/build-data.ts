@@ -1,14 +1,14 @@
 // Keep this out of the server process: the transform it runs peaks near 560 MB.
 //
 // Runnable by hand to rebuild the data file without restarting the server:
-//   node build/routes/bibrefs/lib/build-data.js <cloneDirectory> <outputFile>
+//   node routes/bibrefs/lib/build-data.ts <cloneDirectory> <outputFile>
 
 import { createRequire } from "node:module";
 import { lstatSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { validate } from "./validate.js";
-import { prepareWorkspace } from "./workspace.js";
+import { validate } from "./validate.ts";
+import { prepareWorkspace } from "./workspace.ts";
 
 /** Symlinks survive a clone, and the transform reads every file in here. */
 function assertEveryInputIsAPlainJsonFile(directory: string) {

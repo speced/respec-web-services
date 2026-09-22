@@ -2,11 +2,11 @@ import path from "path";
 
 import type { Request, Response } from "express";
 
-import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
+import { BackgroundTaskQueue } from "#utils/background-task-queue.ts";
 
-import { reloadGroups } from "./group.js";
+import { reloadGroups } from "./group.ts";
 
-const workerFile = path.join(import.meta.dirname, "update.worker.js");
+const workerFile = path.join(import.meta.dirname, "update.worker.ts");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
   "w3c_groups_update",

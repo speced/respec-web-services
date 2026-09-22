@@ -1,4 +1,4 @@
-import { parseLine } from "../../../../../build/routes/api/unicode/lib/scraper.js";
+import { parseLine } from "#routes/api/unicode/lib/scraper.ts";
 
 describe("api/unicode/lib/scraper - parseLine", () => {
   it("parses a normal data line into [codepoint, { name }]", () => {

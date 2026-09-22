@@ -1,10 +1,10 @@
 import path from "path";
-import { BackgroundTaskQueue } from "../../../utils/background-task-queue.js";
-import { store } from "./lib/store-init.js";
+import { BackgroundTaskQueue } from "#utils/background-task-queue.ts";
+import { store } from "./lib/store-init.ts";
 import type { Request, Response } from "express";
 
-const workerFile = path.join(import.meta.dirname, "update.worker.js");
-const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.js")>(
+const workerFile = path.join(import.meta.dirname, "update.worker.ts");
+const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
   "unicode_update",
 );

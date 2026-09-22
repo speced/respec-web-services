@@ -1,5 +1,5 @@
 import { createHmac } from "crypto";
-import githubWebhookAuthenticator from "../../build/utils/auth-github-webhook.js";
+import githubWebhookAuthenticator from "#utils/auth-github-webhook.ts";
 
 const SECRET = "test-webhook-secret-1234";
 

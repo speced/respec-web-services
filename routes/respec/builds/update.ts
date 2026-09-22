@@ -3,8 +3,8 @@ import { mkdir, readFile } from "node:fs/promises";
 
 import type { Request, Response } from "express";
 
-import { env, HTTPError } from "../../../utils/misc.js";
-import sh from "../../../utils/sh.js";
+import { env, HTTPError } from "#utils/misc.ts";
+import sh from "#utils/sh.ts";
 
 export const PKG_DIR = path.join(env("DATA_DIR"), "respec", "package");
 

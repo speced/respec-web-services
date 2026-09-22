@@ -1,6 +1,6 @@
 // GH_TOKEN (read by tokens.ts at import time) is set by tests/helpers/env.js
 // before any spec loads, so the module can be imported statically.
-import { requestData } from "../../../../../build/routes/github/lib/utils/rest.js";
+import { requestData } from "#routes/github/lib/utils/rest.ts";
 
 describe("github/lib/utils/rest - requestData", () => {
   let originalFetch;

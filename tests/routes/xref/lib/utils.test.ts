@@ -1,4 +1,4 @@
-import * as utils from "../../../../build/routes/xref/lib/utils.js";
+import * as utils from "#routes/xref/lib/utils.ts";
 
 describe("xref - utils", () => {
   it("objectHash", () => {

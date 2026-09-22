@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { seconds } from "../../utils/misc.js";
-import { getCommits } from "./lib/commits.js";
+import { seconds } from "#utils/misc.ts";
+import { getCommits } from "./lib/commits.ts";
 
 type Params = { org: string; repo: string };
 type Query = { from: string; to?: string; path?: string };

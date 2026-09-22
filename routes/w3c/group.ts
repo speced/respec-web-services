@@ -3,8 +3,8 @@ import { readFileSync } from "fs";
 
 import type { Request, Response } from "express";
 
-import { MemCache } from "../../utils/mem-cache.js";
-import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
+import { MemCache } from "#utils/mem-cache.ts";
+import { env, ms, seconds, HTTPError } from "#utils/misc.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");
@@ -63,7 +63,7 @@ export default async function route(req: IRequest, res: Response) {
   const { shortname, type } = req.params;
   if (!shortname) {
     if (req.headers.accept?.includes("text/html")) {
-      return res.render("w3c/groups.js", { groups });
+      return res.render("w3c/groups.ts", { groups });
     }
     return res.json(groups);
   }

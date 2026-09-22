@@ -1,7 +1,7 @@
 import path from "path";
 import { mkdir, readFile, rename, writeFile } from "fs/promises";
 
-import { env } from "../../../../utils/misc.js";
+import { env } from "#utils/misc.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const LATEST_DATA_URL =

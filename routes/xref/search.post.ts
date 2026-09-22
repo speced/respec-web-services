@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 
-import { searchOne, type Query, type Options, type DataEntry } from "./lib/search.js";
-import { Store } from "./lib/store.js";
-import { store } from "./lib/store-init.js";
+import { searchOne, type Query, type Options, type DataEntry } from "./lib/search.ts";
+import { Store } from "./lib/store.ts";
+import { store } from "./lib/store-init.ts";
 
 interface RequestBody {
   options: Partial<Options>;

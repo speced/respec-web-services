@@ -3,10 +3,16 @@ import { promises as fs } from "fs";
 
 import { html } from "ucontent";
 
-import { BROWSERS, DEFAULT_BROWSERS, SUPPORT_TITLES } from "./constants.js";
-import { env } from "../../../utils/misc.js";
-import { MemCache } from "../../../utils/mem-cache.js";
-import type { BrowserVersionData, SupportKeys, ScraperOutput as Data } from "./constants.js";
+import {
+  BROWSERS,
+  DEFAULT_BROWSERS,
+  SUPPORT_TITLES,
+  type BrowserVersionData,
+  type SupportKeys,
+  type ScraperOutput as Data,
+} from "./constants.ts";
+import { env } from "#utils/misc.ts";
+import { MemCache } from "#utils/mem-cache.ts";
 
 export type { Data };
 

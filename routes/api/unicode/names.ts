@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-import { store, type Store } from "./lib/store-init.js";
+import { store, type Store } from "./lib/store-init.ts";
 
 interface Query {
   /** Codepoint as hex */

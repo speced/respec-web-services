@@ -1,4 +1,4 @@
-import { getToken, updateRateLimit, type RateLimit } from "./tokens.js";
+import { getToken, updateRateLimit, type RateLimit } from "./tokens.ts";
 
 const GITHUB_API_ORIGIN = "https://api.github.com";
 

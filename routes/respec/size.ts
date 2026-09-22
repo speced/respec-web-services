@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 
 import type { Request, Response } from "express";
 
-import { env } from "../../utils/misc.js";
+import { env } from "#utils/misc.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const RESPEC_GH_ACTION_SECRET = env("RESPEC_GH_ACTION_SECRET");

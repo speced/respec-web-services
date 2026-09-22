@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { store } from "./lib/store-init.js";
+import { store } from "./lib/store-init.ts";
 
 interface HeadingsQuery {
   spec: string;

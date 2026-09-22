@@ -2,8 +2,8 @@ import type { Request, Response } from "express";
 import { readFileSync } from "fs";
 import path from "path";
 
-import { PROJECT_ROOT } from "../../utils/constants.js";
-import { store as bibrefs } from "../bibrefs/lib/store-init.js";
+import { PROJECT_ROOT } from "#utils/constants.ts";
+import { store as bibrefs } from "../bibrefs/lib/store-init.ts";
 
 let version = "unknown";
 try {

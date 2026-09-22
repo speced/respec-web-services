@@ -44,7 +44,7 @@ function respondWith(response) {
 }
 
 beforeAll(async () => {
-  const mod = await import("../../../build/routes/docs/update.js");
+  const mod = await import("#routes/docs/update.ts");
   regenerateDocs = mod.regenerateDocs;
   route = mod.default;
 });

@@ -1,4 +1,4 @@
-import { MemCache } from "../../build/utils/mem-cache.js";
+import { MemCache } from "#utils/mem-cache.ts";
 
 describe("utils/MemCache", () => {
   describe("set() and get()", () => {

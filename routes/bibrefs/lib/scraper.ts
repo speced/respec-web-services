@@ -4,9 +4,9 @@ import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { env, ms } from "../../../utils/misc.js";
+import { env, ms } from "#utils/misc.ts";
 
-import { DATA_FILE } from "./paths.js";
+import { DATA_FILE } from "./paths.ts";
 
 const run = promisify(execFile);
 
@@ -95,7 +95,7 @@ async function updateInputSource() {
 
 /** Its own process: a worker thread would share this process's memory. */
 async function buildData() {
-  const script = path.join(import.meta.dirname, "build-data.js");
+  const script = path.join(import.meta.dirname, "build-data.ts");
   const { PATH, HOME } = process.env;
   const { stdout } = await run(
     process.execPath,

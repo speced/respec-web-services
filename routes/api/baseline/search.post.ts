@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 
-import { seconds } from "../../../utils/misc.js";
-import { store } from "./lib/store-init.js";
-import { normalizeUrl } from "./lib/store.js";
+import { seconds } from "#utils/misc.ts";
+import { store } from "./lib/store-init.ts";
+import { normalizeUrl } from "./lib/store.ts";
 
 const MAX_SPECS = 50;
 

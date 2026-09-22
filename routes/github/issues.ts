@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { seconds } from "../../utils/misc.js";
-import { getIssues } from "./lib/issues.js";
+import { seconds } from "#utils/misc.ts";
+import { getIssues } from "./lib/issues.ts";
 
 type Params = { org: string; repo: string };
 type Query = { issues: string | string[] };

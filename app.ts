@@ -4,21 +4,21 @@ import express from "express";
 import compression from "compression";
 import helmet from "helmet";
 
-import * as logging from "./utils/logging.js";
-import { register as registerViewEngine } from "./utils/view-engine.js";
-import { PROJECT_ROOT } from "./utils/constants.js";
+import * as logging from "./utils/logging.ts";
+import { register as registerViewEngine } from "./utils/view-engine.ts";
+import { PROJECT_ROOT } from "./utils/constants.ts";
 
-import xrefRouter from "./routes/xref/index.js";
-import bibrefsRouter from "./routes/bibrefs/index.js";
-import caniuseRouter from "./routes/caniuse/index.js";
-import githubRouter from "./routes/github/index.js";
-import respecRouter from "./routes/respec/index.js";
-import w3cRouter from "./routes/w3c/index.js";
-import baselineRouter from "./routes/api/baseline/index.js";
-import apiRouter from "./routes/api/index.js";
-import wellKnownRouter from "./routes/well-known/index.js";
-import monitorRouter from "./routes/monitor/index.js";
-import docsRouter from "./routes/docs/index.js";
+import xrefRouter from "./routes/xref/index.ts";
+import bibrefsRouter from "./routes/bibrefs/index.ts";
+import caniuseRouter from "./routes/caniuse/index.ts";
+import githubRouter from "./routes/github/index.ts";
+import respecRouter from "./routes/respec/index.ts";
+import w3cRouter from "./routes/w3c/index.ts";
+import baselineRouter from "./routes/api/baseline/index.ts";
+import apiRouter from "./routes/api/index.ts";
+import wellKnownRouter from "./routes/well-known/index.ts";
+import monitorRouter from "./routes/monitor/index.ts";
+import docsRouter from "./routes/docs/index.ts";
 
 const app = express();
 app.use(compression());

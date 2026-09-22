@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { BROWSERS, DEFAULT_BROWSERS } from "./lib/constants.js";
-import { type Data, getData } from "./lib/index.js";
+import { BROWSERS, DEFAULT_BROWSERS } from "./lib/constants.ts";
+import { type Data, getData } from "./lib/index.ts";
 
 type Params = { feature: string };
 type Query = { browsers?: string | string[] };

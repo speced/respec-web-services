@@ -1,4 +1,4 @@
-import { env } from "../../../../utils/misc.js";
+import { env } from "#utils/misc.ts";
 
 export interface RateLimit {
   remaining: number;

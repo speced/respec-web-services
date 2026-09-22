@@ -1,13 +1,13 @@
 import express from "express";
 import cors from "cors";
 
-import authGithubWebhook from "../../../utils/auth-github-webhook.js";
-import { env, ms } from "../../../utils/misc.js";
+import authGithubWebhook from "#utils/auth-github-webhook.ts";
+import { env, ms } from "#utils/misc.ts";
 
-import allRoute from "./all.js";
-import featureRoute from "./feature.js";
-import searchRoute from "./search.post.js";
-import updateRoute from "./update.js";
+import allRoute from "./all.ts";
+import featureRoute from "./feature.ts";
+import searchRoute from "./search.post.ts";
+import updateRoute from "./update.ts";
 
 const baseline = express.Router({ mergeParams: true });
 

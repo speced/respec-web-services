@@ -2,7 +2,7 @@
 // module reads it at import time. Assertions avoid the raw token value so a real
 // developer token can't leak into Jasmine failure diffs.
 const { getToken, updateRateLimit, getLimits } = await import(
-  "../../../../../build/routes/github/lib/utils/tokens.js"
+  "#routes/github/lib/utils/tokens.ts"
 );
 
 describe("routes/github/lib/utils/tokens", () => {

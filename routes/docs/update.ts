@@ -3,8 +3,8 @@ import { writeFile } from "fs/promises";
 
 import type { Request, Response } from "express";
 
-import { HTTPError } from "../../utils/misc.js";
-import { PROJECT_ROOT } from "../../utils/constants.js";
+import { HTTPError } from "#utils/misc.ts";
+import { PROJECT_ROOT } from "#utils/constants.ts";
 
 export default async function route(_req: Request, res: Response) {
   try {

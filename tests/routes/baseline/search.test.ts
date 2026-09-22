@@ -1,8 +1,9 @@
-import searchRoute from "../../../build/routes/api/baseline/search.post.js";
-import { store } from "../../../build/routes/api/baseline/lib/store-init.js";
+import type { Response } from "express";
 
-/** @returns {import("express").Response} */
-function makeRes() {
+import searchRoute from "#routes/api/baseline/search.post.ts";
+import { store } from "#routes/api/baseline/lib/store-init.ts";
+
+function makeRes(): Response {
   const res = {
     _status: 200,
     _body: undefined,

@@ -1,4 +1,4 @@
-import w3cGroupsScraper from "../../scripts/update-w3c-groups-list.js";
+import w3cGroupsScraper from "#scripts/update-w3c-groups-list.ts";
 
 export default async function w3cGroupsUpdate() {
   try {

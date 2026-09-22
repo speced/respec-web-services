@@ -9,11 +9,11 @@ import { mkdir, readFile, readdir, writeFile } from "fs/promises";
 
 import type { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
 
-import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.js";
-import { uniq } from "./utils.js";
-import { Store, type SpecMapGroup } from "./store.js";
-import { env } from "../../../utils/misc.js";
-import sh from "../../../utils/sh.js";
+import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.ts";
+import { uniq } from "./utils.ts";
+import { Store, type SpecMapGroup } from "./store.ts";
+import { env } from "#utils/misc.ts";
+import sh from "#utils/sh.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const INPUT_REPO_SRC = "https://github.com/w3c/webref.git";

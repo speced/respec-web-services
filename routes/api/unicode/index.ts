@@ -3,10 +3,10 @@ import path from "node:path";
 import express from "express";
 import cors from "cors";
 
-import { env, ms } from "../../../utils/misc.js";
+import { env, ms } from "#utils/misc.ts";
 
-import namesRoute from "./names.js";
-import updateRoute from "./update.js";
+import namesRoute from "./names.ts";
+import updateRoute from "./update.ts";
 
 const DATA_DIR = env("DATA_DIR");
 

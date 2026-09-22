@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { prepareWorkspace } from "../../../build/routes/bibrefs/lib/workspace.js";
+import { prepareWorkspace } from "#routes/bibrefs/lib/workspace.ts";
 
 describe("routes/bibrefs - build workspace", () => {
   let root;

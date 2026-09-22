@@ -1,4 +1,4 @@
-import { regenerateDocs } from "../routes/docs/update.js";
+import { regenerateDocs } from "../routes/docs/update.ts";
 
 const start = Date.now();
 console.log("Regenerating docs...");

@@ -7,7 +7,7 @@ import {
 } from "node:fs";
 import path from "node:path";
 
-import { PROJECT_ROOT } from "../../../utils/constants.js";
+import { PROJECT_ROOT } from "#utils/constants.ts";
 
 const VENDOR_DIRECTORY = path.join(PROJECT_ROOT, "vendor", "specref");
 export const TRANSFORM = "bibref.js";
