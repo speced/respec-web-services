@@ -3,7 +3,7 @@ let origFetch;
 
 const SPEC_GENERATOR = "https://www.w3.org/publications/spec-generator/";
 
-/** Build a spec-generator response carrying only the count headers it really sends. */
+/** The generator answers 200 even when ReSpec found errors; the counts arrive in headers. */
 function generatorResponse(headers) {
   return new Response("<html></html>", { status: 200, headers });
 }
@@ -75,7 +75,7 @@ describe("routes/docs/update regenerateDocs()", () => {
     try {
       await regenerateDocs();
     } catch {
-      // the throw is asserted elsewhere; this spec is about the request
+      // the specs above cover the throw; this one only inspects the request
     }
 
     const url = new URL(requested);
@@ -84,5 +84,23 @@ describe("routes/docs/update regenerateDocs()", () => {
     expect(url.searchParams.get("url")).toBe(
       "https://respec.org/docs/src.html",
     );
+  });
+
+  it("surfaces the generator's own status and error when it refuses the request", async () => {
+    globalThis.fetch = async () =>
+      new Response(JSON.stringify({ error: "unknown spec generator type" }), {
+        status: 502,
+        headers: { "content-type": "application/json" },
+      });
+
+    let caught;
+    try {
+      await regenerateDocs();
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught.statusCode).toBe(502);
+    expect(caught.message).toBe("unknown spec generator type");
   });
 });

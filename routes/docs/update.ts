@@ -41,8 +41,7 @@ export async function regenerateDocs() {
   const errorCount = parseInt(res.headers.get("x-errors-count") || "0");
   if (errorCount > 0) {
     const warningCount = res.headers.get("x-warnings-count") ?? "0";
-    // The generator returns counts only, never the messages, so name the
-    // command that prints them.
+    // The generator returns counts only, never the messages themselves.
     throw new Error(
       `ReSpec found ${errorCount} errors and ${warningCount} warnings in ${DOCS_SOURCE}. ` +
         `Run "npx respec -s ${DOCS_SOURCE} -o /dev/null" to see them.`,
