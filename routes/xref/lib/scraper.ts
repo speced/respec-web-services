@@ -7,11 +7,11 @@ import path from "path";
 import { existsSync } from "fs";
 import { mkdir, readFile, readdir, writeFile } from "fs/promises";
 
-import { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
+import type { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
 
 import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.js";
 import { uniq } from "./utils.js";
-import { Store, SpecMapGroup } from "./store.js";
+import { Store, type SpecMapGroup } from "./store.js";
 import { env } from "../../../utils/misc.js";
 import sh from "../../../utils/sh.js";
 

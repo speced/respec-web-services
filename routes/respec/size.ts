@@ -2,7 +2,7 @@ import path from "path";
 import { appendFile, readFile } from "fs/promises";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import { env } from "../../utils/misc.js";
 

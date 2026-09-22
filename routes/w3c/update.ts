@@ -1,6 +1,6 @@
 import path from "path";
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
 

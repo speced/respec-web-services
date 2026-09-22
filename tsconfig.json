@@ -12,6 +12,8 @@
     "module": "nodenext",
     "outDir": "build",
     "sourceMap": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
     "resolveJsonModule": true
   },
   "include": [

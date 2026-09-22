@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { ms, seconds } from "../../utils/misc.js";
 import { DiskCache } from "../../utils/disk-cache.js";
 
-import { Contributor, getContributors } from "./lib/contributors.js";
-import { getUsersDetails, User, Users } from "./lib/users.js";
+import { type Contributor, getContributors } from "./lib/contributors.js";
+import { getUsersDetails, type User, type Users } from "./lib/users.js";
 
 type Contributors = (Contributor & User)[];
 

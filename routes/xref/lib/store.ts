@@ -2,8 +2,8 @@ import path from "path";
 import { readFileSync } from "fs";
 
 import { env, getErrnoCode } from "../../../utils/misc.js";
-import { DataEntry } from "./search.js";
-import { HeadingEntry, HeadingsBySpec } from "./scraper.js";
+import type { DataEntry } from "./search.js";
+import type { HeadingEntry, HeadingsBySpec } from "./scraper.js";
 
 export type SpecMapGroup = {
   [specid: string]: {
