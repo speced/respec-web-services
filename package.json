@@ -33,12 +33,7 @@
     "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
     "update-data-sources": "node --env-file-if-exists=.env build/scripts/update-data-sources.js"
   },
-  "packageManager": "pnpm@9.8.0",
-  "pnpm": {
-    "overrides": {
-      "html-minifier": "npm:html-minifier-terser@^7.2.0"
-    }
-  },
+  "packageManager": "pnpm@12.5.1",
   "simple-git-hooks": {
     "post-merge": "pnpm i && pnpm build"
   },
