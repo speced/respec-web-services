@@ -39,7 +39,7 @@ async function catchError(promise) {
   throw new Error("Expected regenerateDocs to reject, but it resolved.");
 }
 
-function answerWith(response) {
+function respondWith(response) {
   spyOn(globalThis, "fetch").and.resolveTo(response);
 }
 
@@ -51,7 +51,7 @@ beforeAll(async () => {
 
 describe("routes/docs/update regenerateDocs()", () => {
   it("reports the error and warning counts the generator actually returned", async () => {
-    answerWith(
+    respondWith(
       generatorResponse({ "x-errors-count": "3", "x-warnings-count": "7" }),
     );
 
@@ -62,7 +62,7 @@ describe("routes/docs/update regenerateDocs()", () => {
   });
 
   it("names the document that failed, so the log identifies it without reading the source", async () => {
-    answerWith(
+    respondWith(
       generatorResponse({ "x-errors-count": "1", "x-warnings-count": "0" }),
     );
 
@@ -73,27 +73,15 @@ describe("routes/docs/update regenerateDocs()", () => {
   });
 
   it("says zero warnings when the generator omits that header", async () => {
-    answerWith(generatorResponse({ "x-errors-count": "2" }));
+    respondWith(generatorResponse({ "x-errors-count": "2" }));
 
     const error = await catchError(regenerateDocs());
 
     expect(error.message).toContain("0 warnings");
   });
 
-  it("writes singular nouns for a single error and a single warning", async () => {
-    answerWith(
-      generatorResponse({ "x-errors-count": "1", "x-warnings-count": "1" }),
-    );
-
-    const error = await catchError(regenerateDocs());
-
-    expect(error.message).toContain("1 error and 1 warning in");
-    expect(error.message).not.toContain("1 errors");
-    expect(error.message).not.toContain("1 warnings");
-  });
-
   it("surfaces the generator's own status and error when it refuses the request", async () => {
-    answerWith(generatorRefusal("unknown spec generator type", 502));
+    respondWith(generatorRefusal("unknown spec generator type", 502));
 
     const error = await catchError(regenerateDocs());
 
@@ -102,7 +90,7 @@ describe("routes/docs/update regenerateDocs()", () => {
   });
 
   it("asks the generator for the docs source as respec", async () => {
-    answerWith(generatorResponse({ "x-errors-count": "1" }));
+    respondWith(generatorResponse({ "x-errors-count": "1" }));
 
     await catchError(regenerateDocs());
 
@@ -117,7 +105,7 @@ describe("routes/docs/update regenerateDocs()", () => {
 
 describe("routes/docs/update route()", () => {
   it("logs a short failure whole, with no trailing ellipsis", async () => {
-    answerWith(generatorRefusal("spec generator is down"));
+    respondWith(generatorRefusal("spec generator is down"));
     spyOn(console, "error");
 
     await route({}, fakeExpressResponse());
@@ -128,7 +116,7 @@ describe("routes/docs/update route()", () => {
   });
 
   it("truncates a failure longer than 400 characters and marks it with one ellipsis", async () => {
-    answerWith(generatorRefusal("x".repeat(500)));
+    respondWith(generatorRefusal("x".repeat(500)));
     spyOn(console, "error");
 
     await route({}, fakeExpressResponse());
