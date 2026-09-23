@@ -85,7 +85,9 @@ function processResults({ includeAllVersions = false }, ...fetchedData) {
   // Remove legacy string entries
   Array.from(results)
     .filter(([, value]) => typeof value !== "object")
-    .forEach(([key]) => results.delete(key));
+    .forEach(([key]) => {
+      results.delete(key);
+    });
   return results;
 }
 
@@ -172,5 +174,5 @@ function endWithDot(str) {
   if (!trimmed || trimmed.endsWith(".")) {
     return trimmed;
   }
-  return trimmed + ".";
+  return `${trimmed}.`;
 }

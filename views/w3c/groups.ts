@@ -92,7 +92,7 @@ function renderTable(groups: Groups, caption: string) {
   `;
 }
 
-function renderGroup([shortname, { id, URI, name }]: [string, GroupMeta]) {
+function renderGroup([shortname, { URI, name }]: [string, GroupMeta]) {
   return html`
     <tr>
       <td><code>${shortname}</code></td>

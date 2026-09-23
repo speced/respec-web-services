@@ -28,7 +28,9 @@ export default function route(req: IRequest, res: Response) {
 
   if (specs.length > MAX_SPECS) {
     res.status(400);
-    res.json({ error: `Too many spec URLs. Maximum is ${MAX_SPECS}, got ${specs.length}.` });
+    res.json({
+      error: `Too many spec URLs. Maximum is ${MAX_SPECS}, got ${specs.length}.`,
+    });
     return;
   }
 
@@ -50,7 +52,7 @@ export default function route(req: IRequest, res: Response) {
   }
 
   const result = [...matchingIds]
-    .map(id => ({ id, ...store.byFeature.get(id)! }))
+    .map(id => ({ id, ...store.byFeature.get(id) }))
     .filter(entry => entry.name);
 
   res.set("Cache-Control", `max-age=${seconds("30m")}`);

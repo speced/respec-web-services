@@ -3,7 +3,10 @@ import { parseLine } from "#routes/api/unicode/lib/scraper.ts";
 describe("api/unicode/lib/scraper - parseLine", () => {
   it("parses a normal data line into [codepoint, { name }]", () => {
     const line = "0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;";
-    expect(parseLine(line)).toEqual(["0041", { name: "LATIN CAPITAL LETTER A" }]);
+    expect(parseLine(line)).toEqual([
+      "0041",
+      { name: "LATIN CAPITAL LETTER A" },
+    ]);
   });
 
   it("maps angle-bracket control names to square brackets", () => {

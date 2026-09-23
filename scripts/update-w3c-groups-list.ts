@@ -104,7 +104,7 @@ export default async function update() {
     if (!group) continue;
     const { shortname, id, name, _links: links } = group;
     const url = links.homepage?.href;
-    data["other"][shortname] = { id, name, URI: url };
+    data.other[shortname] = { id, name, URI: url };
   }
 
   // Sort results for presentation.

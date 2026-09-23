@@ -76,7 +76,7 @@ export class BaselineStore {
     }
 
     try {
-      const data = JSON.parse(readFileSync(dataFile, "utf8")) as WebFeaturesData;
+      const data: WebFeaturesData = JSON.parse(readFileSync(dataFile, "utf8"));
 
       const features = Object.entries(data.features).filter(
         ([, feature]) => feature.kind === "feature",

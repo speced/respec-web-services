@@ -4,8 +4,12 @@ import { requestData } from "#routes/github/lib/utils/rest.ts";
 
 describe("github/lib/utils/rest - requestData", () => {
   let originalFetch;
-  beforeEach(() => { originalFetch = globalThis.fetch; });
-  afterEach(() => { globalThis.fetch = originalFetch; });
+  beforeEach(() => {
+    originalFetch = globalThis.fetch;
+  });
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
 
   const rateLimitHeaders = {
     "x-ratelimit-remaining": "4999",
@@ -17,13 +21,18 @@ describe("github/lib/utils/rest - requestData", () => {
   function page(body, { status = 200, statusText = "OK", next } = {}) {
     const headers = new Headers(rateLimitHeaders);
     if (next) {
-      headers.set("link", `<https://api.github.com/repos/w3c/respec/issues?page=${next}>; rel="next"`);
+      headers.set(
+        "link",
+        `<https://api.github.com/repos/w3c/respec/issues?page=${next}>; rel="next"`,
+      );
     }
     return new Response(JSON.stringify(body), { status, statusText, headers });
   }
 
   function mockFetch(body, opts) {
-    globalThis.fetch = jasmine.createSpy("fetch").and.resolveTo(page(body, opts));
+    globalThis.fetch = jasmine
+      .createSpy("fetch")
+      .and.resolveTo(page(body, opts));
   }
 
   describe("endpoint URL validation (SSRF guard)", () => {
@@ -54,24 +63,31 @@ describe("github/lib/utils/rest - requestData", () => {
     it("rejects a next link pointing to a non-GitHub domain", async () => {
       globalThis.fetch = jasmine.createSpy("fetch").and.resolveTo(
         new Response(JSON.stringify({ page: 1 }), {
-          headers: new Headers({ ...rateLimitHeaders, link: '<https://evil.com/next>; rel="next"' }),
+          headers: new Headers({
+            ...rateLimitHeaders,
+            link: '<https://evil.com/next>; rel="next"',
+          }),
         }),
       );
       const gen = requestData("https://api.github.com/repos/w3c/respec/issues");
       expect((await gen.next()).value.result).toEqual({ page: 1 });
-      await expectAsync(gen.next()).toBeRejectedWithError(/expected https:\/\/api\.github\.com/);
+      await expectAsync(gen.next()).toBeRejectedWithError(
+        /expected https:\/\/api\.github\.com/,
+      );
     });
 
     it("follows valid next links and stops when there are none", async () => {
       let n = 0;
-      globalThis.fetch = jasmine
-        .createSpy("fetch")
-        .and.callFake(() => {
-          const isFirstPage = ++n === 1;
-          return Promise.resolve(isFirstPage ? page({ page: 1 }, { next: 2 }) : page({ page: 2 }));
-        });
+      globalThis.fetch = jasmine.createSpy("fetch").and.callFake(() => {
+        const isFirstPage = ++n === 1;
+        return Promise.resolve(
+          isFirstPage ? page({ page: 1 }, { next: 2 }) : page({ page: 2 }),
+        );
+      });
       const results = [];
-      for await (const item of requestData("https://api.github.com/repos/w3c/respec/issues")) {
+      for await (const item of requestData(
+        "https://api.github.com/repos/w3c/respec/issues",
+      )) {
         results.push(item.result);
       }
       expect(results).toEqual([{ page: 1 }, { page: 2 }]);
@@ -79,11 +95,16 @@ describe("github/lib/utils/rest - requestData", () => {
   });
 
   it("throws on non-OK responses", async () => {
-    for (const [status, statusText] of [[404, "Not Found"], [500, "Internal Server Error"]]) {
+    for (const [status, statusText] of [
+      [404, "Not Found"],
+      [500, "Internal Server Error"],
+    ]) {
       mockFetch({}, { status, statusText });
       await expectAsync(requestData("https://api.github.com/repos/x").next())
         .withContext(String(status))
-        .toBeRejectedWithError(new RegExp(`Failed to fetch.*${status} ${statusText}`));
+        .toBeRejectedWithError(
+          new RegExp(`Failed to fetch.*${status} ${statusText}`),
+        );
     }
   });
 
@@ -91,15 +112,22 @@ describe("github/lib/utils/rest - requestData", () => {
     let n = 0;
     globalThis.fetch = jasmine
       .createSpy("fetch")
-      .and.callFake(() => Promise.resolve(page({ page: ++n }, { next: n + 1 })));
+      .and.callFake(() =>
+        Promise.resolve(page({ page: ++n }, { next: n + 1 })),
+      );
     spyOn(console, "warn");
     const results = [];
-    for await (const item of requestData("https://api.github.com/repos/w3c/respec/issues", 2)) {
+    for await (const item of requestData(
+      "https://api.github.com/repos/w3c/respec/issues",
+      2,
+    )) {
       results.push(item.result);
     }
     expect(results).toEqual([{ page: 1 }, { page: 2 }]);
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-    expect(console.warn).toHaveBeenCalledWith(jasmine.stringMatching(/Some pages were skipped/));
+    expect(console.warn).toHaveBeenCalledWith(
+      jasmine.stringMatching(/Some pages were skipped/),
+    );
   });
 
   it("sends Accept and Authorization headers", async () => {

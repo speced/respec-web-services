@@ -3,7 +3,7 @@
   The source for this document is at:
   https://github.com/speced/respec-web-services/blob/main/static/docs/src.html
 -->
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="color-scheme" content="light dark">
@@ -14,6 +14,7 @@
       defer
     ></script>
     <script class="remove">
+      // biome-ignore lint/correctness/noUnusedVariables: respecConfig is a global read by the ReSpec script above
       var respecConfig = {
         edDraftURI: null,
         editors: [
@@ -97,6 +98,7 @@
        * @param {*} _
        * @param {string} content
        */
+      // biome-ignore lint/correctness/noUnusedVariables: referenced by name in fixIncludes() as the data-oninclude value
       function fixMarkupOnInclude(_, content) {
         const ZERO_WIDTH_SPACE = "&#8203;";
         // Escape [[[foo]]] and [[foo]] by adding zero-width space. We remove these
@@ -110,10 +112,10 @@
           .replace(/\[\^/g, `[${ZERO_WIDTH_SPACE}^`)
           .replace(/{\^/g, `{${ZERO_WIDTH_SPACE}^`)
           // and also escape | used for inline variables
-          .replace(/\`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
-          .replace(/(\w+)\\\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
-          .replace(/\`\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
-          .replace(/(\w+)\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``);
+          .replace(/`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+          .replace(/(\w+)\\\|`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
+          .replace(/`\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+          .replace(/(\w+)\|`/g, `$1${ZERO_WIDTH_SPACE}\\|\``);
 
         // Add .note and .advisement classes based on line prefix
         content = content
@@ -202,7 +204,9 @@
         ];
         const selector = attributesToRemove.map(attr => `[${attr}]`).join(", ");
         document.querySelectorAll(selector).forEach(el => {
-          attributesToRemove.forEach(attr => el.removeAttribute(attr));
+          attributesToRemove.forEach(attr => {
+            el.removeAttribute(attr);
+          });
         });
 
         document.getElementById("respec-dfn-panel").remove();

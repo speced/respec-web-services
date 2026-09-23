@@ -2,10 +2,6 @@ import { autocomplete } from './autocomplete.js?v=5.0.1';
 import Fuse from './fuse.js?v=6.0.4';
 
 class OptionSelector extends HTMLInputElement {
-  constructor() {
-    super();
-  }
-
   static get observedAttributes() {
     return ['data-options'];
   }
@@ -15,7 +11,7 @@ class OptionSelector extends HTMLInputElement {
     return Array.from(this.selectedValues);
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name, _oldValue, newValue) {
     if (name === 'data-options') {
       this.options = [...new Set(newValue.split('|'))];
       this.fuse = new Fuse(this.options);
@@ -63,7 +59,7 @@ class OptionSelector extends HTMLInputElement {
     const button = document.createElement('button');
     button.setAttribute('type', 'button');
     button.textContent = value;
-    button.addEventListener('click', ev => {
+    button.addEventListener('click', _ev => {
       button.remove();
       selectedValues.delete(value);
     });
@@ -180,7 +176,7 @@ function renderResults(entries, query) {
           : howToCiteTerm(citeTerm, entry);
     // Each citation is its own button: click/tap the citation to copy just it.
     const citeCell = cites.map(citeButton).join('<br>');
-    let row = `
+    const row = `
       <tr>
         <td><a href="${link}">${title}</a></td>
         <td>${entry.shortname || entry.spec || ''}</td>
@@ -251,6 +247,7 @@ function howToCiteIDL(term, entry, overloadedPairs = null) {
   }
   let cite;
   switch (type) {
+    // biome-ignore lint/suspicious/noFallthroughSwitchClause: intentional
     case 'exception':
       if (!exceptionExceptions.has(term)) {
         cite = `{{"${safeTerm}"}}`;
@@ -334,7 +331,7 @@ function howToCiteAnchor(term, entry) {
 }
 
 function howToCiteTerm(term, entry) {
-  const { type, for: forList } = entry;
+  const { for: forList } = entry;
   term = escapeHTML(term.replace('/', '\\/'));
   if (forList) {
     return forList.map(f => `[=${escapeHTML(f)}/${term}=]`);
@@ -459,7 +456,10 @@ async function ready() {
   });
 
   const { searchParams } = new URL(window.location.href);
-  const hasAdvancedParams = searchParams.has('specs') || searchParams.has('types') || searchParams.has('for');
+  const hasAdvancedParams =
+    searchParams.has('specs') ||
+    searchParams.has('types') ||
+    searchParams.has('for');
   for (const [field, value] of searchParams) {
     switch (field) {
       case 'term':
@@ -468,13 +468,17 @@ async function ready() {
         break;
       case 'specs':
       case 'types':
-        value.split(',').forEach(val => form[field].select(val));
+        value.split(',').forEach(val => {
+          form[field].select(val);
+        });
         break;
     }
   }
   if (hasAdvancedParams) {
     form.advanced.checked = true;
-    form.querySelectorAll('.advanced').forEach(el => { el.hidden = false; });
+    form.querySelectorAll('.advanced').forEach(el => {
+      el.hidden = false;
+    });
     localStorage.setItem('showAdvanced', 'yes');
   }
   if (searchParams.has('term') || hasAdvancedParams) {

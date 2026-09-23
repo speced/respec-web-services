@@ -113,7 +113,7 @@ describe("utils/DiskCache", () => {
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
       await expectAsync(cache.set("foo/../evil", "data")).toBeRejectedWithError(
         Error,
-        /Invalid (key|path)/i
+        /Invalid (key|path)/i,
       );
     });
 
@@ -121,7 +121,7 @@ describe("utils/DiskCache", () => {
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
       await expectAsync(cache.set("foo//bar", "data")).toBeRejectedWithError(
         Error,
-        /Invalid (key|path)/i
+        /Invalid (key|path)/i,
       );
     });
 
@@ -129,7 +129,7 @@ describe("utils/DiskCache", () => {
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
       await expectAsync(cache.set("foo/./bar", "data")).toBeRejectedWithError(
         Error,
-        /Invalid (key|path)/i
+        /Invalid (key|path)/i,
       );
     });
 
@@ -139,7 +139,7 @@ describe("utils/DiskCache", () => {
       // The check must use baseDir + sep to prevent this bypass.
       const cache = new DiskCache({ ttl: 60_000, path: "test-cache" });
       await expectAsync(
-        cache.set("../test-cache-evil/pwn", "data")
+        cache.set("../test-cache-evil/pwn", "data"),
       ).toBeRejectedWithError(Error, /Invalid (key|path)/i);
     });
   });

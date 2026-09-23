@@ -130,7 +130,7 @@ async function getFilesList(owner: string, name: string, opts: Options) {
 
   const response: GraphQLResponse = await requestData(query, variables);
 
-  if (!response || !response.repository || !response.repository.object) {
+  if (!response?.repository?.object) {
     throw new Error("INTERNAL_ERROR");
   }
 
@@ -168,7 +168,7 @@ function createQuery(depth = 1) {
 
 // Run a DFS to flatten the recursive TreeObject
 function flattenFilesList(object: TreeObject, result: string[], dir = "") {
-  if (!object || !object.entries) return;
+  if (!object?.entries) return;
   for (const entry of object.entries) {
     result.push(`${dir}${entry.name}`);
     if (entry.type === "tree") {

@@ -22,7 +22,10 @@ const excBlock = text.slice(excStart, text.indexOf("]);", excStart) + 3);
 
 // Fail loudly if the helpers are renamed/reordered so the slices no longer
 // capture what we expect, rather than silently testing the wrong thing.
-if (!fnBlock.includes("function howToCiteTerm") || !excBlock.includes("URIError")) {
+if (
+  !fnBlock.includes("function howToCiteTerm") ||
+  !excBlock.includes("URIError")
+) {
   throw new Error("could not slice citation helpers out of script.js");
 }
 

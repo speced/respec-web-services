@@ -1,6 +1,6 @@
 import unicodeScraper from "./lib/scraper.ts";
 
-interface Input {}
+type Input = Record<string, never>;
 
 export default async function unicodeUpdate(_input: Input) {
   const updated = await unicodeScraper();

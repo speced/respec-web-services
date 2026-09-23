@@ -9,7 +9,7 @@ const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   "unicode_update",
 );
 
-export default async function route(req: Request, res: Response) {
+export default async function route(_req: Request, res: Response) {
   const job = taskQueue.add({});
   try {
     const { updated } = await job.run();

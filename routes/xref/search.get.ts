@@ -22,7 +22,10 @@ export default async function route(req: IRequest, res: Response) {
   // rejected here.
   if (typeof term === "undefined" && !specs?.length) {
     res.status(400).json({
-      message: { type: "error", text: "Missing required query parameter: term (or provide specs to browse)" },
+      message: {
+        type: "error",
+        text: "Missing required query parameter: term (or provide specs to browse)",
+      },
     });
     return;
   }

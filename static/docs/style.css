@@ -1,10 +1,10 @@
-.logo img {
-  max-width: 1.8cm;
-}
-
 img {
   max-width: 100%;
   height: auto;
+}
+
+.logo img {
+  max-width: 1.8cm;
 }
 
 pre {

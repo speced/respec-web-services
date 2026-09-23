@@ -38,9 +38,12 @@ export async function regenerateDocs() {
     throw new HTTPError(res.status, error);
   }
 
-  const errorCount = parseInt(res.headers.get("x-errors-count") || "0");
+  const errorCount = parseInt(res.headers.get("x-errors-count") || "0", 10);
   if (errorCount > 0) {
-    const warningCount = parseInt(res.headers.get("x-warnings-count") || "0");
+    const warningCount = Number.parseInt(
+      res.headers.get("x-warnings-count") || "0",
+      10,
+    );
     // The generator returns counts only, never the messages themselves.
     throw new Error(
       `ReSpec found ${errorCount} errors and ${warningCount} warnings in ${DOCS_SOURCE}. ` +

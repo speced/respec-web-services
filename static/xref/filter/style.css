@@ -7,7 +7,7 @@ body {
   height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
-  font-family: Inconsolata, Fira Mono, Fira Code, monospace;
+  font-family: "Inconsolata", "Fira Mono", "Fira Code", monospace;
 }
 
 h1 {

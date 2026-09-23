@@ -17,7 +17,9 @@ describe("routes/github/lib/utils/tokens", () => {
     updateRateLimit(token, { ...base, remaining: 4500 });
     updateRateLimit(token, { ...base, remaining: 100 });
     const stored = Object.values(getLimits()).find(v => v !== null);
-    expect(stored).toEqual(jasmine.objectContaining({ remaining: 100, limit: 5000 }));
+    expect(stored).toEqual(
+      jasmine.objectContaining({ remaining: 100, limit: 5000 }),
+    );
   });
 
   it("getLimits() masks each token to asterisks plus the last 4 chars", () => {

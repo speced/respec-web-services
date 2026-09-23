@@ -102,10 +102,7 @@ describe("routes/api/baseline/search.post", () => {
     beforeEach(() => {
       store.data = EMPTY_STORE_DATA;
       store.bySpecUrl = new Map([
-        [
-          "https://drafts.csswg.org/css-animations/",
-          ["css-animations"],
-        ],
+        ["https://drafts.csswg.org/css-animations/", ["css-animations"]],
       ]);
       store.byFeature = new Map([
         [

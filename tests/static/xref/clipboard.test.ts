@@ -38,7 +38,9 @@ describe("xref/script - citeButton", () => {
     // Exception citations like {{"DOMException"}} contain literal quotes that
     // would otherwise break out of the aria-label attribute.
     const html = citeButton('{{"DOMException"}}');
-    expect(html).toContain('aria-label="Copy citation {{&quot;DOMException&quot;}}"');
+    expect(html).toContain(
+      'aria-label="Copy citation {{&quot;DOMException&quot;}}"',
+    );
     // The visible button text keeps the real quotes (escapeHTML leaves " alone).
     expect(html).toContain('>{{"DOMException"}}</button>');
   });

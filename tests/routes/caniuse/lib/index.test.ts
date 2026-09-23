@@ -142,7 +142,9 @@ describe("caniuse - constants", () => {
     it("does not contain empty values", () => {
       for (const [key, value] of BROWSERS) {
         expect(key).withContext("key is non-empty").toBeTruthy();
-        expect(value).withContext(`value for "${key}" is non-empty`).toBeTruthy();
+        expect(value)
+          .withContext(`value for "${key}" is non-empty`)
+          .toBeTruthy();
       }
     });
   });
@@ -188,7 +190,9 @@ describe("caniuse - constants", () => {
 
     it("maps single keys to descriptive titles", () => {
       expect(SUPPORT_TITLES.get("y")).toBe("Supported.");
-      expect(SUPPORT_TITLES.get("n")).toBe("No support, or disabled by default.");
+      expect(SUPPORT_TITLES.get("n")).toBe(
+        "No support, or disabled by default.",
+      );
       expect(SUPPORT_TITLES.get("a")).toBe(
         "Almost supported (aka Partial support).",
       );
@@ -231,12 +235,8 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
           ["17", ["y"]],
           ["16", ["a"]],
         ],
-        edge: [
-          ["120", ["y"]],
-        ],
-        opera: [
-          ["100", ["n"]],
-        ],
+        edge: [["120", ["y"]]],
+        opera: [["100", ["n"]]],
       },
       summary: {
         chrome: [["120", ["y"]]],
@@ -285,7 +285,9 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       ["not-a-browser", "also-invalid"],
     ]) {
       const result = await jsonBody({ browsers });
-      expect(result).withContext(`browsers: ${JSON.stringify(browsers)}`).not.toBeNull();
+      expect(result)
+        .withContext(`browsers: ${JSON.stringify(browsers)}`)
+        .not.toBeNull();
       const keys = Object.keys(result);
       expect(keys).toContain("chrome");
       expect(keys).toContain("firefox");

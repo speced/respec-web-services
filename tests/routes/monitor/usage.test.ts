@@ -1,15 +1,22 @@
-const { default: route } = await import(
-  "#routes/monitor/usage.ts"
-);
+const { default: route } = await import("#routes/monitor/usage.ts");
 
 function mockRes() {
   const res = {
     _status: 200,
     _body: undefined,
     _headers: {},
-    status(code) { res._status = code; return res; },
-    json(body) { res._body = body; return res; },
-    set(header, value) { res._headers[header] = value; return res; },
+    status(code) {
+      res._status = code;
+      return res;
+    },
+    json(body) {
+      res._body = body;
+      return res;
+    },
+    set(header, value) {
+      res._headers[header] = value;
+      return res;
+    },
   };
   return res;
 }

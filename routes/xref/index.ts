@@ -28,7 +28,12 @@ xref
 xref.get("/meta{/:field}", cors(), metaRoute);
 xref
   .options("/search/headings", cors({ methods: ["POST"], maxAge: ms("1day") }))
-  .post("/search/headings", express.json({ limit: "1mb" }), cors(), headingsRoutePost);
+  .post(
+    "/search/headings",
+    express.json({ limit: "1mb" }),
+    cors(),
+    headingsRoutePost,
+  );
 xref.post("/update", authGithubWebhook(env("W3C_WEBREF_SECRET")), updateRoute);
 xref.use("/data", express.static(path.join(DATA_DIR, "xref")));
 

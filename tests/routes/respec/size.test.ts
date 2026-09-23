@@ -20,7 +20,9 @@ const validBody = (overrides = {}) => ({
 function mockRes() {
   return {
     headers: {},
-    setHeader(name, value) { this.headers[name] = value; },
+    setHeader(name, value) {
+      this.headers[name] = value;
+    },
     send: jasmine.createSpy("send"),
     sendStatus: jasmine.createSpy("sendStatus"),
   };
@@ -28,14 +30,20 @@ function mockRes() {
 
 // Call put() with an Authorization header (defaults to the valid secret).
 async function putBody(body, authorization = TEST_SECRET) {
-  const req = { body, get: h => (h === "Authorization" ? authorization : undefined) };
+  const req = {
+    body,
+    get: h => (h === "Authorization" ? authorization : undefined),
+  };
   const res = mockRes();
   await put(req, res);
   return res;
 }
 
 async function lastStoredEntry() {
-  const content = await readFile(path.join(DATA_DIR, "respec/respec-w3c.json"), "utf-8");
+  const content = await readFile(
+    path.join(DATA_DIR, "respec/respec-w3c.json"),
+    "utf-8",
+  );
   const lines = content.trim().split("\n");
   return JSON.parse(lines[lines.length - 1]);
 }
@@ -46,7 +54,9 @@ describe("routes/respec/size", () => {
       // null (missing) doesn't trigger putBody's default secret.
       for (const auth of [null, "wrong-secret"]) {
         const res = await putBody(validBody(), auth);
-        expect(res.sendStatus).withContext(String(auth)).toHaveBeenCalledWith(401);
+        expect(res.sendStatus)
+          .withContext(String(auth))
+          .toHaveBeenCalledWith(401);
       }
     });
 
@@ -56,7 +66,7 @@ describe("routes/respec/size", () => {
         validBody({ sha: "not-hex" }),
         validBody({ sha: "abcdef1234" }), // too short
         validBody({ sha: "A".repeat(40) }), // uppercase not allowed
-        validBody({ sha: "g" + "a".repeat(39) }), // non-hex char
+        validBody({ sha: `g${"a".repeat(39)}` }), // non-hex char
         validBody({ sha: "a".repeat(41) }), // too long
         validBody({ size: "0" }),
         validBody({ size: "abc" }),
@@ -65,7 +75,9 @@ describe("routes/respec/size", () => {
       ];
       for (const body of invalidBodies) {
         const res = await putBody(body);
-        expect(res.sendStatus).withContext(JSON.stringify(body)).toHaveBeenCalledWith(400);
+        expect(res.sendStatus)
+          .withContext(JSON.stringify(body))
+          .toHaveBeenCalledWith(400);
       }
     });
 
@@ -73,7 +85,9 @@ describe("routes/respec/size", () => {
       const sha = "b".repeat(40);
       const res = await putBody(validBody({ sha, timestamp: "1700000001" }));
       expect(res.sendStatus).toHaveBeenCalledWith(201);
-      expect(await lastStoredEntry()).toEqual(jasmine.objectContaining({ sha: "b".repeat(10) }));
+      expect(await lastStoredEntry()).toEqual(
+        jasmine.objectContaining({ sha: "b".repeat(10) }),
+      );
     });
 
     it("rejects a duplicate sha with 412", async () => {
@@ -89,7 +103,9 @@ describe("routes/respec/size", () => {
         expect(res.sendStatus).withContext(sha).toHaveBeenCalledWith(201);
       }
       // The first sha was evicted, so submitting it again succeeds (not 412).
-      const res = await putBody(validBody({ sha: shas[0], timestamp: "1700000005" }));
+      const res = await putBody(
+        validBody({ sha: shas[0], timestamp: "1700000005" }),
+      );
       expect(res.sendStatus).toHaveBeenCalledWith(201);
     });
   });

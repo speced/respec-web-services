@@ -53,9 +53,10 @@ export class Store {
 
     return {
       ...heading,
-      specTitle: this.specTitleByShortname.get(normalizedSpec)
-        || this.specTitleByShortname.get(normalizedSpec.replace(/-\d+$/, ""))
-        || spec,
+      specTitle:
+        this.specTitleByShortname.get(normalizedSpec) ||
+        this.specTitleByShortname.get(normalizedSpec.replace(/-\d+$/, "")) ||
+        spec,
     };
   }
 

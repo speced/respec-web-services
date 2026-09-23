@@ -25,7 +25,7 @@ const AS_SECONDS = {
  * ```
  */
 export function seconds(duration: string) {
-  const matches = duration.match(/^([\d\.,]+)\s?(\w)/);
+  const matches = duration.match(/^([\d.,]+)\s?(\w)/);
   if (matches && matches.length === 3) {
     const value = parseFloat(matches[1]);
     const unit = matches[2].toLowerCase() as keyof typeof AS_SECONDS;

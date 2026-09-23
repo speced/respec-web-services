@@ -1,7 +1,12 @@
 import { readFileSync, statSync } from "node:fs";
 
 import { DATA_FILE } from "./paths.ts";
-import { isUnsafeKey, type Reference, type References, validate } from "./validate.ts";
+import {
+  isUnsafeKey,
+  type Reference,
+  type References,
+  validate,
+} from "./validate.ts";
 
 export class Store {
   /** Set until `fill` accepts a data file. The route answers 503 while it is. */

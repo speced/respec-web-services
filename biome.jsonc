@@ -1,0 +1,73 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": ["**", "!vendor", "!static/xref/fuse.js"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space"
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        "noAutofocus": "off" // we use autofocus carefully, on purpose
+      },
+      "complexity": {
+        "noImportantStyles": "off" // too many changes, revisit later
+      },
+      "style": {
+        "useNodejsImportProtocol": "off", // too many changes, revisit later
+        "noNonNullAssertion": "off" // too many instances, revisit later
+      },
+      "suspicious": {
+        "noDuplicateProperties": "off", // some duplicates are intentional fallbacks
+        "noExplicitAny": "off" // too many instances, revisit later
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "trailingCommas": "all",
+      "arrowParentheses": "asNeeded"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "off" // TODO, but not yet
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["tests/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            // tests/ isn't part of tsconfig.json's type-checked include yet
+            "noImplicitAnyLet": "off"
+          }
+        }
+      }
+    },
+    {
+      // this directory already used single quotes; too many changes to flip now, revisit later
+      "includes": ["static/xref/**"],
+      "javascript": {
+        "formatter": {
+          "quoteStyle": "single"
+        }
+      }
+    }
+  ]
+}
