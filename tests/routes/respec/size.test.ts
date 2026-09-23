@@ -3,7 +3,7 @@ import path from "path";
 
 // Env vars (DATA_DIR, RESPEC_GH_ACTION_SECRET) are set by tests/helpers/env.js
 // before any spec loads, so the module can be imported statically.
-import { get, put } from "../../../build/routes/respec/size.js";
+import { get, put } from "#routes/respec/size.ts";
 
 const DATA_DIR = process.env.DATA_DIR;
 const TEST_SECRET = process.env.RESPEC_GH_ACTION_SECRET;

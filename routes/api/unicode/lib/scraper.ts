@@ -7,7 +7,7 @@ import { ReadableStream } from "node:stream/web";
 import { finished } from "node:stream/promises";
 import { createInterface } from "node:readline/promises";
 
-import { env } from "../../../../utils/misc.js";
+import { env } from "#utils/misc.ts";
 
 const DATA_DIR = env("DATA_DIR");
 

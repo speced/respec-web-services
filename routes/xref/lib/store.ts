@@ -1,9 +1,9 @@
 import path from "path";
 import { readFileSync } from "fs";
 
-import { env, getErrnoCode } from "../../../utils/misc.js";
-import type { DataEntry } from "./search.js";
-import type { HeadingEntry, HeadingsBySpec } from "./scraper.js";
+import { env, getErrnoCode } from "#utils/misc.ts";
+import type { DataEntry } from "./search.ts";
+import type { HeadingEntry, HeadingsBySpec } from "./scraper.ts";
 
 export type SpecMapGroup = {
   [specid: string]: {

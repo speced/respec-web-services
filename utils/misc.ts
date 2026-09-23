@@ -63,7 +63,12 @@ export function getErrnoCode(err: unknown): string | undefined {
 }
 
 export class HTTPError extends Error {
-  constructor(public statusCode: number, message: string, public url?: string) {
+  statusCode: number;
+  url?: string;
+
+  constructor(statusCode: number, message: string, url?: string) {
     super(message);
+    this.statusCode = statusCode;
+    this.url = url;
   }
 }

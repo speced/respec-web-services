@@ -1,19 +1,18 @@
 import path from "path";
 
-import express from "express";
+import express, { type Request, type Response } from "express";
 import cors from "cors";
-import type { Request, Response } from "express";
 
-import authGithubWebhook from "../../utils/auth-github-webhook.js";
-import { env, ms } from "../../utils/misc.js";
+import authGithubWebhook from "#utils/auth-github-webhook.ts";
+import { env, ms } from "#utils/misc.ts";
 
-import { store } from "./lib/store-init.js";
-import searchRouteGet from "./search.get.js";
-import searchRoutePost from "./search.post.js";
-import headingsRoutePost from "./headings.post.js";
-import metaRoute from "./meta.js";
-import updateRoute from "./update.js";
-import { search, type Options, type Query } from "./lib/search.js";
+import { store } from "./lib/store-init.ts";
+import searchRouteGet from "./search.get.ts";
+import searchRoutePost from "./search.post.ts";
+import headingsRoutePost from "./headings.post.ts";
+import metaRoute from "./meta.ts";
+import updateRoute from "./update.ts";
+import { search, type Options, type Query } from "./lib/search.ts";
 
 const DATA_DIR = env("DATA_DIR");
 

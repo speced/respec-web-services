@@ -1,13 +1,12 @@
 import cors from "cors";
-import express from "express";
-import type { Request, Response } from "express";
+import express, { type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
 
-import { ms, seconds } from "../../utils/misc.js";
-import { DATA_FILE } from "./lib/paths.js";
-import { startRefreshing } from "./lib/refresh.js";
-import { store } from "./lib/store-init.js";
-import { isUnsafeKey } from "./lib/validate.js";
+import { ms, seconds } from "#utils/misc.ts";
+import { DATA_FILE } from "./lib/paths.ts";
+import { startRefreshing } from "./lib/refresh.ts";
+import { store } from "./lib/store-init.ts";
+import { isUnsafeKey } from "./lib/validate.ts";
 
 const MAX_REFERENCES_PER_REQUEST = 500;
 const CACHE_SECONDS = seconds("1h");

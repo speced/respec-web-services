@@ -1,8 +1,8 @@
-import { getRefs } from "../../../build/routes/bibrefs/lib/store.js";
+import { getRefs } from "#routes/bibrefs/lib/store.ts";
 import {
   validate,
   SMALLEST_PLAUSIBLE_DATABASE,
-} from "../../../build/routes/bibrefs/lib/validate.js";
+} from "#routes/bibrefs/lib/validate.ts";
 
 /** Enough entries to clear the store's minimum-size check. */
 function bulk() {

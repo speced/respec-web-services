@@ -1,7 +1,7 @@
 import path from "path";
 import { existsSync, readFileSync } from "fs";
 
-import { env } from "../../../../utils/misc.js";
+import { env } from "#utils/misc.ts";
 
 interface SupportData {
   chrome?: string;

@@ -1,11 +1,11 @@
 import { Router } from "express";
 import cors from "cors";
 
-import authGithubWebhook from "../../utils/auth-github-webhook.js";
-import { env } from "../../utils/misc.js";
+import authGithubWebhook from "#utils/auth-github-webhook.ts";
+import { env } from "#utils/misc.ts";
 
-import groupsRoute from "./group.js";
-import updateRoute from "./update.js";
+import groupsRoute from "./group.ts";
+import updateRoute from "./update.ts";
 
 const w3c = Router();
 w3c.get("/groups{/:shortname}{/:type}", cors(), groupsRoute);

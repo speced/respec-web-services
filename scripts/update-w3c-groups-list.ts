@@ -1,14 +1,14 @@
 /**
  * Updates {@link {DATA_DIR}/w3c/groups.json} with current group shortnames and IDs.
  *
- * Standalone: node --env-file-if-exists=.env build/scripts/update-w3c-groups-list.js
+ * Standalone: node --env-file-if-exists=.env scripts/update-w3c-groups-list.ts
  * Via npm:    npm run update-data-sources
  */
 
 import path from "path";
 import { writeFile, mkdir } from "fs/promises";
 
-import { env } from "../utils/misc.js";
+import { env } from "../utils/misc.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const OUTPUT_FILE = path.join(DATA_DIR, "w3c/groups.json");

@@ -1,8 +1,8 @@
 import path from "path";
 import { readFileSync } from "fs";
 
-import { env } from "../../../../utils/misc.js";
-import { INPUT_DATA_SOURCE } from "./scraper.js";
+import { env } from "#utils/misc.ts";
+import { INPUT_DATA_SOURCE } from "./scraper.ts";
 
 export class Store {
   version = -1;

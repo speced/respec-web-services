@@ -1,3 +1,3 @@
-import { Store } from "./store.js";
+import { Store } from "./store.ts";
 
 export const store = new Store();

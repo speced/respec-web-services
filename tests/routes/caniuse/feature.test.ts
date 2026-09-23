@@ -1,9 +1,9 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
-import { env } from "../../../build/utils/misc.js";
-import route from "../../../build/routes/caniuse/feature.js";
-import { cache } from "../../../build/routes/caniuse/lib/index.js";
+import { env } from "#utils/misc.ts";
+import route from "#routes/caniuse/feature.ts";
+import { cache } from "#routes/caniuse/lib/index.ts";
 
 const CANIUSE_DIR = path.join(env("DATA_DIR"), "caniuse");
 

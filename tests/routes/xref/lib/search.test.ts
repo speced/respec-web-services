@@ -1,8 +1,10 @@
 import {
   search as _search,
   cache,
-} from "../../../../build/routes/xref/lib/search.js";
-import { buildTermLowerIndex } from "../../../../build/routes/xref/lib/store.js";
+  type Query,
+  type Options
+} from "#routes/xref/lib/search.ts";
+import { buildTermLowerIndex } from "#routes/xref/lib/store.ts";
 
 import byTerm from "./data-by-term.js";
 import bySpec from "./data-by-spec.js";
@@ -23,11 +25,7 @@ const specmap = {
 
 const store = { byTerm, bySpec, specmap, byTermLower: buildTermLowerIndex(byTerm) };
 
-/**
- * @param {import("../../../../routes/xref/lib/search.js").Query} query
- * @param {import("../../../../routes/xref/lib/search.js").Options} options
- */
-const search = (query, options) => {
+const search = (query: Query, options: Options) => {
   const response = _search([query], store, { fields: ["uri"], ...options });
   return response.result[0][1];
 };

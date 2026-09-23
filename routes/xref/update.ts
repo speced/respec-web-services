@@ -2,13 +2,13 @@ import path from "path";
 
 import type { Request, Response } from "express";
 
-import { BackgroundTaskQueue } from "../../utils/background-task-queue.js";
-import { ms } from "../../utils/misc.js";
+import { BackgroundTaskQueue } from "#utils/background-task-queue.ts";
+import { ms } from "#utils/misc.ts";
 
-import { cache as searchCache } from "./lib/search.js";
-import { store } from "./lib/store-init.js";
+import { cache as searchCache } from "./lib/search.ts";
+import { store } from "./lib/store-init.ts";
 
-const workerFile = path.join(import.meta.dirname, "update.worker.js");
+const workerFile = path.join(import.meta.dirname, "update.worker.ts");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(
   workerFile,
   "xref_update",

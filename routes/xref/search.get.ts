@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
-import { seconds } from "../../utils/misc.js";
+import { seconds } from "#utils/misc.ts";
 
-import { searchOne, type Query, type Options } from "./lib/search.js";
-import { store } from "./lib/store-init.js";
+import { searchOne, type Query, type Options } from "./lib/search.ts";
+import { store } from "./lib/store-init.ts";
 
 interface QueryParams {
   term?: string;

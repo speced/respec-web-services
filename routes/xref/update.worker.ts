@@ -1,4 +1,4 @@
-import xrefScraper from "./lib/scraper.js";
+import xrefScraper from "./lib/scraper.ts";
 
 interface Input {
   webhookId: string;

@@ -1,9 +1,10 @@
-import { route } from "../../../build/routes/bibrefs/index.js";
-import { store } from "../../../build/routes/bibrefs/lib/store-init.js";
-import { DATA_FILE } from "../../../build/routes/bibrefs/lib/paths.js";
+import type { Response } from "express";
 
-/** @returns {import("express").Response} */
-function makeRes() {
+import { route } from "#routes/bibrefs/index.ts";
+import { store } from "#routes/bibrefs/lib/store-init.ts";
+import { DATA_FILE } from "#routes/bibrefs/lib/paths.ts";
+
+function makeRes(): Response {
   return {
     locals: {},
     _status: 200,

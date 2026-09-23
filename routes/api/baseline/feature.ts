@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
-import { seconds } from "../../../utils/misc.js";
-import { store } from "./lib/store-init.js";
+import { seconds } from "#utils/misc.ts";
+import { store } from "./lib/store-init.ts";
 
 type Params = { feature: string };
 type IRequest = Request<Params>;

@@ -1,7 +1,7 @@
-import { QUERY_CACHE_DURATION, IDL_TYPES, CONCEPT_TYPES } from "./constants.js";
-import { Store } from "./store.js";
-import { objectHash, pickFields, textVariations } from "./utils.js";
-import { MemCache } from "../../../utils/mem-cache.js";
+import { QUERY_CACHE_DURATION, IDL_TYPES, CONCEPT_TYPES } from "./constants.ts";
+import { Store } from "./store.ts";
+import { objectHash, pickFields, textVariations } from "./utils.ts";
+import { MemCache } from "#utils/mem-cache.ts";
 
 type Type =
   | "attribute"

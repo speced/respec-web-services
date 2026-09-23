@@ -1,6 +1,6 @@
-import { requestData } from "./utils/graphql.js";
-import { ms } from "../../../utils/misc.js";
-import { DiskCache } from "../../../utils/disk-cache.js";
+import { requestData } from "./utils/graphql.ts";
+import { ms } from "#utils/misc.ts";
+import { DiskCache } from "#utils/disk-cache.ts";
 
 interface CacheEntry {
   files: string[];

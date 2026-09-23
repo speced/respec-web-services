@@ -1,4 +1,4 @@
-import unicodeScraper from "./lib/scraper.js";
+import unicodeScraper from "./lib/scraper.ts";
 
 interface Input {}
 

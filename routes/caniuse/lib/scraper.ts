@@ -8,9 +8,9 @@ import * as path from "path";
 import { existsSync } from "fs";
 import { readFile, writeFile, readdir, mkdir } from "fs/promises";
 
-import sh from "../../../utils/sh.js";
-import { env } from "../../../utils/misc.js";
-import type { BrowserVersionData, ScraperOutput as Output } from "./constants.js";
+import sh from "#utils/sh.ts";
+import { env } from "#utils/misc.ts";
+import type { BrowserVersionData, ScraperOutput as Output } from "./constants.ts";
 
 interface Input {
   stats: {

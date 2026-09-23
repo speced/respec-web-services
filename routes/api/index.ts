@@ -1,5 +1,5 @@
 import express from "express";
-import unicode from "./unicode/index.js";
+import unicode from "./unicode/index.ts";
 
 const router = express.Router({ mergeParams: true });
 

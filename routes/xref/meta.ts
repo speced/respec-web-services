@@ -6,8 +6,8 @@ import {
   CSS_TYPES,
   MARKUP_TYPES,
   HTTP_TYPES,
-} from "./lib/constants.js";
-import { store } from "./lib/store-init.js";
+} from "./lib/constants.ts";
+import { store } from "./lib/store-init.ts";
 
 let data = getData();
 

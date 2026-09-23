@@ -1,12 +1,12 @@
 import { mkdir } from "fs/promises";
-import { env } from "../utils/misc.js";
-import caniuse from "../routes/caniuse/lib/scraper.js";
-import xref from "../routes/xref/lib/scraper.js";
-import baseline from "../routes/api/baseline/lib/scraper.js";
-import unicode from "../routes/api/unicode/lib/scraper.js";
-import bibrefs from "../routes/bibrefs/lib/scraper.js";
-import { pullRelease } from "../routes/respec/builds/update.js";
-import w3cGroupsList from "./update-w3c-groups-list.js";
+import { env } from "../utils/misc.ts";
+import caniuse from "../routes/caniuse/lib/scraper.ts";
+import xref from "../routes/xref/lib/scraper.ts";
+import baseline from "../routes/api/baseline/lib/scraper.ts";
+import unicode from "../routes/api/unicode/lib/scraper.ts";
+import bibrefs from "../routes/bibrefs/lib/scraper.ts";
+import { pullRelease } from "../routes/respec/builds/update.ts";
+import w3cGroupsList from "./update-w3c-groups-list.ts";
 
 // ensure the data directory exists
 await mkdir(env("DATA_DIR"), { recursive: true });

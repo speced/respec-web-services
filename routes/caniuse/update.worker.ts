@@ -1,4 +1,4 @@
-import caniuseScraper from "./lib/scraper.js";
+import caniuseScraper from "./lib/scraper.ts";
 
 interface Input {
   webhookId: string;

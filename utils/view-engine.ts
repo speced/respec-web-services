@@ -11,6 +11,6 @@ const engine: EngineCallback = (filePath, options, callback) => {
 };
 
 export function register(app: Application) {
-  app.engine("js", engine);
-  app.set("view engine", "js");
+  app.engine("ts", engine);
+  app.set("view engine", "ts");
 }

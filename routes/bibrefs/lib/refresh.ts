@@ -1,7 +1,7 @@
-import { ms } from "../../../utils/misc.js";
+import { ms } from "#utils/misc.ts";
 
-import scraper from "./scraper.js";
-import { store } from "./store-init.js";
+import scraper from "./scraper.ts";
+import { store } from "./store-init.ts";
 
 /** Polling, because we do not own tobie/specref. A webhook would need Tobie to add one. */
 async function tick() {

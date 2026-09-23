@@ -1,4 +1,4 @@
-import { normalizeUrl } from "../../../../build/routes/api/baseline/lib/store.js";
+import { normalizeUrl } from "#routes/api/baseline/lib/store.ts";
 
 describe("routes/api/baseline/lib/store - normalizeUrl", () => {
   it("removes URL fragment (hash)", () => {

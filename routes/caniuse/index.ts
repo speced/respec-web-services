@@ -1,13 +1,12 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
 import cors from "cors";
-import type { Request, Response } from "express";
 
-import authGithubWebhook from "../../utils/auth-github-webhook.js";
-import { env, seconds } from "../../utils/misc.js";
+import authGithubWebhook from "#utils/auth-github-webhook.ts";
+import { env, seconds } from "#utils/misc.ts";
 
-import { createResponseBody } from "./lib/index.js";
-import updateRoute from "./update.js";
-import featureRoute from "./feature.js";
+import { createResponseBody } from "./lib/index.ts";
+import updateRoute from "./update.ts";
+import featureRoute from "./feature.ts";
 
 const caniuse = Router({ mergeParams: true });
 

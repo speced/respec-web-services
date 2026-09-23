@@ -1,5 +1,5 @@
-import bibrefs from "../../../build/routes/bibrefs/index.js";
-import { store } from "../../../build/routes/bibrefs/lib/store-init.js";
+import bibrefs from "#routes/bibrefs/index.ts";
+import { store } from "#routes/bibrefs/lib/store-init.ts";
 
 /**
  * Drives the real router, middleware included, because the rate limits live in

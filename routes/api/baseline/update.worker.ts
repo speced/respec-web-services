@@ -1,4 +1,4 @@
-import baselineScraper from "./lib/scraper.js";
+import baselineScraper from "./lib/scraper.ts";
 
 interface Input {
   webhookId: string;

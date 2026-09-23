@@ -1,8 +1,8 @@
 import path from "path";
 import { mkdir, readFile, unlink, writeFile } from "fs/promises";
 
-import { env, getErrnoCode } from "./misc.js";
-import { MemCache } from "./mem-cache.js";
+import { env, getErrnoCode } from "./misc.ts";
+import { MemCache } from "./mem-cache.ts";
 
 interface CacheEntry<V> {
   time: number;

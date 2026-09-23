@@ -1,8 +1,9 @@
-import featureRoute from "../../../build/routes/api/baseline/feature.js";
-import { store } from "../../../build/routes/api/baseline/lib/store-init.js";
+import type { Response } from "express";
 
-/** @returns {import("express").Response} */
-function makeRes() {
+import featureRoute from "#routes/api/baseline/feature.ts";
+import { store } from "#routes/api/baseline/lib/store-init.ts";
+
+function makeRes(): Response {
   const res = {
     _status: 200,
     _body: undefined,

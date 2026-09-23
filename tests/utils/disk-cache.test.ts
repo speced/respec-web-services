@@ -1,4 +1,4 @@
-import { DiskCache } from "../../build/utils/disk-cache.js";
+import { DiskCache } from "#utils/disk-cache.ts";
 import { mkdtemp, rm } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";

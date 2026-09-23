@@ -2,11 +2,14 @@
   "name": "respec.org",
   "version": "1.0.0",
   "description": "respec.org website and HTTP APIs",
-  "main": "app.js",
+  "main": "app.ts",
   "repository": "git@github.com:marcoscaceres/respec.org.git",
   "author": "Marcos Caceres <marcos@marcosc.com>",
   "type": "module",
   "license": "MIT",
+  "imports": {
+    "#*": "./*"
+  },
   "engines": {
     "node": ">=24"
   },
@@ -24,18 +27,18 @@
     "ucontent": "^2.0.0"
   },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc -w",
+    "typecheck": "tsc",
+    "typecheck:watch": "tsc -w",
     "prestart": "npm run update-data-sources && npm run regenerate-docs",
-    "start": "node --env-file-if-exists=.env --enable-source-maps build/app.js",
+    "start": "node --env-file-if-exists=.env app.ts",
     "start:server": "pm2 start ecosystem.config.cjs --env production",
     "test": "jasmine --config=tests/jasmine.json",
-    "regenerate-docs": "node --trace-warnings ./build/scripts/regenerate-docs.js",
-    "update-data-sources": "node --env-file-if-exists=.env build/scripts/update-data-sources.js"
+    "regenerate-docs": "node --trace-warnings ./scripts/regenerate-docs.ts",
+    "update-data-sources": "node --env-file-if-exists=.env scripts/update-data-sources.ts"
   },
   "packageManager": "pnpm@12.5.1",
   "simple-git-hooks": {
-    "post-merge": "pnpm i && pnpm build"
+    "post-merge": "pnpm i"
   },
   "prettier": {
     "singleQuote": false,

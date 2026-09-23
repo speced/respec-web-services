@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import authGithubWebhook from "../../utils/auth-github-webhook.js";
-import { env } from "../../utils/misc.js";
+import authGithubWebhook from "#utils/auth-github-webhook.ts";
+import { env } from "#utils/misc.ts";
 
-import updateRoute from "./update.js";
+import updateRoute from "./update.ts";
 
 const routes = Router({ mergeParams: true });
 

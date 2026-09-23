@@ -1,4 +1,4 @@
-import { PROJECT_ROOT } from "../../build/utils/constants.js";
+import { PROJECT_ROOT } from "#utils/constants.ts";
 import { existsSync } from "fs";
 import { join } from "path";
 
