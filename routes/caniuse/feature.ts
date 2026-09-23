@@ -13,9 +13,10 @@ export default async function route(req: IRequest, res: Response) {
   try {
     const data = await getData(feature);
     if (data === null) {
-      const hint = feature.startsWith("wf-") && feature.length > 3
-        ? ` The "wf-" prefix indicates a web-features ID. No matching caniuse data was found for "${feature}" or "${feature.slice(3)}".`
-        : "";
+      const hint =
+        feature.startsWith("wf-") && feature.length > 3
+          ? ` The "wf-" prefix indicates a web-features ID. No matching caniuse data was found for "${feature}" or "${feature.slice(3)}".`
+          : "";
       res.status(404).json({ error: `Feature "${feature}" not found.${hint}` });
       return;
     }
@@ -42,7 +43,7 @@ function normalizeBrowsers(browsers?: string | string[]) {
 }
 
 function getBrowserData(data?: Data["all"][string]) {
-  if (!data || !data.length) {
+  if (!data?.length) {
     return { caniuse: "u" };
   }
   // Find the first change in compatibility

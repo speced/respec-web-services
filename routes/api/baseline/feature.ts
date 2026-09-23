@@ -28,7 +28,11 @@ export default function route(req: IRequest, res: Response) {
     const target = store.byFeature.get(rawFeature.redirect_target);
     if (target) {
       res.set("Cache-Control", cacheControl);
-      res.json({ id: rawFeature.redirect_target, redirected_from: featureId, ...target });
+      res.json({
+        id: rawFeature.redirect_target,
+        redirected_from: featureId,
+        ...target,
+      });
       return;
     }
   }

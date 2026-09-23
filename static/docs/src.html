@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <!--
   The source for this document is at:
   https://github.com/speced/respec-web-services/blob/main/static/docs/src.html
 -->
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <meta name="color-scheme" content="light dark">
     <title>ReSpec Documentation</title>
     <script
@@ -14,6 +14,7 @@
       defer
     ></script>
     <script class="remove">
+      // biome-ignore lint/correctness/noUnusedVariables: respecConfig is a global read by the ReSpec script above
       var respecConfig = {
         edDraftURI: null,
         editors: [
@@ -65,18 +66,14 @@
       };
 
       function addSectionIds() {
-        const sections = document.querySelectorAll(
-          "section[data-include]:not([id])",
-        );
+        const sections = document.querySelectorAll("section[data-include]:not([id])");
         for (const section of sections) {
           section.id = section.dataset.include;
         }
       }
 
       function fixIncludes() {
-        for (const section of document.querySelectorAll(
-          "section[data-include]",
-        )) {
+        for (const section of document.querySelectorAll("section[data-include]")) {
           const { include } = section.dataset;
           Object.assign(section.dataset, {
             includeName: include,
@@ -86,9 +83,7 @@
             include: `https://raw.githubusercontent.com/wiki/speced/respec/${include}.md`,
           });
           if (!section.hasAttribute("data-max-toc")) {
-            section.dataset.maxToc = section.querySelector("section")
-              ? "2"
-              : "1";
+            section.dataset.maxToc = section.querySelector("section") ? "2" : "1";
           }
         }
       }
@@ -97,6 +92,7 @@
        * @param {*} _
        * @param {string} content
        */
+      // biome-ignore lint/correctness/noUnusedVariables: referenced by name in fixIncludes() as the data-oninclude value
       function fixMarkupOnInclude(_, content) {
         const ZERO_WIDTH_SPACE = "&#8203;";
         // Escape [[[foo]]] and [[foo]] by adding zero-width space. We remove these
@@ -110,10 +106,10 @@
           .replace(/\[\^/g, `[${ZERO_WIDTH_SPACE}^`)
           .replace(/{\^/g, `{${ZERO_WIDTH_SPACE}^`)
           // and also escape | used for inline variables
-          .replace(/\`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
-          .replace(/(\w+)\\\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
-          .replace(/\`\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
-          .replace(/(\w+)\|\`/g, `$1${ZERO_WIDTH_SPACE}\\|\``);
+          .replace(/`\\\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+          .replace(/(\w+)\\\|`/g, `$1${ZERO_WIDTH_SPACE}\\|\``)
+          .replace(/`\|(\w+)/g, `\`\\|${ZERO_WIDTH_SPACE}$1`)
+          .replace(/(\w+)\|`/g, `$1${ZERO_WIDTH_SPACE}\\|\``);
 
         // Add .note and .advisement classes based on line prefix
         content = content
@@ -161,9 +157,7 @@
             // behaviour. We manually add `id-` prefix to overcome that.
             a.href = `#id-${href}`;
           } else if (document.querySelector(`[data-include-name="${href}"]`)) {
-            const { id } = document.querySelector(
-              `[data-include-name="${href}"]`,
-            );
+            const { id } = document.querySelector(`[data-include-name="${href}"]`);
             a.href = `#${id}`;
           } else {
             // TODO: update URL on migration to speced org
@@ -202,28 +196,26 @@
         ];
         const selector = attributesToRemove.map(attr => `[${attr}]`).join(", ");
         document.querySelectorAll(selector).forEach(el => {
-          attributesToRemove.forEach(attr => el.removeAttribute(attr));
+          attributesToRemove.forEach(attr => {
+            el.removeAttribute(attr);
+          });
         });
 
         document.getElementById("respec-dfn-panel").remove();
       }
     </script>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <section id="abstract">
       <p>
-        ReSpec makes it easier to write technical documents. It was originally
-        designed for writing W3C specifications, but now supports many output
-        formats.
+        ReSpec makes it easier to write technical documents. It was originally designed
+        for writing W3C specifications, but now supports many output formats.
       </p>
     </section>
     <section data-max-toc="3" data-include-name="ReSpec-Editor's-Guide">
       <h2>Getting Started</h2>
-      <section
-        data-include="ReSpec-Editor's-Guide"
-        data-include-replace="true"
-      ></section>
+      <section data-include="ReSpec-Editor's-Guide" data-include-replace="true"></section>
       <section data-max-toc="1" data-include="WebIDL-Guide"></section>
       <section data-max-toc="1" data-include="CDDL"></section>
     </section>
@@ -409,8 +401,8 @@
       <h2>Editing this document</h2>
       <p>
         This document is generated directly from the content of the
-        <a href="https://github.com/speced/respec/wiki">ReSpec project wiki</a> on
-        GitHub. Thus, it can be edited in two ways:
+        <a href="https://github.com/speced/respec/wiki">ReSpec project wiki</a>
+        on GitHub. Thus, it can be edited in two ways:
       </p>
       <ol>
         <li>
@@ -419,17 +411,16 @@
             href="https://github.com/speced/respec-web-services/edit/main/static/docs/src.html"
             >src.html</a
           >
-          for this document provides the structure. The `src.html` is available
-          in the
+          for this document provides the structure. The `src.html` is available in the
           <a href="https://github.com/speced/respec-web-services"
             >respec-web-services repository</a
           >.
         </li>
         <li>
           The
-          <a href="https://github.com/speced/respec/wiki">ReSpec project wiki</a>.
-          In addition, hovering over a section heading provides a link to
-          directly edit the relevant page in the wiki.
+          <a href="https://github.com/speced/respec/wiki">ReSpec project wiki</a>. In
+          addition, hovering over a section heading provides a link to directly edit the
+          relevant page in the wiki.
         </li>
       </ol>
     </section>

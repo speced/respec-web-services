@@ -10,7 +10,10 @@ import { readFile, writeFile, readdir, mkdir } from "fs/promises";
 
 import sh from "#utils/sh.ts";
 import { env } from "#utils/misc.ts";
-import type { BrowserVersionData, ScraperOutput as Output } from "./constants.ts";
+import type {
+  BrowserVersionData,
+  ScraperOutput as Output,
+} from "./constants.ts";
 
 interface Input {
   stats: {

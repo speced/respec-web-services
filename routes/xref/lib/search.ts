@@ -1,5 +1,5 @@
 import { QUERY_CACHE_DURATION, IDL_TYPES, CONCEPT_TYPES } from "./constants.ts";
-import { Store } from "./store.ts";
+import type { Store } from "./store.ts";
 import { objectHash, pickFields, textVariations } from "./utils.ts";
 import { MemCache } from "#utils/mem-cache.ts";
 
@@ -87,7 +87,7 @@ export function search(
     const result = searchOne(query, store, options);
     response.result.push([query.id, result]);
     if (options.query) {
-      response.query!.push(query);
+      response.query?.push(query);
     }
   }
 
@@ -210,7 +210,7 @@ function collectBySpecs(specsLists: string[][], store: Store) {
     specs
       .map(spec => resolveSpecKey(spec, store))
       .filter(spec => !seen.has(spec) && seen.add(spec))
-      .flatMap(spec => store.bySpec[spec] ?? [])
+      .flatMap(spec => store.bySpec[spec] ?? []),
   );
 }
 
@@ -296,7 +296,7 @@ function filterByForContext(data: DataEntry[], query: Query, options: Options) {
 
   return data.filter(item => {
     if (!forContext) return !item.for;
-    if (!!item.for && item.for.includes(forContext)) return true;
+    if (item.for?.includes(forContext)) return true;
     if (CONCEPT_TYPES.has(item.type)) {
       return !!item.for && item.for.includes(forContext.toLowerCase());
     }

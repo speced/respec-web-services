@@ -17,12 +17,12 @@ const mobileFirefox =
 const keyUpEventName = mobileFirefox ? 'input' : 'keyup';
 
 const defaults = {
-  render(text, currentValue) {
+  render(text, _currentValue) {
     const option = doc.createElement('li');
     option.textContent = text || '';
     option.setAttribute('role', 'option');
     return option;
-  }
+  },
 };
 
 export function autocomplete(settings) {
@@ -30,7 +30,7 @@ export function autocomplete(settings) {
     input,
     debounceWaitMs = 0,
     minLen = 1,
-    showOnFocus = false
+    showOnFocus = false,
   } = settings;
   const container = doc.createElement('ul');
   container.setAttribute('role', 'listbox');
@@ -104,7 +104,7 @@ export function autocomplete(settings) {
       top: `${top}px`,
       bottom: '',
       left: `${inputRect.left}px`,
-      maxHeight: `${maxHeight}px`
+      maxHeight: `${maxHeight}px`,
     });
   }
 
@@ -171,6 +171,7 @@ export function autocomplete(settings) {
 
   function keyupEventHandler(ev) {
     const keyCode = ev.which || ev.keyCode || 0;
+    // biome-ignore format: easier to scan this way
     const ignore = [
       38 /* Up */,
       13 /* Enter */,
@@ -182,7 +183,7 @@ export function autocomplete(settings) {
       18 /* Alt */,
       20 /* CapsLock */,
       91 /* WindowsKey */,
-      9 /* Tab */
+      9 /* Tab */,
     ];
     for (let _i = 0, ignore_1 = ignore; _i < ignore_1.length; _i++) {
       const key = ignore_1[_i];
@@ -308,7 +309,7 @@ export function autocomplete(settings) {
       clearDebounceTimer();
       debounceTimer = window.setTimeout(
         () => settings.fetch(val, onFetch, 0 /* Keyboard */),
-        trigger === 0 /* Keyboard */ ? debounceWaitMs : 0
+        trigger === 0 /* Keyboard */ ? debounceWaitMs : 0,
       );
     } else {
       clear();

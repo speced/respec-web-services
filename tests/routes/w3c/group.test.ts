@@ -5,15 +5,35 @@ import { tmpdir } from "os";
 // Fixture data representing the groups.json structure
 const FIXTURE_GROUPS = {
   wg: {
-    webapps: { id: 114929, name: "Web Applications Working Group", URI: "https://www.w3.org/groups/wg/webapps/" },
-    css: { id: 32061, name: "CSS Working Group", URI: "https://www.w3.org/groups/wg/css/" },
-    apa: { id: 83907, name: "Accessible Platform Architectures Working Group", URI: "https://www.w3.org/groups/wg/apa/" },
+    webapps: {
+      id: 114929,
+      name: "Web Applications Working Group",
+      URI: "https://www.w3.org/groups/wg/webapps/",
+    },
+    css: {
+      id: 32061,
+      name: "CSS Working Group",
+      URI: "https://www.w3.org/groups/wg/css/",
+    },
+    apa: {
+      id: 83907,
+      name: "Accessible Platform Architectures Working Group",
+      URI: "https://www.w3.org/groups/wg/apa/",
+    },
   },
   cg: {
-    wicg: { id: 80485, name: "Web Incubator CG", URI: "https://www.w3.org/community/wicg/" },
+    wicg: {
+      id: 80485,
+      name: "Web Incubator CG",
+      URI: "https://www.w3.org/community/wicg/",
+    },
   },
   ig: {
-    wai: { id: 34520, name: "WAI Interest Group", URI: "https://www.w3.org/groups/ig/wai/" },
+    wai: {
+      id: 34520,
+      name: "WAI Interest Group",
+      URI: "https://www.w3.org/groups/ig/wai/",
+    },
   },
   bg: {},
   other: {},

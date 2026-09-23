@@ -33,6 +33,9 @@
     "start": "node --env-file-if-exists=.env app.ts",
     "start:server": "pm2 start ecosystem.config.cjs --env production",
     "test": "jasmine --config=tests/jasmine.json",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "regenerate-docs": "node --trace-warnings ./scripts/regenerate-docs.ts",
     "update-data-sources": "node --env-file-if-exists=.env scripts/update-data-sources.ts"
   },
@@ -40,12 +43,8 @@
   "simple-git-hooks": {
     "post-merge": "pnpm i"
   },
-  "prettier": {
-    "singleQuote": false,
-    "trailingComma": "all",
-    "arrowParens": "avoid"
-  },
   "devDependencies": {
+    "@biomejs/biome": "2.5.14",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

@@ -18,8 +18,14 @@ function mockRes() {
   const res = {
     statusCode: null,
     body: null,
-    status(code) { res.statusCode = code; return res; },
-    send(data) { res.body = data; return res; },
+    status(code) {
+      res.statusCode = code;
+      return res;
+    },
+    send(data) {
+      res.body = data;
+      return res;
+    },
   };
   return res;
 }
@@ -28,11 +34,14 @@ function mockRes() {
 // `signature === undefined` means the header is absent.
 function run({ body, signature, secret = SECRET }) {
   const verifier = githubWebhookAuthenticator(secret)[1];
-  const headers = signature === undefined ? {} : { "X-Hub-Signature": signature };
+  const headers =
+    signature === undefined ? {} : { "X-Hub-Signature": signature };
   const req = mockReq({ body: Buffer.from(body), headers });
   const res = mockRes();
   let nextCalled = false;
-  verifier(req, res, () => { nextCalled = true; });
+  verifier(req, res, () => {
+    nextCalled = true;
+  });
   return { req, res, nextCalled };
 }
 
@@ -40,14 +49,23 @@ describe("utils/auth-github-webhook", () => {
   it("calls next() and parses the body when the signature is valid", () => {
     const payload = { action: "opened", number: 42 };
     const body = JSON.stringify(payload);
-    const { nextCalled, req } = run({ body, signature: sign(Buffer.from(body), SECRET) });
+    const { nextCalled, req } = run({
+      body,
+      signature: sign(Buffer.from(body), SECRET),
+    });
     expect(nextCalled).toBeTrue();
     expect(req.body).toEqual(payload);
   });
 
   it("responds 'pong' to a ping event (zen field) without calling next()", () => {
-    const body = JSON.stringify({ zen: "Keep it logically awesome.", hook_id: 1 });
-    const { nextCalled, res } = run({ body, signature: sign(Buffer.from(body), SECRET) });
+    const body = JSON.stringify({
+      zen: "Keep it logically awesome.",
+      hook_id: 1,
+    });
+    const { nextCalled, res } = run({
+      body,
+      signature: sign(Buffer.from(body), SECRET),
+    });
     expect(nextCalled).toBeFalse();
     expect(res.body).toBe("pong");
   });
@@ -77,7 +95,7 @@ describe("utils/auth-github-webhook", () => {
     // the length guard before timingSafeEqual (which throws on unequal buffers).
     const body = JSON.stringify({ ref: "refs/heads/main" });
     const validSig = sign(Buffer.from(body), SECRET);
-    const nonAsciiSig = validSig.slice(0, -2) + "ñ" + "a";
+    const nonAsciiSig = `${validSig.slice(0, -2)}ña`;
     expect(nonAsciiSig.length).toBe(validSig.length);
     const { nextCalled, res } = run({ body, signature: nonAsciiSig });
     expect(nextCalled).toBeFalse();

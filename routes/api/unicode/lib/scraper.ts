@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { createReadStream, createWriteStream } from "node:fs";
 import { mkdir, rm } from "node:fs/promises";
 import { Readable } from "node:stream";
-import { ReadableStream } from "node:stream/web";
+import type { ReadableStream } from "node:stream/web";
 import { finished } from "node:stream/promises";
 import { createInterface } from "node:readline/promises";
 
@@ -53,7 +53,7 @@ async function updateInputSource() {
   for await (const line of rl) {
     const parsed = parseLine(line);
     if (!parsed) continue;
-    dest.write(JSON.stringify(parsed) + ",\n");
+    dest.write(`${JSON.stringify(parsed)},\n`);
   }
   dest.write(`["null", {"name": ""}]`);
   dest.write("\n]\n");

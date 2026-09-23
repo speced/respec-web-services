@@ -2,7 +2,7 @@ import {
   search as _search,
   cache,
   type Query,
-  type Options
+  type Options,
 } from "#routes/xref/lib/search.ts";
 import { buildTermLowerIndex } from "#routes/xref/lib/store.ts";
 
@@ -12,18 +12,47 @@ import bySpec from "./data-by-spec.js";
 // Minimal specmap matching production shape: { [group]: { [specid]: { shortname, url, title } } }
 const specmap = {
   current: {
-    "referrer-policy-1": { url: "", shortname: "referrer-policy", title: "Referrer Policy" },
-    "font-metrics-api-1": { url: "", shortname: "font-metrics-api", title: "Font Metrics API" },
-    "css-cascade-3": { url: "", shortname: "css-cascade", title: "CSS Cascading Level 3" },
-    "css-cascade-4": { url: "", shortname: "css-cascade", title: "CSS Cascading Level 4" },
-    "css-lists-3": { url: "", shortname: "css-lists", title: "CSS Lists Level 3" },
-    "web-bluetooth-1": { url: "", shortname: "web-bluetooth", title: "Web Bluetooth" },
+    "referrer-policy-1": {
+      url: "",
+      shortname: "referrer-policy",
+      title: "Referrer Policy",
+    },
+    "font-metrics-api-1": {
+      url: "",
+      shortname: "font-metrics-api",
+      title: "Font Metrics API",
+    },
+    "css-cascade-3": {
+      url: "",
+      shortname: "css-cascade",
+      title: "CSS Cascading Level 3",
+    },
+    "css-cascade-4": {
+      url: "",
+      shortname: "css-cascade",
+      title: "CSS Cascading Level 4",
+    },
+    "css-lists-3": {
+      url: "",
+      shortname: "css-lists",
+      title: "CSS Lists Level 3",
+    },
+    "web-bluetooth-1": {
+      url: "",
+      shortname: "web-bluetooth",
+      title: "Web Bluetooth",
+    },
     "wai-aria-1.2": { url: "", shortname: "wai-aria", title: "WAI-ARIA 1.2" },
   },
   snapshot: {},
 };
 
-const store = { byTerm, bySpec, specmap, byTermLower: buildTermLowerIndex(byTerm) };
+const store = {
+  byTerm,
+  bySpec,
+  specmap,
+  byTermLower: buildTermLowerIndex(byTerm),
+};
 
 const search = (query: Query, options: Options) => {
   const response = _search([query], store, { fields: ["uri"], ...options });
@@ -475,10 +504,7 @@ describe("xref - search", () => {
 
   describe("browsing a spec (term omitted)", () => {
     it("returns all entries for a spec when term is omitted", () => {
-      const results = search(
-        { specs: [["dom"]], id: "" },
-        { all: true },
-      );
+      const results = search({ specs: [["dom"]], id: "" }, { all: true });
       // dom has: EventInit (dictionary), event (dfn), event (attr for Window),
       // aborted (attr for AbortSignal)
       expect(results.length).toBeGreaterThan(0);

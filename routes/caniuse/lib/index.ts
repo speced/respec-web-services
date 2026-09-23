@@ -47,7 +47,6 @@ export async function createResponseBody(options: Options) {
   switch (opts.format) {
     case "json":
       return await createResponseBodyJSON(opts);
-    case "html":
     default:
       return await createResponseBodyHTML(opts);
   }

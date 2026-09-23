@@ -19,7 +19,7 @@ export default async function route(req: IRequest, res: Response) {
   const issues = [
     ...new Set(
       req.query.issues
-        .split(/\,/)
+        .split(/,/)
         .map(issue => parseInt(issue.trim(), 10))
         .filter(issue => !Number.isNaN(issue) && issue > 0),
     ),
@@ -31,7 +31,7 @@ export default async function route(req: IRequest, res: Response) {
     const result = await getIssues(org, repo, issues);
     if (result === null) return res.sendStatus(404);
     res.json(result);
-  } catch (error) {
+  } catch {
     res.sendStatus(500);
   }
 }

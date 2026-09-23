@@ -111,8 +111,7 @@ class Logger {
   async write() {
     const { id, input, timings, result, stdout, stderr } = this;
     const data = { id, input, timings, result, stdout, stderr };
-    const logFile =
-      path.join(Logger.LOG_DIR, id.replace(/\//g, path.sep)) + ".json";
+    const logFile = `${path.join(Logger.LOG_DIR, id.replace(/\//g, path.sep))}.json`;
     await mkdir(path.dirname(logFile), { recursive: true });
     await writeFile(logFile, JSON.stringify(data, null, 2));
   }

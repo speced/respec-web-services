@@ -88,7 +88,7 @@ describe("utils/misc", () => {
     });
 
     it("throws on invalid format", () => {
-      expect(() => ms("bad")).toThrowError("Invalid duration format: \"bad\"");
+      expect(() => ms("bad")).toThrowError('Invalid duration format: "bad"');
     });
   });
 

@@ -78,7 +78,7 @@ describe("routes/bibrefs - route", () => {
     });
     expect(res._headers["Cache-Control"]).toBe("public, max-age=3600");
     // Parsed, not merely present: an empty Expires satisfies toBeDefined.
-    const expires = Date.parse(res._headers["Expires"]);
+    const expires = Date.parse(res._headers.Expires);
     expect(expires).not.toBeNaN();
     expect(Math.abs(expires - (Date.now() + 3600_000))).toBeLessThan(60_000);
     expect(res.locals.reason).toBeUndefined();
@@ -156,7 +156,7 @@ describe("routes/bibrefs - route", () => {
   });
 
   it("blocks prototype keys whatever their case", () => {
-    store.references["__PROTO__"] = {
+    store.references.__PROTO__ = {
       title: "hostile",
       href: "https://example.com/x",
     };

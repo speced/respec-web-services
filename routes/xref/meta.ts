@@ -62,7 +62,7 @@ function getData() {
       concept: [...CONCEPT_TYPES],
       markup: [...MARKUP_TYPES],
       css: [...CSS_TYPES],
-      http: [...HTTP_TYPES]
+      http: [...HTTP_TYPES],
     },
     specs: store.specmap,
     terms,
@@ -71,8 +71,11 @@ function getData() {
 }
 
 function pickFields<T, K extends keyof T>(fields: K[], data: T): Pick<T, K> {
-  return fields.reduce((result, field) => {
-    result[field] = data[field];
-    return result;
-  }, {} as Pick<T, K>);
+  return fields.reduce(
+    (result, field) => {
+      result[field] = data[field];
+      return result;
+    },
+    {} as Pick<T, K>,
+  );
 }

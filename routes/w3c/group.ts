@@ -18,7 +18,13 @@ type GroupType = "wg" | "cg" | "ig" | "bg" | "other";
 export type Groups = Record<string, GroupMeta>;
 export type GroupsByType = Record<GroupType, Groups>;
 
-const EMPTY_GROUPS: GroupsByType = { wg: {}, cg: {}, ig: {}, bg: {}, other: {} };
+const EMPTY_GROUPS: GroupsByType = {
+  wg: {},
+  cg: {},
+  ig: {},
+  bg: {},
+  other: {},
+};
 
 interface Group {
   id: number;
@@ -72,7 +78,7 @@ export default async function route(req: IRequest, res: Response) {
     return res.redirect(301, `/w3c/groups/${LEGACY_SHORTNAMES.get(shortname)}`);
   }
 
-  if (type && !groups.hasOwnProperty(type)) {
+  if (type && !Object.hasOwn(groups, type)) {
     res.set("Content-Type", "text/plain");
     return res.status(404).send(`Invalid group type: "${type}".`);
   }
@@ -129,12 +135,13 @@ async function fetchGroupInfo(
       { href: string }
     >;
   }
+  let json: APIResponse;
   try {
     const res = await fetch(url.href);
     if (!res.ok) {
       throw new HTTPError(res.status, res.statusText);
     }
-    var json = (await res.json()) as APIResponse;
+    json = (await res.json()) as APIResponse;
   } catch (error) {
     if (error instanceof HTTPError) throw error;
     throw new HTTPError(
@@ -170,8 +177,8 @@ async function getPatentPolicy(
   const url = new URL(activeCharterApiUrl);
 
   const res = await fetch(url.href);
-  const { ["patent-policy"]: patentPolicyURL } = (await res.json()) as {
-    ["patent-policy"]?: string;
+  const { "patent-policy": patentPolicyURL } = (await res.json()) as {
+    "patent-policy"?: string;
   };
 
   if (!patentPolicyURL || typeof patentPolicyURL !== "string") {
@@ -188,7 +195,7 @@ function getGroupMeta(shortname: string, requestedType?: GroupType) {
     ? [requestedType]
     : (Object.keys(groups) as GroupType[]);
   const data = types
-    .filter(type => groups[type].hasOwnProperty(shortname))
+    .filter(type => Object.hasOwn(groups[type], shortname))
     .map(type => {
       const id = groups[type][shortname].id;
       return { shortname, type, id };

@@ -19,8 +19,11 @@ export default async function sh(
   command: string,
   options: Options["output"] | Partial<Options> = {},
 ) {
-  const { output = "silent", log = defaultLogger, ...execOptions } =
-    typeof options === "string" ? { output: options } : options;
+  const {
+    output = "silent",
+    log = defaultLogger,
+    ...execOptions
+  } = typeof options === "string" ? { output: options } : options;
   const shouldStream =
     output === "stream" || (typeof options !== "string" && !!options.log);
 
@@ -32,8 +35,8 @@ export default async function sh(
 
   try {
     const { promise, resolve, reject } = Promise.withResolvers<string>();
-    let stdout: string[] = [];
-    let stderr: string[] = [];
+    const stdout: string[] = [];
+    const stderr: string[] = [];
     const child = exec(command, {
       ...execOptions,
       env: { ...process.env, ...execOptions.env },

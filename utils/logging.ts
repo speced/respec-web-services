@@ -30,7 +30,7 @@ const prettyJSON = (() => {
   };
   return (obj: Record<string, BasicTypes>) =>
     Object.entries(obj)
-      .map(([key, value]) => chalk.magentaBright(key + "=") + colored(value))
+      .map(([key, value]) => chalk.magentaBright(`${key}=`) + colored(value))
       .join(" ");
 })();
 
@@ -73,7 +73,7 @@ const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
     request,
     formattedReferrer || unknown,
     contentLength ? chalk.cyan(prettyBytes(contentLength)) : unknown,
-    chalk.cyan(responseTime + " ms"),
+    chalk.cyan(`${responseTime} ms`),
     locals ? prettyJSON(locals) : unknown,
   ].join(" | ");
 };

@@ -47,9 +47,11 @@ export async function* getCommits(
   repo: string,
   fromRef: string,
   toRef = "HEAD",
-  path?: string
+  path?: string,
 ) {
-  const cacheKey = path ? `${org}/${repo}/${path}@${fromRef}..${toRef}` : `${org}/${repo}@${fromRef}..${toRef}`;
+  const cacheKey = path
+    ? `${org}/${repo}/${path}@${fromRef}..${toRef}`
+    : `${org}/${repo}@${fromRef}..${toRef}`;
   const cached = await cache.get(cacheKey);
   const { since, commits } = cached || {
     since: await getCommitDate(org, repo, fromRef),
@@ -67,14 +69,14 @@ export async function* getCommits(
     cursor = data.cursor;
 
     // to update cache
-    if (data.commits && data.commits.length) {
+    if (data.commits?.length) {
       newCacheEntry.commits.push(...data.commits);
       if (newCacheEntry.since === "") {
         const HEAD = data.commits[0];
         newCacheEntry.since = HEAD.committedDate;
       }
     }
-  } while (!!cursor);
+  } while (cursor);
 
   const hasNewData = !cached || newCacheEntry.since !== cached.since;
   if (hasNewData && newCacheEntry.since !== "") {

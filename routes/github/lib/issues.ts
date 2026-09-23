@@ -100,7 +100,7 @@ function alias(issue: number) {
 
 // opposite of alias
 function antiAlias(id: string) {
-  return parseInt(id.slice(1));
+  return parseInt(id.slice(1), 10);
 }
 
 function createCacheKey(owner: string, name: string, issue: number) {

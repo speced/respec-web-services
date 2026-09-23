@@ -28,7 +28,7 @@ export default {
       for: ["ReferrerPolicy"],
     },
   ],
-  "fetch": [
+  fetch: [
     {
       term: "",
       type: "enum-value",
@@ -56,7 +56,7 @@ export default {
       uri: "#concept-body",
     },
   ],
-  "xhr": [
+  xhr: [
     {
       term: "",
       type: "enum-value",
@@ -78,7 +78,7 @@ export default {
       normative: true,
     },
   ],
-  "svg": [
+  svg: [
     {
       term: "baseline",
       type: "dfn",
@@ -144,7 +144,7 @@ export default {
       uri: "painting.html#MarkerElement",
     },
   ],
-  "html": [
+  html: [
     {
       term: "event handler",
       type: "dfn",
@@ -231,7 +231,7 @@ export default {
       uri: "#marker",
     },
   ],
-  "dom": [
+  dom: [
     {
       term: "EventInit",
       type: "dictionary",
@@ -278,7 +278,7 @@ export default {
       for: ["BluetoothDevice"],
     },
   ],
-  "infra": [
+  infra: [
     {
       term: "for each",
       type: "dfn",
@@ -286,7 +286,7 @@ export default {
       shortname: "infra",
       status: "current",
       uri: "#list-iterate",
-      for: ["list","set"],
+      for: ["list", "set"],
     },
     {
       term: "user agent",

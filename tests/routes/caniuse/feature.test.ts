@@ -75,7 +75,9 @@ describe("caniuse - feature route", () => {
       const res = mockRes();
       await route(mockReq("nonexistent-xyz"), res);
       expect(res.statusCode).toBe(404);
-      expect(res.body).toEqual(jasmine.objectContaining({ error: jasmine.any(String) }));
+      expect(res.body).toEqual(
+        jasmine.objectContaining({ error: jasmine.any(String) }),
+      );
       expect(res.body.error).toContain("nonexistent-xyz");
     });
 
@@ -102,7 +104,9 @@ describe("caniuse - feature route", () => {
         const res = mockRes();
         await route(mockReq("css-grid"), res);
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual(jasmine.objectContaining({ result: jasmine.any(Array) }));
+        expect(res.body).toEqual(
+          jasmine.objectContaining({ result: jasmine.any(Array) }),
+        );
       } finally {
         await removeFixture("css-grid");
       }
@@ -133,11 +137,15 @@ describe("caniuse - feature route", () => {
         const res = mockRes();
         await route(mockReq("broken-feature"), res);
         expect(res.statusCode).toBe(500);
-        expect(res.body).toEqual(jasmine.objectContaining({ error: jasmine.any(String) }));
+        expect(res.body).toEqual(
+          jasmine.objectContaining({ error: jasmine.any(String) }),
+        );
       } finally {
         try {
           await fs.unlink(path.join(CANIUSE_DIR, "broken-feature.json"));
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
     });
   });

@@ -11,7 +11,7 @@ import type { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
 
 import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.ts";
 import { uniq } from "./utils.ts";
-import { Store, type SpecMapGroup } from "./store.ts";
+import type { SpecMapGroup } from "./store.ts";
 import { env } from "#utils/misc.ts";
 import sh from "#utils/sh.ts";
 
@@ -205,7 +205,7 @@ function normalizeTerm(term: string, type: string) {
     return term.replace(/^"|"$/g, "");
   }
   if (type === "method" && !term.endsWith(")")) {
-    return term + "()";
+    return `${term}()`;
   }
   return term;
 }
@@ -221,7 +221,9 @@ async function getAllData(baseDir: string) {
 
   for (const entry of data) {
     if (entry.dfns) {
-      const dfnsData = await readJSON<{ dfns: InputDfn[] }>(path.join(baseDir, entry.dfns));
+      const dfnsData = await readJSON<{ dfns: InputDfn[] }>(
+        path.join(baseDir, entry.dfns),
+      );
       const dfns: InputDfn[] = dfnsData.dfns;
       dfnSources.push({
         series: entry.series.shortname,
@@ -250,9 +252,7 @@ async function readJSON<T = unknown>(filePath: string): Promise<T> {
  * Read all headings data from webref's ed/headings/ directory.
  * Returns { shortname: { id: HeadingEntry } } — pre-indexed for O(1) lookup.
  */
-async function readAllHeadings(
-  headingsDir: string,
-): Promise<HeadingsBySpec> {
+async function readAllHeadings(headingsDir: string): Promise<HeadingsBySpec> {
   const result: HeadingsBySpec = Object.create(null);
   if (!existsSync(headingsDir)) {
     console.warn(`Headings directory not found: ${headingsDir}`);
