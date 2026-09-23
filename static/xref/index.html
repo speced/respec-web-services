@@ -1,33 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search cross references</title>
-    <link rel="stylesheet" href="style.css?v=0e4aa500" />
+    <link rel="stylesheet" href="style.css?v=0e4aa500">
     <script src="//unpkg.com/@ungap/custom-elements-builtin"></script>
     <script src="script.js?v=5998df8f" type="module" defer></script>
   </head>
   <body>
-    <main>
     <form action="/xref" id="xref-search" name="xref-search" method="post">
       <div class="field">
         <label for="term">Terms, concept, or WebIDL</label>
-        <input name="term" placeholder="event target, EventTarget"  autocomplete="off" aria-autocomplete="list" autofocus/>
+        <input
+          name="term"
+          placeholder="event target, EventTarget"
+          autocomplete="off"
+          aria-autocomplete="list"
+          autofocus
+        >
       </div>
       <div class="field advanced" hidden>
         <label for="specs">Specification(s) short name</label>
         <div class="selections" data-for="specs"></div>
-        <input name="specs" is="option-selector" placeholder="html, webidl, infra..." />
+        <input name="specs" is="option-selector" placeholder="html, webidl, infra...">
       </div>
       <div class="field advanced" hidden>
         <label for="types">Types</label>
         <div class="selections" data-for="types"></div>
-        <input name="types" is="option-selector" placeholder="dfn,interface,_IDL_" />
+        <input name="types" is="option-selector" placeholder="dfn,interface,_IDL_">
       </div>
       <div class="field advanced" hidden>
         <label for="for">For</label>
-        <input name="for" placeholder="ResizeObservation" />
+        <input name="for" placeholder="ResizeObservation">
       </div>
       <button type="submit" disabled>Search</button>
       <div class="field">
@@ -42,8 +47,14 @@
         </label>
       </div>
       <div class="field">
-        <label> <input type="checkbox" name="all" checked /> Show every match (ignore "for" context). </label>
-        <label style="float: right;"> <input type="checkbox" name="advanced" /> Advanced Search. </label>
+        <label>
+          <input type="checkbox" name="all" checked>
+          Show every match (ignore "for" context).
+        </label>
+        <label style="float: right;">
+          <input type="checkbox" name="advanced">
+          Advanced Search.
+        </label>
       </div>
     </form>
     <section>
@@ -66,7 +77,6 @@
         </tbody>
       </table>
     </section>
-    </main>
     <footer>
       <p>Data from <a href="https://github.com/w3c/webref/">WebRef</a>.</p>
       <p>Last updated: <time id="last-updated-date">...</time></p>

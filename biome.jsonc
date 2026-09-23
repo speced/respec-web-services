@@ -40,6 +40,14 @@
       "arrowParentheses": "asNeeded"
     }
   },
+  "html": {
+    "formatter": {
+      "enabled": true,
+      "selfCloseVoidElements": "never",
+      "indentScriptAndStyle": true,
+      "lineWidth": 90
+    }
+  },
   "assist": {
     "enabled": true,
     "actions": {
