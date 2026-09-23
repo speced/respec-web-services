@@ -1,4 +1,4 @@
-import { exec, ExecOptions } from "child_process";
+import { exec, type ExecOptions } from "child_process";
 import split from "split2";
 
 type Logger = (line?: string) => void;

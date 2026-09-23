@@ -2,7 +2,7 @@ import path from "path";
 
 import express from "express";
 import cors from "cors";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, ms } from "../../utils/misc.js";
@@ -13,7 +13,7 @@ import searchRoutePost from "./search.post.js";
 import headingsRoutePost from "./headings.post.js";
 import metaRoute from "./meta.js";
 import updateRoute from "./update.js";
-import { search, Options, Query } from "./lib/search.js";
+import { search, type Options, type Query } from "./lib/search.js";
 
 const DATA_DIR = env("DATA_DIR");
 

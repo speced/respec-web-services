@@ -1,7 +1,7 @@
 import path from "path";
 import { writeFile } from "fs/promises";
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import { HTTPError } from "../../utils/misc.js";
 import { PROJECT_ROOT } from "../../utils/constants.js";

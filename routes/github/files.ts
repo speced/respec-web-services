@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { seconds } from "../../utils/misc.js";
 import { getFiles } from "./lib/files.js";
 

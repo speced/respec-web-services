@@ -1,5 +1,5 @@
 import { css, html } from "ucontent";
-import { GroupMeta, Groups, GroupsByType } from "../../routes/w3c/group.js";
+import type { GroupMeta, Groups, GroupsByType } from "../../routes/w3c/group.js";
 
 const style = css`
   h1,

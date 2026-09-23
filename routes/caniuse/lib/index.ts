@@ -6,13 +6,9 @@ import { html } from "ucontent";
 import { BROWSERS, DEFAULT_BROWSERS, SUPPORT_TITLES } from "./constants.js";
 import { env } from "../../../utils/misc.js";
 import { MemCache } from "../../../utils/mem-cache.js";
-import {
-  BrowserVersionData,
-  SupportKeys,
-  ScraperOutput as Data,
-} from "./constants.js";
+import type { BrowserVersionData, SupportKeys, ScraperOutput as Data } from "./constants.js";
 
-export { Data };
+export type { Data };
 
 const DATA_DIR = env("DATA_DIR");
 const CANIUSE_DIR = path.join(DATA_DIR, "caniuse");

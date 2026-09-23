@@ -10,7 +10,7 @@ import { readFile, writeFile, readdir, mkdir } from "fs/promises";
 
 import sh from "../../../utils/sh.js";
 import { env } from "../../../utils/misc.js";
-import { BrowserVersionData, ScraperOutput as Output } from "./constants.js";
+import type { BrowserVersionData, ScraperOutput as Output } from "./constants.js";
 
 interface Input {
   stats: {

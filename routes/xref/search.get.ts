@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { seconds } from "../../utils/misc.js";
 
-import { searchOne, Query, Options } from "./lib/search.js";
+import { searchOne, type Query, type Options } from "./lib/search.js";
 import { store } from "./lib/store-init.js";
 
 interface QueryParams {

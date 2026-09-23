@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
 import express from "express";
-import { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 type RawRequest = Request<unknown, unknown, Buffer>;
 

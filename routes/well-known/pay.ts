@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 const PAYMENT_POINTERS = [
   // "$ilp.uphold.com/DwJmxPHHi8K3", // Marcos

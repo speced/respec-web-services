@@ -1,6 +1,6 @@
 import { Router } from "express";
 import cors from "cors";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import authGithubWebhook from "../../utils/auth-github-webhook.js";
 import { env, seconds } from "../../utils/misc.js";

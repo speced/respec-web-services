@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
-import { searchOne, Query, Options, DataEntry } from "./lib/search.js";
+import { searchOne, type Query, type Options, type DataEntry } from "./lib/search.js";
 import { Store } from "./lib/store.js";
 import { store } from "./lib/store-init.js";
 

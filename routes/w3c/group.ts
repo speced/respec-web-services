@@ -1,7 +1,7 @@
 import path from "path";
 import { readFileSync } from "fs";
 
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 import { MemCache } from "../../utils/mem-cache.js";
 import { env, ms, seconds, HTTPError } from "../../utils/misc.js";
