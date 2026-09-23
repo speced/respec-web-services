@@ -5,8 +5,8 @@
  * Via npm:    npm run update-data-sources
  */
 
-import path from "path";
-import { writeFile, mkdir } from "fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 import { env } from "../utils/misc.ts";
 

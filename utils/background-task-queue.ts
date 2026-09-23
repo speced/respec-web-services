@@ -1,11 +1,11 @@
-import path from "path";
-import EventEmitter from "events";
-import { Worker, isMainThread, parentPort } from "worker_threads";
-import { mkdir, writeFile } from "fs/promises";
+import EventEmitter from "node:events";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { isMainThread, parentPort, Worker } from "node:worker_threads";
 
 import { nanoid } from "nanoid";
+import { deserializeError, serializeError } from "serialize-error";
 import split2 from "split2";
-import { serializeError, deserializeError } from "serialize-error";
 
 import { env } from "./misc.ts";
 

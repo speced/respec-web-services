@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
 
 import {
-  IDL_TYPES,
   CONCEPT_TYPES,
   CSS_TYPES,
-  MARKUP_TYPES,
   HTTP_TYPES,
+  IDL_TYPES,
+  MARKUP_TYPES,
 } from "./lib/constants.ts";
 import { store } from "./lib/store-init.ts";
 

@@ -1,18 +1,17 @@
-import path from "node:path";
 import { promises as fs } from "node:fs";
-
-import { env } from "#utils/misc.ts";
-import {
-  getData,
-  cache,
-  createResponseBody,
-} from "#routes/caniuse/lib/index.ts";
+import path from "node:path";
 
 import {
   BROWSERS,
   DEFAULT_BROWSERS,
   SUPPORT_TITLES,
 } from "#routes/caniuse/lib/constants.ts";
+import {
+  cache,
+  createResponseBody,
+  getData,
+} from "#routes/caniuse/lib/index.ts";
+import { env } from "#utils/misc.ts";
 
 const CANIUSE_DIR = path.join(env("DATA_DIR"), "caniuse");
 

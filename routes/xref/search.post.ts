@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
 
 import {
-  searchOne,
-  type Query,
-  type Options,
   type DataEntry,
+  type Options,
+  type Query,
+  searchOne,
 } from "./lib/search.ts";
 import type { Store } from "./lib/store.ts";
 import { store } from "./lib/store-init.ts";

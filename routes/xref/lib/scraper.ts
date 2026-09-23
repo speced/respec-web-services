@@ -3,17 +3,17 @@
 // - specs.json having data by spec shortname
 // - specmap.json having spec details
 
-import path from "path";
-import { existsSync } from "fs";
-import { mkdir, readFile, readdir, writeFile } from "fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 
-import type { Definition as InputDfn, DfnsJSON, SpecsJSON } from "webref";
+import type { DfnsJSON, Definition as InputDfn, SpecsJSON } from "webref";
 
-import { SUPPORTED_TYPES, CSS_TYPES_INPUT } from "./constants.ts";
-import { uniq } from "./utils.ts";
-import type { SpecMapGroup } from "./store.ts";
 import { env } from "#utils/misc.ts";
 import sh from "#utils/sh.ts";
+import { CSS_TYPES_INPUT, SUPPORTED_TYPES } from "./constants.ts";
+import type { SpecMapGroup } from "./store.ts";
+import { uniq } from "./utils.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const INPUT_REPO_SRC = "https://github.com/w3c/webref.git";

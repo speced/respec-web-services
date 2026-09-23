@@ -1,9 +1,8 @@
-import { Router } from "express";
 import cors from "cors";
+import { Router } from "express";
 
 import authGithubWebhook from "#utils/auth-github-webhook.ts";
 import { env } from "#utils/misc.ts";
-
 import groupsRoute from "./group.ts";
 import updateRoute from "./update.ts";
 

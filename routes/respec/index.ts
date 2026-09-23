@@ -1,12 +1,12 @@
 import path from "node:path";
+
 import express from "express";
-
-import { env, ms } from "#utils/misc.ts";
 import rateLimit from "express-rate-limit";
-import authGithubWebhook from "#utils/auth-github-webhook.ts";
 
-import * as sizeRoute from "./size.ts";
+import authGithubWebhook from "#utils/auth-github-webhook.ts";
+import { env, ms } from "#utils/misc.ts";
 import buildUpdateRoute, { PKG_DIR } from "./builds/update.ts";
+import * as sizeRoute from "./size.ts";
 
 const router = express.Router({ mergeParams: true });
 

@@ -1,5 +1,5 @@
-import { readFile } from "fs/promises";
-import path from "path";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 // Env vars (DATA_DIR, RESPEC_GH_ACTION_SECRET) are set by tests/helpers/env.js
 // before any spec loads, so the module can be imported statically.

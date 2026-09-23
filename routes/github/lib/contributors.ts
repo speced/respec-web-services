@@ -1,6 +1,6 @@
-import { requestData } from "./utils/rest.ts";
-import { ms } from "#utils/misc.ts";
 import { DiskCache } from "#utils/disk-cache.ts";
+import { ms } from "#utils/misc.ts";
+import { requestData } from "./utils/rest.ts";
 
 export interface Contributor {
   login: string;

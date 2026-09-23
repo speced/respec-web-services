@@ -1,6 +1,6 @@
-import path from "path";
-import { appendFile, readFile } from "fs/promises";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { appendFile, readFile } from "node:fs/promises";
+import path from "node:path";
 
 import type { Request, Response } from "express";
 
@@ -15,8 +15,7 @@ if (!existsSync(FILE_PATH)) {
   writeFileSync(FILE_PATH, "");
 }
 
-export { getHandler as get };
-export { putHandler as put };
+export { getHandler as get, putHandler as put };
 
 async function getHandler(_req: Request, res: Response) {
   res.setHeader("Content-Type", "text/plain");

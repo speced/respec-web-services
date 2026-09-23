@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
-import { ms, seconds } from "#utils/misc.ts";
-import { DiskCache } from "#utils/disk-cache.ts";
 
+import { DiskCache } from "#utils/disk-cache.ts";
+import { ms, seconds } from "#utils/misc.ts";
 import { type Contributor, getContributors } from "./lib/contributors.ts";
 import { getUsersDetails, type User, type Users } from "./lib/users.ts";
 

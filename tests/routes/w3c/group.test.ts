@@ -1,6 +1,6 @@
-import { mkdtemp, writeFile, mkdir, rm, unlink } from "fs/promises";
-import path from "path";
-import { tmpdir } from "os";
+import { mkdir, mkdtemp, rm, unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 
 // Fixture data representing the groups.json structure
 const FIXTURE_GROUPS = {

@@ -1,10 +1,10 @@
-import { Router } from "express";
 import cors from "cors";
+import { Router } from "express";
 
-import contributorsRoute from "./contributors.ts";
-import issuesRoute from "./issues.ts";
 import commitsRoute from "./commits.ts";
+import contributorsRoute from "./contributors.ts";
 import filesRoute from "./files.ts";
+import issuesRoute from "./issues.ts";
 
 const gh = Router({ mergeParams: true });
 gh.get("/contributors", cors(), contributorsRoute);

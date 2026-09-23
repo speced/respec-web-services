@@ -1,18 +1,18 @@
-import * as path from "path";
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
 
 import { html } from "ucontent";
 
+import { MemCache } from "#utils/mem-cache.ts";
+import { env } from "#utils/misc.ts";
 import {
   BROWSERS,
+  type BrowserVersionData,
+  type ScraperOutput as Data,
   DEFAULT_BROWSERS,
   SUPPORT_TITLES,
-  type BrowserVersionData,
   type SupportKeys,
-  type ScraperOutput as Data,
 } from "./constants.ts";
-import { env } from "#utils/misc.ts";
-import { MemCache } from "#utils/mem-cache.ts";
 
 export type { Data };
 

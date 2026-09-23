@@ -1,7 +1,8 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
 import { DiskCache } from "#utils/disk-cache.ts";
-import { mkdtemp, rm } from "fs/promises";
-import { join } from "path";
-import { tmpdir } from "os";
 
 describe("utils/DiskCache", () => {
   let tempDir;

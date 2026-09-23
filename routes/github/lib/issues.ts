@@ -1,6 +1,6 @@
-import { requestData } from "./utils/graphql.ts";
-import { ms } from "#utils/misc.ts";
 import { DiskCache } from "#utils/disk-cache.ts";
+import { ms } from "#utils/misc.ts";
+import { requestData } from "./utils/graphql.ts";
 
 type IssueState = "OPEN" | "CLOSED";
 type Label = { name: string; color: string };

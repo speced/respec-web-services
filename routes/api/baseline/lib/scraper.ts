@@ -1,5 +1,5 @@
-import path from "path";
-import { mkdir, readFile, rename, writeFile } from "fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 import { env } from "#utils/misc.ts";
 

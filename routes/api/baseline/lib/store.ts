@@ -1,5 +1,5 @@
-import path from "path";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
 import { env } from "#utils/misc.ts";
 

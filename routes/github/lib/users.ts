@@ -1,6 +1,6 @@
-import { requestData } from "./utils/graphql.ts";
-import { ms } from "#utils/misc.ts";
 import { MemCache } from "#utils/mem-cache.ts";
+import { ms } from "#utils/misc.ts";
+import { requestData } from "./utils/graphql.ts";
 
 export interface User {
   name: string;

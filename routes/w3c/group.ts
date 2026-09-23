@@ -1,10 +1,10 @@
-import path from "path";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 import type { Request, Response } from "express";
 
 import { MemCache } from "#utils/mem-cache.ts";
-import { env, ms, seconds, HTTPError } from "#utils/misc.ts";
+import { env, HTTPError, ms, seconds } from "#utils/misc.ts";
 
 const DATA_DIR = env("DATA_DIR");
 const dataSource = path.join(DATA_DIR, "w3c/groups.json");

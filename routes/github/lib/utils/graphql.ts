@@ -1,4 +1,4 @@
-import { getToken, updateRateLimit, type RateLimit } from "./tokens.ts";
+import { getToken, type RateLimit, updateRateLimit } from "./tokens.ts";
 
 const ENDPOINT = "https://api.github.com/graphql";
 

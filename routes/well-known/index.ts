@@ -1,5 +1,5 @@
-import { Router } from "express";
 import cors from "cors";
+import { Router } from "express";
 
 import payRoute from "./pay.ts";
 
