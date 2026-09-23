@@ -1,7 +1,7 @@
 import { getRefs } from "#routes/bibrefs/lib/store.ts";
 import {
-  validate,
   SMALLEST_PLAUSIBLE_DATABASE,
+  validate,
 } from "#routes/bibrefs/lib/validate.ts";
 
 /** Enough entries to clear the store's minimum-size check. */

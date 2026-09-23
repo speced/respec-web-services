@@ -4,12 +4,12 @@
 //  - Sort browser versions (latest first)
 //  - Remove footnotes and other unnecessary data
 
-import * as path from "path";
-import { existsSync } from "fs";
-import { readFile, writeFile, readdir, mkdir } from "fs/promises";
+import { existsSync } from "node:fs";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import * as path from "node:path";
 
-import sh from "#utils/sh.ts";
 import { env } from "#utils/misc.ts";
+import sh from "#utils/sh.ts";
 import type {
   BrowserVersionData,
   ScraperOutput as Output,

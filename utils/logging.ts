@@ -1,7 +1,6 @@
-import morgan from "morgan";
-import type { FormatFn, Options } from "morgan";
 import chalk from "chalk";
 import type { Request, Response } from "express";
+import morgan, { type FormatFn, type Options } from "morgan";
 
 const prettyBytes = (bytes: number) => {
   const threshold = 1024;

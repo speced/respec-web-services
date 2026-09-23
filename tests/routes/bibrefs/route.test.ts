@@ -1,8 +1,8 @@
 import type { Response } from "express";
 
 import { route } from "#routes/bibrefs/index.ts";
-import { store } from "#routes/bibrefs/lib/store-init.ts";
 import { DATA_FILE } from "#routes/bibrefs/lib/paths.ts";
+import { store } from "#routes/bibrefs/lib/store-init.ts";
 
 function makeRes(): Response {
   return {

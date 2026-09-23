@@ -1,9 +1,8 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 
 import authGithubWebhook from "#utils/auth-github-webhook.ts";
 import { env, ms } from "#utils/misc.ts";
-
 import allRoute from "./all.ts";
 import featureRoute from "./feature.ts";
 import searchRoute from "./search.post.ts";

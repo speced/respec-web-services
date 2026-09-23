@@ -1,4 +1,4 @@
-import { env, seconds, ms, HTTPError, getErrnoCode } from "#utils/misc.ts";
+import { env, getErrnoCode, HTTPError, ms, seconds } from "#utils/misc.ts";
 
 describe("utils/misc", () => {
   describe("env()", () => {

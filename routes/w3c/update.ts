@@ -1,9 +1,8 @@
-import path from "path";
+import path from "node:path";
 
 import type { Request, Response } from "express";
 
 import { BackgroundTaskQueue } from "#utils/background-task-queue.ts";
-
 import { reloadGroups } from "./group.ts";
 
 const workerFile = path.join(import.meta.dirname, "update.worker.ts");

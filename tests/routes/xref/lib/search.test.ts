@@ -1,13 +1,12 @@
 import {
   search as _search,
   cache,
-  type Query,
   type Options,
+  type Query,
 } from "#routes/xref/lib/search.ts";
 import { buildTermLowerIndex } from "#routes/xref/lib/store.ts";
-
-import byTerm from "./data-by-term.js";
 import bySpec from "./data-by-spec.js";
+import byTerm from "./data-by-term.js";
 
 // Minimal specmap matching production shape: { [group]: { [specid]: { shortname, url, title } } }
 const specmap = {

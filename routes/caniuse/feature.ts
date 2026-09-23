@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+
 import { BROWSERS, DEFAULT_BROWSERS } from "./lib/constants.ts";
 import { type Data, getData } from "./lib/index.ts";
 

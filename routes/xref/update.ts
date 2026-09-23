@@ -1,10 +1,9 @@
-import path from "path";
+import path from "node:path";
 
 import type { Request, Response } from "express";
 
 import { BackgroundTaskQueue } from "#utils/background-task-queue.ts";
 import { ms } from "#utils/misc.ts";
-
 import { cache as searchCache } from "./lib/search.ts";
 import { store } from "./lib/store-init.ts";
 

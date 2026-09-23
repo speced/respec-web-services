@@ -5,7 +5,6 @@ import path from "node:path";
 import { promisify } from "node:util";
 
 import { env, ms } from "#utils/misc.ts";
-
 import { DATA_FILE } from "./paths.ts";
 
 const run = promisify(execFile);

@@ -1,6 +1,7 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { PROJECT_ROOT } from "#utils/constants.ts";
-import { existsSync } from "fs";
-import { join } from "path";
 
 describe("utils/constants", () => {
   it("PROJECT_ROOT resolves to the repo root", () => {

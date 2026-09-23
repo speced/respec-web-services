@@ -24,7 +24,6 @@
         "noImportantStyles": "off" // too many changes, revisit later
       },
       "style": {
-        "useNodejsImportProtocol": "off", // too many changes, revisit later
         "noNonNullAssertion": "off" // too many instances, revisit later
       },
       "suspicious": {
@@ -52,7 +51,19 @@
     "enabled": true,
     "actions": {
       "source": {
-        "organizeImports": "off" // TODO, but not yet
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              [":NODE:"],
+              ":BLANK_LINE:",
+              [":PACKAGE:", ":PACKAGE_WITH_PROTOCOL:"],
+              ":BLANK_LINE:",
+              [":ALIAS:"],
+              [":PATH:"]
+            ]
+          }
+        }
       }
     }
   },

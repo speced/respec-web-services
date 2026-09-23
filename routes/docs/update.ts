@@ -1,10 +1,10 @@
-import path from "path";
-import { writeFile } from "fs/promises";
+import { writeFile } from "node:fs/promises";
+import path from "node:path";
 
 import type { Request, Response } from "express";
 
-import { HTTPError } from "#utils/misc.ts";
 import { PROJECT_ROOT } from "#utils/constants.ts";
+import { HTTPError } from "#utils/misc.ts";
 
 export default async function route(_req: Request, res: Response) {
   try {

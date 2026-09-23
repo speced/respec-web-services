@@ -1,7 +1,9 @@
-import path from "path";
+import path from "node:path";
+
+import type { Request, Response } from "express";
+
 import { BackgroundTaskQueue } from "#utils/background-task-queue.ts";
 import { store } from "./lib/store-init.ts";
-import type { Request, Response } from "express";
 
 const workerFile = path.join(import.meta.dirname, "update.worker.ts");
 const taskQueue = new BackgroundTaskQueue<typeof import("./update.worker.ts")>(

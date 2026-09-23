@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+
 import { seconds } from "#utils/misc.ts";
 import { getIssues } from "./lib/issues.ts";
 

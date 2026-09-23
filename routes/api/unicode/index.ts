@@ -1,10 +1,9 @@
 import path from "node:path";
 
-import express from "express";
 import cors from "cors";
+import express from "express";
 
 import { env, ms } from "#utils/misc.ts";
-
 import namesRoute from "./names.ts";
 import updateRoute from "./update.ts";
 

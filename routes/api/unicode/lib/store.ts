@@ -1,5 +1,5 @@
-import path from "path";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 import { env } from "#utils/misc.ts";
 import { INPUT_DATA_SOURCE } from "./scraper.ts";

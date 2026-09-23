@@ -1,7 +1,7 @@
 import type { Response } from "express";
 
-import searchRoute from "#routes/api/baseline/search.post.ts";
 import { store } from "#routes/api/baseline/lib/store-init.ts";
+import searchRoute from "#routes/api/baseline/search.post.ts";
 
 function makeRes(): Response {
   const res = {

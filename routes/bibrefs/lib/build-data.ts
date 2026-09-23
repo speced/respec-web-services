@@ -3,8 +3,8 @@
 // Runnable by hand to rebuild the data file without restarting the server:
 //   node routes/bibrefs/lib/build-data.ts <cloneDirectory> <outputFile>
 
-import { createRequire } from "node:module";
 import { lstatSync, readdirSync, renameSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 
 import { validate } from "./validate.ts";
