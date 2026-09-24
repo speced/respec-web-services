@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { DiskCache } from "#utils/disk-cache.ts";
 
 describe("utils/DiskCache", () => {
-  let tempDir;
-  let originalDataDir;
+  let tempDir: string | undefined;
+  let originalDataDir: string | undefined;
 
   beforeEach(async () => {
     tempDir = undefined;
@@ -68,7 +68,7 @@ describe("utils/DiskCache", () => {
   });
 
   describe("time-dependent expiry", () => {
-    let now;
+    let now: number;
 
     beforeEach(() => {
       now = 1_000;

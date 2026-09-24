@@ -1,14 +1,16 @@
-let regenerateDocs;
-let route;
+type UpdateModule = typeof import("#routes/docs/update.ts");
+
+let regenerateDocs: UpdateModule["regenerateDocs"];
+let route: UpdateModule["default"];
 
 const SPEC_GENERATOR = "https://www.w3.org/publications/spec-generator/";
 
 /** The generator answers 200 even when ReSpec found errors; the counts arrive in headers. */
-function generatorResponse(headers) {
+function generatorResponse(headers: Record<string, string>) {
   return new Response("<html></html>", { status: 200, headers });
 }
 
-function generatorRefusal(error, status = 500) {
+function generatorRefusal(error: string, status = 500) {
   return new Response(JSON.stringify({ error }), {
     status,
     headers: { "content-type": "application/json" },
@@ -30,16 +32,18 @@ function fakeExpressResponse() {
 }
 
 /** Returns the error a promise rejects with, and fails the spec if it resolves. */
-async function catchError(promise) {
+async function catchError(
+  promise: Promise<unknown>,
+): Promise<Error & { statusCode?: number }> {
   try {
     await promise;
   } catch (error) {
-    return error;
+    return error as Error & { statusCode?: number };
   }
   throw new Error("Expected regenerateDocs to reject, but it resolved.");
 }
 
-function respondWith(response) {
+function respondWith(response: Response) {
   spyOn(globalThis, "fetch").and.resolveTo(response);
 }
 
@@ -94,7 +98,9 @@ describe("routes/docs/update regenerateDocs()", () => {
 
     await catchError(regenerateDocs());
 
-    const url = new URL(globalThis.fetch.calls.mostRecent().args[0]);
+    const url = new URL(
+      (globalThis.fetch as jasmine.Spy).calls.mostRecent().args[0],
+    );
     expect(url.origin + url.pathname).toBe(SPEC_GENERATOR);
     expect(url.searchParams.get("type")).toBe("respec");
     expect(url.searchParams.get("url")).toBe(
@@ -108,6 +114,7 @@ describe("routes/docs/update route()", () => {
     respondWith(generatorRefusal("spec generator is down"));
     spyOn(console, "error");
 
+    // @ts-expect-error intentionally passing an invalid request
     await route({}, fakeExpressResponse());
 
     expect(console.error).toHaveBeenCalledWith(
@@ -119,9 +126,10 @@ describe("routes/docs/update route()", () => {
     respondWith(generatorRefusal("x".repeat(500)));
     spyOn(console, "error");
 
+    // @ts-expect-error intentionally passing an invalid request
     await route({}, fakeExpressResponse());
 
-    const line = console.error.calls.mostRecent().args[0];
+    const line = (console.error as jasmine.Spy).calls.mostRecent().args[0];
     expect(line.endsWith("...")).toBe(true);
     expect(line).toContain("x".repeat(400));
     expect(line).not.toContain("x".repeat(401));

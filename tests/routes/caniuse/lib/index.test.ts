@@ -3,7 +3,9 @@ import path from "node:path";
 
 import {
   BROWSERS,
+  type BrowserVersionData,
   DEFAULT_BROWSERS,
+  type ScraperOutput,
   SUPPORT_TITLES,
 } from "#routes/caniuse/lib/constants.ts";
 import {
@@ -16,12 +18,12 @@ import { env } from "#utils/misc.ts";
 const CANIUSE_DIR = path.join(env("DATA_DIR"), "caniuse");
 
 /** Minimal valid ScraperOutput fixture */
-const FIXTURE = {
+const FIXTURE: ScraperOutput = {
   all: { chrome: [["100", ["y"]]], firefox: [["99", ["n"]]] },
   summary: { chrome: [["100", ["y"]]] },
 };
 
-async function writeFixture(name, data = FIXTURE) {
+async function writeFixture(name: string, data: ScraperOutput = FIXTURE) {
   await fs.mkdir(CANIUSE_DIR, { recursive: true });
   await fs.writeFile(
     path.join(CANIUSE_DIR, `${name}.json`),
@@ -30,7 +32,7 @@ async function writeFixture(name, data = FIXTURE) {
   );
 }
 
-async function removeFixture(name) {
+async function removeFixture(name: string) {
   try {
     await fs.unlink(path.join(CANIUSE_DIR, `${name}.json`));
   } catch {
@@ -216,7 +218,7 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
     await fs.mkdir(CANIUSE_DIR, { recursive: true });
 
     // Write a minimal fixture for a feature called "test-feature"
-    const fixtureData = {
+    const fixtureData: ScraperOutput = {
       all: {
         chrome: [
           ["120", ["y"]],
@@ -248,7 +250,7 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
     await writeFixture("test-feature", fixtureData);
 
     // Write a fixture with compound and unknown support keys for HTML tests
-    const compoundFixture = {
+    const compoundFixture: ScraperOutput = {
       all: {
         chrome: [["120", ["y", "x"]]],
         firefox: [["121", ["z"]]],
@@ -267,12 +269,14 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
   });
 
   /** Build a json-format response body for the standard test-feature. */
-  function jsonBody(overrides = {}) {
+  function jsonBody(
+    overrides: { browsers?: string | string[]; versions?: number } = {},
+  ) {
     return createResponseBody({
       feature: "test-feature",
       format: "json",
       ...overrides,
-    });
+    }) as Promise<Record<string, BrowserVersionData[]> | null>;
   }
 
   it("returns default browsers for undefined, non-array, and all-invalid input", async () => {
@@ -287,7 +291,7 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       expect(result)
         .withContext(`browsers: ${JSON.stringify(browsers)}`)
         .not.toBeNull();
-      const keys = Object.keys(result);
+      const keys = Object.keys(result!);
       expect(keys).toContain("chrome");
       expect(keys).toContain("firefox");
       expect(keys).toContain("safari");
@@ -297,7 +301,7 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
   it("returns all browsers when 'all' is passed", async () => {
     const result = await jsonBody({ browsers: "all" });
     expect(result).not.toBeNull();
-    const keys = Object.keys(result);
+    const keys = Object.keys(result!);
     expect(keys).toContain("chrome");
     expect(keys).toContain("firefox");
     expect(keys).toContain("safari");
@@ -310,7 +314,7 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
       browsers: ["chrome", "invalid-browser", "firefox"],
     });
     expect(result).not.toBeNull();
-    const keys = Object.keys(result);
+    const keys = Object.keys(result!);
     expect(keys).toContain("chrome");
     expect(keys).toContain("firefox");
     expect(keys).not.toContain("invalid-browser");
@@ -327,18 +331,18 @@ describe("caniuse - sanitizeBrowsersList (via createResponseBody)", () => {
   it("defaults to 4 versions when none specified", async () => {
     const result = await jsonBody({ browsers: ["chrome"] });
     expect(result).not.toBeNull();
-    expect(result.chrome.length).toBe(4);
+    expect(result!.chrome.length).toBe(4);
   });
 
   it("respects custom version count", async () => {
     const result = await jsonBody({ browsers: ["chrome"], versions: 2 });
     expect(result).not.toBeNull();
-    expect(result.chrome.length).toBe(2);
+    expect(result!.chrome.length).toBe(2);
   });
 
   describe("HTML title attributes (getSupportTitle via formatAsHTML)", () => {
     /** Build an html-format response body. */
-    function htmlBody(feature, browsers) {
+    function htmlBody(feature: string, browsers: string[]) {
       return createResponseBody({ feature, browsers, format: "html" });
     }
 

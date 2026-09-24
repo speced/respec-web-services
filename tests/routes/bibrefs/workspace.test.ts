@@ -5,7 +5,7 @@ import path from "node:path";
 import { prepareWorkspace } from "#routes/bibrefs/lib/workspace.ts";
 
 describe("routes/bibrefs - build workspace", () => {
-  let root;
+  let root: string;
 
   beforeEach(() => {
     root = mkdtempSync(path.join(os.tmpdir(), "bibrefs-workspace-"));

@@ -1,9 +1,15 @@
-// GH_TOKEN (read by tokens.ts at import time) is set by tests/helpers/env.js
+// GH_TOKEN (read by tokens.ts at import time) is set by tests/helpers/env.ts
 // before any spec loads, so the module can be imported statically.
 import { requestData } from "#routes/github/lib/utils/rest.ts";
 
+interface PageOptions {
+  status?: number;
+  statusText?: string;
+  next?: number;
+}
+
 describe("github/lib/utils/rest - requestData", () => {
-  let originalFetch;
+  let originalFetch: typeof globalThis.fetch;
   beforeEach(() => {
     originalFetch = globalThis.fetch;
   });
@@ -18,7 +24,10 @@ describe("github/lib/utils/rest - requestData", () => {
   };
 
   // A JSON page response; `next` (a page number) adds a rel="next" Link header.
-  function page(body, { status = 200, statusText = "OK", next } = {}) {
+  function page(
+    body: unknown,
+    { status = 200, statusText = "OK", next }: PageOptions = {},
+  ) {
     const headers = new Headers(rateLimitHeaders);
     if (next) {
       headers.set(
@@ -29,7 +38,7 @@ describe("github/lib/utils/rest - requestData", () => {
     return new Response(JSON.stringify(body), { status, statusText, headers });
   }
 
-  function mockFetch(body, opts) {
+  function mockFetch(body: unknown, opts?: PageOptions) {
     globalThis.fetch = jasmine
       .createSpy("fetch")
       .and.resolveTo(page(body, opts));
@@ -52,9 +61,10 @@ describe("github/lib/utils/rest - requestData", () => {
 
     it("accepts a valid GitHub API URL", async () => {
       mockFetch([{ id: 1 }]);
-      const { value } = await requestData(
+      const { value, done } = await requestData(
         "https://api.github.com/search/repositories?q=respec",
       ).next();
+      if (done) throw new Error("expected requestData to yield a value");
       expect(value.result).toEqual([{ id: 1 }]);
     });
   });
@@ -70,7 +80,9 @@ describe("github/lib/utils/rest - requestData", () => {
         }),
       );
       const gen = requestData("https://api.github.com/repos/w3c/respec/issues");
-      expect((await gen.next()).value.result).toEqual({ page: 1 });
+      const first = await gen.next();
+      if (first.done) throw new Error("expected requestData to yield a value");
+      expect(first.value.result).toEqual({ page: 1 });
       await expectAsync(gen.next()).toBeRejectedWithError(
         /expected https:\/\/api\.github\.com/,
       );
@@ -95,10 +107,11 @@ describe("github/lib/utils/rest - requestData", () => {
   });
 
   it("throws on non-OK responses", async () => {
-    for (const [status, statusText] of [
+    const cases: [number, string][] = [
       [404, "Not Found"],
       [500, "Internal Server Error"],
-    ]) {
+    ];
+    for (const [status, statusText] of cases) {
       mockFetch({}, { status, statusText });
       await expectAsync(requestData("https://api.github.com/repos/x").next())
         .withContext(String(status))

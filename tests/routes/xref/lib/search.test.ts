@@ -1,12 +1,16 @@
 import {
   search as _search,
   cache,
+  type DataEntry,
   type Options,
   type Query,
 } from "#routes/xref/lib/search.ts";
-import { buildTermLowerIndex } from "#routes/xref/lib/store.ts";
-import bySpec from "./data-by-spec.js";
-import byTerm from "./data-by-term.js";
+import { buildTermLowerIndex, type Store } from "#routes/xref/lib/store.ts";
+import bySpecRaw from "./data-by-spec.ts";
+import byTermRaw from "./data-by-term.ts";
+
+const bySpec = bySpecRaw as unknown as Record<string, DataEntry[]>;
+const byTerm = byTermRaw as unknown as Record<string, DataEntry[]>;
 
 // Minimal specmap matching production shape: { [group]: { [specid]: { shortname, url, title } } }
 const specmap = {
@@ -51,10 +55,13 @@ const store = {
   bySpec,
   specmap,
   byTermLower: buildTermLowerIndex(byTerm),
-};
+} as unknown as Store;
 
-const search = (query: Query, options: Options) => {
-  const response = _search([query], store, { fields: ["uri"], ...options });
+const search = (query: Partial<Query>, options: Partial<Options> = {}) => {
+  const response = _search([query as Query], store, {
+    ...options,
+    fields: options.fields ?? ["uri"],
+  });
   return response.result[0][1];
 };
 
@@ -72,8 +79,8 @@ describe("xref - search", () => {
       });
 
       it("adds id to query if none is given", () => {
-        const getQuery = query =>
-          _search([query], store, { query: true }).query[0];
+        const getQuery = (query: Partial<Query>) =>
+          _search([query as Query], store, { query: true }).query![0];
         expect(getQuery({ term: "html" })).toEqual({
           term: "html",
           id: "4c0b68a3658fd64c8a77242fffd6e4e615331375",
@@ -88,7 +95,8 @@ describe("xref - search", () => {
     });
 
     describe("fields", () => {
-      const search = (q, opts) => _search([q], store, { ...opts }).result[0][1];
+      const search = (q: Partial<Query>, opts: Partial<Options> = {}) =>
+        _search([q as Query], store, { ...opts }).result[0][1];
 
       it("returns only requested fields", () => {
         expect(
@@ -138,9 +146,9 @@ describe("xref - search", () => {
 
   describe("backward compatibility", () => {
     it("allows query.specs as string[]", () => {
-      const inputQuery = { specs: ["html"], id: "ID" };
+      const inputQuery = { specs: ["html"], id: "ID" } as unknown as Query;
       const outputQuery = _search([inputQuery], store, { query: true })
-        .query[0];
+        .query![0];
       expect(outputQuery).toEqual({ specs: [["html"]], id: "ID", types: [] });
     });
   });
@@ -154,7 +162,7 @@ describe("xref - search", () => {
     });
 
     it("textVariations", () => {
-      const types = ["dfn"];
+      const types: NonNullable<Query["types"]> = ["dfn"];
       const result = [{ uri: "webappapis.html#event-handlers" }];
       expect(search({ term: "event handler" })).toEqual(result);
       expect(search({ term: "event handlers" })).toEqual([]);
@@ -202,8 +210,10 @@ describe("xref - search", () => {
       // When the case-insensitive fallback fires, each result entry should
       // include the canonical term it was indexed under, so cite syntax can
       // use the correct casing instead of the user's input.
-      const searchWithTerm = query => {
-        const response = _search([query], store, { fields: ["uri", "term"] });
+      const searchWithTerm = (query: Partial<Query>) => {
+        const response = _search([query as Query], store, {
+          fields: ["uri", "term"],
+        });
         return response.result[0][1];
       };
 
@@ -263,7 +273,7 @@ describe("xref - search", () => {
   describe("filter@specs", () => {
     it("skips filter if query.specs not provided", () => {
       const results = search({ term: "script" }).sort((a, b) =>
-        a.uri.localeCompare(b.uri),
+        a.uri!.localeCompare(b.uri!),
       );
       const expectedResults = [
         { uri: "interact.html#elementdef-script" },
@@ -277,7 +287,7 @@ describe("xref - search", () => {
 
     it("filters on spec id first, then on shortname", () => {
       const term = "inherited value";
-      const options = { fields: ["spec", "uri"] };
+      const options: Partial<Options> = { fields: ["spec", "uri"] };
       expect(search({ term, specs: [["css-cascade-3"]] }, options)).toEqual([
         { spec: "css-cascade-3", uri: "#inherited-value" },
       ]);
@@ -289,7 +299,7 @@ describe("xref - search", () => {
 
     it("prefers latest version of same spec", () => {
       const term = "inherited value";
-      const options = { fields: ["spec", "uri"] };
+      const options: Partial<Options> = { fields: ["spec", "uri"] };
       expect(search({ term, specs: [["css-cascade"]] }, options)).toEqual([
         { spec: "css-cascade-4", uri: "#inherited-value" },
       ]);
@@ -539,7 +549,7 @@ describe("xref - search", () => {
         { specs: [["fetch"]], types: ["enum-value"], id: "" },
         { all: true },
       );
-      const sorted = results.sort((a, b) => a.uri.localeCompare(b.uri));
+      const sorted = results.sort((a, b) => a.uri!.localeCompare(b.uri!));
       expect(sorted).toEqual([
         { uri: "#dom-requestdestination" },
         { uri: "#dom-requestdestination-script" },
@@ -586,6 +596,7 @@ describe("xref - search", () => {
     it("treats a null term as a browse rather than throwing", () => {
       expect(() =>
         search(
+          // @ts-expect-error intentionally passing null
           { term: null, types: ["dfn"], specs: [["dom"]], id: "" },
           { fields: ["uri"], all: true },
         ),
@@ -593,9 +604,13 @@ describe("xref - search", () => {
     });
 
     it("treats a null term with no specs as no results", () => {
-      let results;
+      let results: ReturnType<typeof search> = [];
       expect(() => {
-        results = search({ term: null, types: ["dfn"], id: "" }, { all: true });
+        results = search(
+          // @ts-expect-error intentionally passing null
+          { term: null, types: ["dfn"], id: "" },
+          { all: true },
+        );
       }).not.toThrow();
       expect(results).toEqual([]);
     });

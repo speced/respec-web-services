@@ -1,12 +1,13 @@
 import { getRefs } from "#routes/bibrefs/lib/store.ts";
 import {
+  type References,
   SMALLEST_PLAUSIBLE_DATABASE,
   validate,
 } from "#routes/bibrefs/lib/validate.ts";
 
 /** Enough entries to clear the store's minimum-size check. */
-function bulk() {
-  const references = {
+function bulk(): References {
+  const references: References = {
     WEBIDL: {
       href: "https://webidl.spec.whatwg.org/",
       title: "Web IDL Standard",
@@ -64,7 +65,7 @@ describe("routes/bibrefs - getRefs", () => {
 
   // Whole objects, not just key names: asserting the keys alone would pass even
   // if every value came back null.
-  const cases = [
+  const cases: [string, string[], References][] = [
     [
       "emits every entry along an alias chain",
       ["ABNF"],
@@ -121,7 +122,7 @@ describe("routes/bibrefs - getRefs", () => {
   }
 
   it("walks a long chain to the end instead of truncating it", () => {
-    const chain = {};
+    const chain: References = {};
     for (let i = 0; i < 40; i++) chain[`a${i}`] = { aliasOf: `a${i + 1}` };
     chain.a40 = { title: "end", href: "https://example.com/end" };
     const output = getRefs(chain, ["a0"]);
@@ -147,7 +148,7 @@ describe("routes/bibrefs - getRefs", () => {
     const hostile = JSON.parse('{"__proto__":{"title":"hostile"}}');
     const output = getRefs(hostile, ["__proto__"]);
     expect(JSON.stringify(output)).toBe("{}");
-    expect({}.title).toBeUndefined();
+    expect(({} as Record<string, unknown>).title).toBeUndefined();
   });
 });
 
@@ -156,7 +157,7 @@ describe("routes/bibrefs - validate", () => {
 
   // Each case asserts WHICH check fired: "not null" alone passes when a later
   // check happens to catch the same fixture, which hides a deleted one.
-  const rejected = [
+  const rejected: [string, unknown, string][] = [
     ["an array", [], "not a plain object"],
     ["a primitive", "nope", "not a plain object"],
     ["null", null, "not a plain object"],
