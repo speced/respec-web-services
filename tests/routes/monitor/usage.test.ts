@@ -1,61 +1,49 @@
+import { createRequest, createResponse } from "node-mocks-http";
+
 const { default: route } = await import("#routes/monitor/usage.ts");
 
-function mockRes() {
-  const res = {
-    _status: 200,
-    _body: undefined,
-    _headers: {},
-    status(code) {
-      res._status = code;
-      return res;
-    },
-    json(body) {
-      res._body = body;
-      return res;
-    },
-    set(header, value) {
-      res._headers[header] = value;
-      return res;
-    },
-  };
+type UsageRequest = Parameters<typeof route>[0];
+type UsageResponse = Parameters<typeof route>[1];
+
+function callRoute() {
+  const req = createRequest<UsageRequest>();
+  const res = createResponse<UsageResponse>();
+  route(req, res);
   return res;
 }
 
 describe("monitor/usage", () => {
   it("returns all required fields with correct types", () => {
-    const res = mockRes();
-    route({}, res);
-    expect(res._body).toBeDefined();
-    expect(typeof res._body.name).toBe("string");
-    expect(typeof res._body.version).toBe("string");
-    expect(typeof res._body.uptime).toBe("number");
-    expect(typeof res._body.heapUsed).toBe("number");
-    expect(typeof res._body.heapTotal).toBe("number");
+    const res = callRoute();
+    const body = res._getJSONData();
+    expect(body).toBeDefined();
+    expect(typeof body.name).toBe("string");
+    expect(typeof body.version).toBe("string");
+    expect(typeof body.uptime).toBe("number");
+    expect(typeof body.heapUsed).toBe("number");
+    expect(typeof body.heapTotal).toBe("number");
   });
 
   it("returns respec.org as the service name", () => {
-    const res = mockRes();
-    route({}, res);
-    expect(res._body.name).toBe("respec.org");
+    const res = callRoute();
+    expect(res._getJSONData().name).toBe("respec.org");
   });
 
   it("sets Cache-Control to no-store", () => {
-    const res = mockRes();
-    route({}, res);
-    expect(res._headers["Cache-Control"]).toBe("no-store");
+    const res = callRoute();
+    expect(res.getHeader("Cache-Control")).toBe("no-store");
   });
 
   it("returns positive uptime", () => {
-    const res = mockRes();
-    route({}, res);
-    expect(res._body.uptime).toBeGreaterThan(0);
+    const res = callRoute();
+    expect(res._getJSONData().uptime).toBeGreaterThan(0);
   });
 
   it("returns positive heap values", () => {
-    const res = mockRes();
-    route({}, res);
-    expect(res._body.heapUsed).toBeGreaterThan(0);
-    expect(res._body.heapTotal).toBeGreaterThan(0);
-    expect(res._body.heapTotal).toBeGreaterThanOrEqual(res._body.heapUsed);
+    const res = callRoute();
+    const body = res._getJSONData();
+    expect(body.heapUsed).toBeGreaterThan(0);
+    expect(body.heapTotal).toBeGreaterThan(0);
+    expect(body.heapTotal).toBeGreaterThanOrEqual(body.heapUsed);
   });
 });

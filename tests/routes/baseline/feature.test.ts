@@ -1,34 +1,20 @@
-import type { Response } from "express";
+import { createRequest, createResponse } from "node-mocks-http";
 
 import featureRoute from "#routes/api/baseline/feature.ts";
+import type { FeatureData } from "#routes/api/baseline/lib/store.ts";
 import { store } from "#routes/api/baseline/lib/store-init.ts";
 
-function makeRes(): Response {
-  const res = {
-    _status: 200,
-    _body: undefined,
-    _headers: {},
-    status(code) {
-      this._status = code;
-      return this;
-    },
-    sendStatus(code) {
-      this._status = code;
-      return this;
-    },
-    set(name, value) {
-      this._headers[name] = value;
-      return this;
-    },
-    json(data) {
-      this._body = data;
-      return this;
-    },
-  };
+type FeatureRequest = Parameters<typeof featureRoute>[0];
+type FeatureResponse = Parameters<typeof featureRoute>[1];
+
+function callRoute(feature: string) {
+  const req = createRequest<FeatureRequest>({ params: { feature } });
+  const res = createResponse<FeatureResponse>();
+  featureRoute(req, res);
   return res;
 }
 
-const FEATURE_DATA = {
+const FEATURE_DATA: FeatureData = {
   kind: "feature",
   name: "CSS Animations",
   spec: ["https://drafts.csswg.org/css-animations/"],
@@ -63,60 +49,48 @@ describe("routes/api/baseline/feature", () => {
   });
 
   it("returns feature data for a known feature", () => {
-    const req = { params: { feature: "css-animations" } };
-    const res = makeRes();
-    featureRoute(req, res);
-    expect(res._status).toBe(200);
-    expect(res._body.id).toBe("css-animations");
-    expect(res._body.name).toBe("CSS Animations");
+    const res = callRoute("css-animations");
+    expect(res.statusCode).toBe(200);
+    expect(res._getJSONData().id).toBe("css-animations");
+    expect(res._getJSONData().name).toBe("CSS Animations");
   });
 
   it("returns 404 when feature is unknown", () => {
-    const req = { params: { feature: "unknown-feature" } };
-    const res = makeRes();
-    featureRoute(req, res);
-    expect(res._status).toBe(404);
+    const res = callRoute("unknown-feature");
+    expect(res.statusCode).toBe(404);
   });
 
   it("returns 404 when store has no data", () => {
     store.data = null;
     store.byFeature = new Map();
-    const req = { params: { feature: "css-animations" } };
-    const res = makeRes();
-    featureRoute(req, res);
-    expect(res._status).toBe(404);
+    const res = callRoute("css-animations");
+    expect(res.statusCode).toBe(404);
   });
 
   it("resolves a moved feature to its redirect target", () => {
-    const req = { params: { feature: "old-animations" } };
-    const res = makeRes();
-    featureRoute(req, res);
-    expect(res._status).toBe(200);
-    expect(res._body.id).toBe("css-animations");
-    expect(res._body.redirected_from).toBe("old-animations");
-    expect(res._body.name).toBe("CSS Animations");
+    const res = callRoute("old-animations");
+    expect(res.statusCode).toBe(200);
+    expect(res._getJSONData().id).toBe("css-animations");
+    expect(res._getJSONData().redirected_from).toBe("old-animations");
+    expect(res._getJSONData().name).toBe("CSS Animations");
   });
 
   it("returns 404 for a moved feature whose target is missing", () => {
-    store.data.features["orphan-moved"] = {
+    store.data!.features["orphan-moved"] = {
       kind: "moved",
       redirect_target: "nonexistent",
     };
-    const req = { params: { feature: "orphan-moved" } };
-    const res = makeRes();
-    featureRoute(req, res);
-    expect(res._status).toBe(404);
+    const res = callRoute("orphan-moved");
+    expect(res.statusCode).toBe(404);
   });
 
   it("resolves a split feature to its redirect targets", () => {
-    const req = { params: { feature: "mega-feature" } };
-    const res = makeRes();
-    featureRoute(req, res);
-    expect(res._status).toBe(200);
-    expect(res._body.id).toBe("mega-feature");
-    expect(res._body.kind).toBe("split");
-    expect(Array.isArray(res._body.split_into)).toBeTrue();
-    expect(res._body.split_into.length).toBe(1);
-    expect(res._body.split_into[0].id).toBe("css-animations");
+    const res = callRoute("mega-feature");
+    expect(res.statusCode).toBe(200);
+    expect(res._getJSONData().id).toBe("mega-feature");
+    expect(res._getJSONData().kind).toBe("split");
+    expect(Array.isArray(res._getJSONData().split_into)).toBeTrue();
+    expect(res._getJSONData().split_into.length).toBe(1);
+    expect(res._getJSONData().split_into[0].id).toBe("css-animations");
   });
 });

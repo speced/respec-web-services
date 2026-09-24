@@ -1,9 +1,14 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 
+import { createRequest, createResponse } from "node-mocks-http";
+
 import route from "#routes/caniuse/feature.ts";
 import { cache } from "#routes/caniuse/lib/index.ts";
 import { env } from "#utils/misc.ts";
+
+type FeatureRequest = Parameters<typeof route>[0];
+type FeatureResponse = Parameters<typeof route>[1];
 
 const CANIUSE_DIR = path.join(env("DATA_DIR"), "caniuse");
 
@@ -21,36 +26,14 @@ const FIXTURE = {
   summary: { chrome: [["100", ["y"]]] },
 };
 
-/** Builds a lightweight mock Express Response. */
-function mockRes() {
-  const res = {
-    statusCode: 200,
-    body: null,
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(body) {
-      this.body = body;
-      return this;
-    },
-    send(body) {
-      this.body = body;
-      return this;
-    },
-    type(_t) {
-      return this;
-    },
-  };
+async function callRoute(feature: string, query: Record<string, string> = {}) {
+  const req = createRequest<FeatureRequest>({ params: { feature }, query });
+  const res = createResponse<FeatureResponse>();
+  await route(req, res);
   return res;
 }
 
-/** Builds a minimal mock Express Request for the `/:feature` route. */
-function mockReq(feature, query = {}) {
-  return { params: { feature }, query };
-}
-
-async function writeFixture(name, data = FIXTURE) {
+async function writeFixture(name: string, data: unknown = FIXTURE) {
   await fs.mkdir(CANIUSE_DIR, { recursive: true });
   await fs.writeFile(
     path.join(CANIUSE_DIR, `${name}.json`),
@@ -59,7 +42,7 @@ async function writeFixture(name, data = FIXTURE) {
   );
 }
 
-async function removeFixture(name) {
+async function removeFixture(name: string) {
   try {
     await fs.unlink(path.join(CANIUSE_DIR, `${name}.json`));
   } catch {
@@ -72,28 +55,25 @@ describe("caniuse - feature route", () => {
 
   describe("404 responses", () => {
     it("returns JSON 404 for a missing feature", async () => {
-      const res = mockRes();
-      await route(mockReq("nonexistent-xyz"), res);
+      const res = await callRoute("nonexistent-xyz");
       expect(res.statusCode).toBe(404);
-      expect(res.body).toEqual(
+      expect(res._getJSONData()).toEqual(
         jasmine.objectContaining({ error: jasmine.any(String) }),
       );
-      expect(res.body.error).toContain("nonexistent-xyz");
+      expect(res._getJSONData().error).toContain("nonexistent-xyz");
     });
 
     it("returns JSON 404 with a wf- hint for a missing wf- feature", async () => {
-      const res = mockRes();
-      await route(mockReq("wf-no-such-feature-xyz"), res);
+      const res = await callRoute("wf-no-such-feature-xyz");
       expect(res.statusCode).toBe(404);
-      expect(res.body.error).toContain("wf-");
-      expect(res.body.error).toContain("web-features");
+      expect(res._getJSONData().error).toContain("wf-");
+      expect(res._getJSONData().error).toContain("web-features");
     });
 
     it("returns JSON 404 without wf- hint for the edge case 'wf-'", async () => {
-      const res = mockRes();
-      await route(mockReq("wf-"), res);
+      const res = await callRoute("wf-");
       expect(res.statusCode).toBe(404);
-      expect(res.body.error).not.toContain("web-features");
+      expect(res._getJSONData().error).not.toContain("web-features");
     });
   });
 
@@ -101,10 +81,9 @@ describe("caniuse - feature route", () => {
     it("returns 200 JSON with browser data for a known feature", async () => {
       await writeFixture("css-grid");
       try {
-        const res = mockRes();
-        await route(mockReq("css-grid"), res);
+        const res = await callRoute("css-grid");
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual(
+        expect(res._getJSONData()).toEqual(
           jasmine.objectContaining({ result: jasmine.any(Array) }),
         );
       } finally {
@@ -115,10 +94,9 @@ describe("caniuse - feature route", () => {
     it("resolves wf- prefixed feature to its caniuse equivalent", async () => {
       await writeFixture("css-grid");
       try {
-        const res = mockRes();
-        await route(mockReq("wf-css-grid"), res);
+        const res = await callRoute("wf-css-grid");
         expect(res.statusCode).toBe(200);
-        expect(res.body.result).toBeDefined();
+        expect(res._getJSONData().result).toBeDefined();
       } finally {
         await removeFixture("css-grid");
       }
@@ -134,10 +112,9 @@ describe("caniuse - feature route", () => {
         "utf8",
       );
       try {
-        const res = mockRes();
-        await route(mockReq("broken-feature"), res);
+        const res = await callRoute("broken-feature");
         expect(res.statusCode).toBe(500);
-        expect(res.body).toEqual(
+        expect(res._getJSONData()).toEqual(
           jasmine.objectContaining({ error: jasmine.any(String) }),
         );
       } finally {
