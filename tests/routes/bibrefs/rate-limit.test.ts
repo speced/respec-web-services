@@ -11,7 +11,7 @@ type BibrefsResponse = Parameters<typeof bibrefs>[1];
 type Query = Record<string, string>;
 
 function send(query: Query, ip: string) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const req = createRequest<BibrefsRequest>({
       method: "GET",
       url: "/",
