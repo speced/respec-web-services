@@ -20,7 +20,10 @@ if (!fnBlock.includes("aria-label")) {
   throw new Error("could not slice citeButton out of script.js");
 }
 
-const sandbox = {};
+interface Sandbox {
+  citeButton: (cite: string) => string;
+}
+const sandbox = {} as unknown as Sandbox;
 vm.createContext(sandbox);
 vm.runInContext(`${fnBlock}\nthis.citeButton = citeButton;`, sandbox);
 const { citeButton } = sandbox;

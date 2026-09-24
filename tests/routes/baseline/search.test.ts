@@ -1,28 +1,15 @@
-import type { Response } from "express";
+import { createRequest, createResponse } from "node-mocks-http";
 
 import { store } from "#routes/api/baseline/lib/store-init.ts";
 import searchRoute from "#routes/api/baseline/search.post.ts";
 
-function makeRes(): Response {
-  const res = {
-    _status: 200,
-    _body: undefined,
-    status(code) {
-      this._status = code;
-      return this;
-    },
-    sendStatus(code) {
-      this._status = code;
-      return this;
-    },
-    set() {
-      return this;
-    },
-    json(data) {
-      this._body = data;
-      return this;
-    },
-  };
+type SearchRequest = Parameters<typeof searchRoute>[0];
+type SearchResponse = Parameters<typeof searchRoute>[1];
+
+function callRoute(body: Record<string, unknown>) {
+  const req = createRequest<SearchRequest>({ body });
+  const res = createResponse<SearchResponse>();
+  searchRoute(req, res);
   return res;
 }
 
@@ -43,10 +30,8 @@ describe("routes/api/baseline/search.post", () => {
   describe("when store data is unavailable", () => {
     it("returns 503 when store.data is null", () => {
       store.data = null;
-      const req = { body: { specs: ["https://example.com/spec/"] } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(503);
+      const res = callRoute({ specs: ["https://example.com/spec/"] });
+      expect(res.statusCode).toBe(503);
     });
   });
 
@@ -56,45 +41,33 @@ describe("routes/api/baseline/search.post", () => {
     });
 
     it("returns 400 when specs is missing", () => {
-      const req = { body: {} };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(400);
+      const res = callRoute({});
+      expect(res.statusCode).toBe(400);
     });
 
     it("returns 400 when specs is not an array", () => {
-      const req = { body: { specs: "https://example.com/" } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(400);
+      const res = callRoute({ specs: "https://example.com/" });
+      expect(res.statusCode).toBe(400);
     });
 
     it("returns 400 when specs is an empty array", () => {
-      const req = { body: { specs: [] } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(400);
+      const res = callRoute({ specs: [] });
+      expect(res.statusCode).toBe(400);
     });
 
     it("returns 400 when specs contains an empty string", () => {
-      const req = { body: { specs: [""] } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(400);
+      const res = callRoute({ specs: [""] });
+      expect(res.statusCode).toBe(400);
     });
 
     it("returns 400 when specs contains a whitespace-only string", () => {
-      const req = { body: { specs: ["   "] } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(400);
+      const res = callRoute({ specs: ["   "] });
+      expect(res.statusCode).toBe(400);
     });
 
     it("returns 400 when specs contains a non-string value", () => {
-      const req = { body: { specs: [42] } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(400);
+      const res = callRoute({ specs: [42] });
+      expect(res.statusCode).toBe(400);
     });
   });
 
@@ -117,23 +90,19 @@ describe("routes/api/baseline/search.post", () => {
     });
 
     it("returns matching features for a given spec URL", () => {
-      const req = {
-        body: { specs: ["https://drafts.csswg.org/css-animations/"] },
-      };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(200);
-      expect(res._body.result).toBeInstanceOf(Array);
-      expect(res._body.result.length).toBe(1);
-      expect(res._body.result[0].id).toBe("css-animations");
+      const res = callRoute({
+        specs: ["https://drafts.csswg.org/css-animations/"],
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res._getJSONData().result).toBeInstanceOf(Array);
+      expect(res._getJSONData().result.length).toBe(1);
+      expect(res._getJSONData().result[0].id).toBe("css-animations");
     });
 
     it("returns empty result for non-matching spec URL", () => {
-      const req = { body: { specs: ["https://example.com/unknown/"] } };
-      const res = makeRes();
-      searchRoute(req, res);
-      expect(res._status).toBe(200);
-      expect(res._body.result).toEqual([]);
+      const res = callRoute({ specs: ["https://example.com/unknown/"] });
+      expect(res.statusCode).toBe(200);
+      expect(res._getJSONData().result).toEqual([]);
     });
   });
 });

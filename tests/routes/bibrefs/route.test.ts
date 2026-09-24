@@ -1,51 +1,23 @@
-import type { Response } from "express";
+import { createRequest, createResponse } from "node-mocks-http";
 
 import { route } from "#routes/bibrefs/index.ts";
 import { DATA_FILE } from "#routes/bibrefs/lib/paths.ts";
 import { store } from "#routes/bibrefs/lib/store-init.ts";
 
-function makeRes(): Response {
-  return {
-    locals: {},
-    _status: 200,
-    _body: undefined,
-    _headers: {},
-    _sentFile: undefined,
-    status(code) {
-      this._status = code;
-      return this;
-    },
-    sendStatus(code) {
-      this._status = code;
-      return this;
-    },
-    set(name, value) {
-      this._headers[name] = value;
-      return this;
-    },
-    json(data) {
-      this._body = data;
-      return this;
-    },
-    jsonp(data) {
-      this._body = data;
-      this._usedJsonp = true;
-      return this;
-    },
-    type() {
-      return this;
-    },
-    sendFile(filePath) {
-      this._sentFile = filePath;
-      return this;
-    },
-  };
-}
+type RouteRequest = Parameters<typeof route>[0];
+type RouteResponse = Parameters<typeof route>[1];
 
-function call(query) {
-  const res = makeRes();
-  route({ query }, res);
-  return res;
+function call(query: Record<string, unknown>) {
+  const req = createRequest<RouteRequest>({ query });
+  const res = createResponse<RouteResponse>();
+  const sentFile = { path: undefined as string | undefined };
+  res.sendFile = ((filePath: string) => {
+    sentFile.path = filePath;
+    return res;
+  }) as RouteResponse["sendFile"];
+  spyOn(res, "jsonp").and.callThrough();
+  route(req, res);
+  return Object.assign(res, { _sentFile: sentFile.path });
 }
 
 describe("routes/bibrefs - route", () => {
@@ -69,22 +41,26 @@ describe("routes/bibrefs - route", () => {
     const res = call({ refs: "WEBIDL" });
     // A literal, not store.references.WEBIDL: comparing against the object the
     // module hands back would pass even if it mutated the entry on the way out.
-    expect(res._body).toEqual({
+    expect(res._getJSONData()).toEqual({
       WEBIDL: {
         title: "Web IDL",
         href: "https://example.com/webidl",
         id: "WEBIDL",
       },
     });
-    expect(res._headers["Cache-Control"]).toBe("public, max-age=3600");
+    expect(res.getHeader("Cache-Control")).toBe("public, max-age=3600");
     // Parsed, not merely present: an empty Expires satisfies toBeDefined.
-    const expires = Date.parse(res._headers.Expires);
+    const expires = Date.parse(res.getHeader("Expires") as string);
     expect(expires).not.toBeNaN();
     expect(Math.abs(expires - (Date.now() + 3600_000))).toBeLessThan(60_000);
     expect(res.locals.reason).toBeUndefined();
   });
 
-  const counted = [
+  const counted: [
+    string,
+    string | string[],
+    { queries: number; errors: number },
+  ][] = [
     ["one key it has", "WEBIDL", { queries: 1, errors: 0 }],
     ["a key it does not have", "WEBIDL,NOPE", { queries: 2, errors: 1 }],
     [
@@ -109,7 +85,7 @@ describe("routes/bibrefs - route", () => {
     });
   }
 
-  const counts = [
+  const counts: [string, number, number][] = [
     ["exactly the limit", 500, 200],
     ["one over the limit", 501, 400],
   ];
@@ -117,9 +93,9 @@ describe("routes/bibrefs - route", () => {
     it(`answers ${status} for ${description}`, () => {
       const refs = Array.from({ length: count }, (_, i) => `K${i}`).join(",");
       const res = call({ refs });
-      expect(res._status).withContext(description).toBe(status);
+      expect(res.statusCode).withContext(description).toBe(status);
       if (status === 400) {
-        expect(res._headers["Cache-Control"]).toBe("no-store");
+        expect(res.getHeader("Cache-Control")).toBe("no-store");
         expect(res.locals.reason).toBe("too-many-references");
       }
     });
@@ -137,7 +113,7 @@ describe("routes/bibrefs - route", () => {
     expect(call({}).locals.reason).toBe("whole-store");
   });
 
-  const notBare = [
+  const notBare: [string, Record<string, string>][] = [
     ["an empty refs parameter", { refs: "" }],
     ["a refs parameter under another name", { "refs[]": "WEBIDL" }],
   ];
@@ -145,14 +121,14 @@ describe("routes/bibrefs - route", () => {
     it(`does not send the whole 26 MB database for ${description}`, () => {
       const res = call(query);
       expect(res._sentFile).withContext(description).toBeUndefined();
-      expect(res._body).toEqual({});
+      expect(res._getJSONData()).toEqual({});
     });
   }
 
   it("answers through jsonp, which the service this replaces supported", () => {
     // Express falls back to plain JSON when no callback is named, so this only
     // pins that the route does not use res.json and lose ?callback= support.
-    expect(call({ refs: "WEBIDL" })._usedJsonp).toBe(true);
+    expect(call({ refs: "WEBIDL" }).jsonp).toHaveBeenCalled();
   });
 
   it("blocks prototype keys whatever their case", () => {
@@ -160,15 +136,15 @@ describe("routes/bibrefs - route", () => {
       title: "hostile",
       href: "https://example.com/x",
     };
-    expect(call({ refs: "__PROTO__" })._body).toEqual({});
-    expect(call({ refs: "__proto__" })._body).toEqual({});
+    expect(call({ refs: "__PROTO__" })._getJSONData()).toEqual({});
+    expect(call({ refs: "__proto__" })._getJSONData()).toEqual({});
   });
 
   it("refuses to serve, uncacheably, while the store is degraded", () => {
     store.degraded = true;
     const res = call({ refs: "WEBIDL" });
-    expect(res._status).toBe(503);
+    expect(res.statusCode).toBe(503);
     expect(res.locals.reason).toBe("degraded");
-    expect(res._headers["Cache-Control"]).toBe("no-store");
+    expect(res.getHeader("Cache-Control")).toBe("no-store");
   });
 });

@@ -1,58 +1,18 @@
+import { EventEmitter } from "node:events";
+
+import { createRequest, createResponse } from "node-mocks-http";
+
 import bibrefs from "#routes/bibrefs/index.ts";
 import { store } from "#routes/bibrefs/lib/store-init.ts";
 
-/**
- * Drives the real router, middleware included, because the rate limits live in
- * middleware that calling the handler directly would skip.
- */
-function send(query, ip) {
+type BibrefsRequest = Parameters<typeof bibrefs>[0];
+type BibrefsResponse = Parameters<typeof bibrefs>[1];
+
+type Query = Record<string, string>;
+
+function send(query: Query, ip: string) {
   return new Promise(resolve => {
-    const res = {
-      locals: {},
-      statusCode: 200,
-      headersSent: false,
-      set() {
-        return this;
-      },
-      setHeader() {
-        return this;
-      },
-      getHeader() {},
-      status(code) {
-        this.statusCode = code;
-        return this;
-      },
-      sendStatus(code) {
-        this.statusCode = code;
-        resolve(this);
-        return this;
-      },
-      json() {
-        resolve(this);
-        return this;
-      },
-      jsonp() {
-        resolve(this);
-        return this;
-      },
-      send() {
-        resolve(this);
-        return this;
-      },
-      type() {
-        return this;
-      },
-      sendFile() {
-        this.sentFile = true;
-        resolve(this);
-        return this;
-      },
-      end() {
-        resolve(this);
-        return this;
-      },
-    };
-    const req = {
+    const req = createRequest<BibrefsRequest>({
       method: "GET",
       url: "/",
       originalUrl: "/bibrefs",
@@ -60,17 +20,22 @@ function send(query, ip) {
       ip,
       ips: [],
       headers: {},
-      get: () => undefined,
       app: { get: () => undefined },
-    };
+    });
+    const res = createResponse<BibrefsResponse>({ eventEmitter: EventEmitter });
+    res.sendFile = (() => {
+      resolve(res);
+      return res;
+    }) as BibrefsResponse["sendFile"];
+    res.on("end", () => resolve(res));
     bibrefs(req, res, () => resolve(res));
   });
 }
 
 /** @returns the 1-based request number that first got a 429, or null. */
-async function firstRejection(query, ip, attempts) {
+async function firstRejection(query: Query, ip: string, attempts: number) {
   for (let attempt = 1; attempt <= attempts; attempt++) {
-    const { statusCode } = await send(query, ip);
+    const { statusCode } = (await send(query, ip)) as { statusCode: number };
     if (statusCode === 429) return attempt;
   }
   return null;

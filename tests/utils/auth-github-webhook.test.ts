@@ -1,44 +1,38 @@
 import { createHmac } from "node:crypto";
 
+import type { NextFunction, Request, Response } from "express";
+import { createRequest, createResponse } from "node-mocks-http";
+
 import githubWebhookAuthenticator from "#utils/auth-github-webhook.ts";
 
 const SECRET = "test-webhook-secret-1234";
 
 // The SHA-1 HMAC signature GitHub sends in X-Hub-Signature, e.g. "sha1=abc…".
-const sign = (body, secret) =>
+const sign = (body: Buffer, secret: string) =>
   `sha1=${createHmac("sha1", secret).update(body).digest("hex")}`;
-
-function mockReq({ body, headers }) {
-  const lower = Object.fromEntries(
-    Object.entries(headers).map(([k, v]) => [k.toLowerCase(), v]),
-  );
-  return { body, headers: lower, get: name => lower[name.toLowerCase()] };
-}
-
-function mockRes() {
-  const res = {
-    statusCode: null,
-    body: null,
-    status(code) {
-      res.statusCode = code;
-      return res;
-    },
-    send(data) {
-      res.body = data;
-      return res;
-    },
-  };
-  return res;
-}
 
 // Run the verifier (the 2nd middleware element; express.raw() is Express's own).
 // `signature === undefined` means the header is absent.
-function run({ body, signature, secret = SECRET }) {
-  const verifier = githubWebhookAuthenticator(secret)[1];
-  const headers =
+function run({
+  body,
+  signature,
+  secret = SECRET,
+}: {
+  body: string;
+  signature: string | undefined;
+  secret?: string;
+}) {
+  const verifier = githubWebhookAuthenticator(secret)[1] as (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => void;
+
+  const headers: Record<string, string> =
     signature === undefined ? {} : { "X-Hub-Signature": signature };
-  const req = mockReq({ body: Buffer.from(body), headers });
-  const res = mockRes();
+
+  const req = createRequest<Request>({ body: Buffer.from(body), headers });
+  const res = createResponse<Response>();
   let nextCalled = false;
   verifier(req, res, () => {
     nextCalled = true;
@@ -68,7 +62,7 @@ describe("utils/auth-github-webhook", () => {
       signature: sign(Buffer.from(body), SECRET),
     });
     expect(nextCalled).toBeFalse();
-    expect(res.body).toBe("pong");
+    expect(res._getData()).toBe("pong");
   });
 
   it("returns 401 when the X-Hub-Signature header is missing or empty", () => {
@@ -88,7 +82,7 @@ describe("utils/auth-github-webhook", () => {
     });
     expect(nextCalled).toBeFalse();
     expect(res.statusCode).toBe(401);
-    expect(res.body).toContain("Failed to authenticate");
+    expect(res._getData()).toContain("Failed to authenticate");
   });
 
   it("compares Buffer byte length, not string length (non-ASCII signature)", () => {

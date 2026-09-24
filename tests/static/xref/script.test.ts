@@ -29,7 +29,18 @@ if (
   throw new Error("could not slice citation helpers out of script.js");
 }
 
-const sandbox = {};
+interface CiteEntry {
+  type: string;
+  for?: string[];
+  uri?: string;
+}
+type HowToCite = (term: string, entry: CiteEntry) => string[];
+interface Sandbox {
+  howToCiteIDL: HowToCite;
+  howToCiteMarkup: HowToCite;
+  howToCiteTerm: HowToCite;
+}
+const sandbox = {} as unknown as Sandbox;
 vm.createContext(sandbox);
 vm.runInContext(
   `${excBlock}\n${fnBlock}\n` +

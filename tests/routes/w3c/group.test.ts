@@ -2,6 +2,8 @@ import { mkdir, mkdtemp, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
+import { createRequest, createResponse } from "node-mocks-http";
+
 // Fixture data representing the groups.json structure
 const FIXTURE_GROUPS = {
   wg: {
@@ -39,11 +41,15 @@ const FIXTURE_GROUPS = {
   other: {},
 };
 
-let tmpDir;
-let groupsJsonPath;
-let route;
-let reloadGroups;
-let origDataDir;
+type GroupRouteModule = typeof import("#routes/w3c/group.ts");
+type GroupRequest = Parameters<GroupRouteModule["default"]>[0];
+type GroupResponse = Parameters<GroupRouteModule["default"]>[1];
+
+let tmpDir: string;
+let groupsJsonPath: string;
+let route: GroupRouteModule["default"];
+let reloadGroups: GroupRouteModule["reloadGroups"];
+let origDataDir: string | undefined;
 
 beforeAll(async () => {
   tmpDir = await mkdtemp(path.join(tmpdir(), "w3c-group-test-"));
@@ -71,53 +77,16 @@ afterAll(async () => {
 });
 
 /**
- * Create a mock Express response object that tracks calls.
- */
-function mockRes() {
-  const res = {
-    _status: 200,
-    _body: undefined,
-    _headers: {},
-    _redirectUrl: undefined,
-    _redirectStatus: undefined,
-    _jsonBody: undefined,
-    _rendered: undefined,
-    status(code) {
-      res._status = code;
-      return res;
-    },
-    send(body) {
-      res._body = body;
-      return res;
-    },
-    json(body) {
-      res._jsonBody = body;
-      return res;
-    },
-    set(header, value) {
-      res._headers[header] = value;
-      return res;
-    },
-    redirect(status, url) {
-      res._redirectStatus = status;
-      res._redirectUrl = url;
-      return res;
-    },
-    render(view, data) {
-      res._rendered = { view, data };
-      return res;
-    },
-  };
-  return res;
-}
-
-/**
  * Invoke the route with a mock request/response and return the response for
  * assertions.
  */
-async function run(params = {}, headers = {}) {
-  const res = mockRes();
-  await route({ params, headers }, res);
+async function run(
+  params: Record<string, string> = {},
+  headers: Record<string, string> = {},
+) {
+  const req = createRequest<GroupRequest>({ params, headers });
+  const res = createResponse<GroupResponse>();
+  await route(req, res);
   return res;
 }
 
@@ -128,8 +97,8 @@ describe("w3c/group - LEGACY_SHORTNAMES behavior", () => {
       ["i18n", "/w3c/groups/i18n-core"],
     ]) {
       const res = await run({ shortname });
-      expect(res._redirectStatus).withContext(shortname).toBe(301);
-      expect(res._redirectUrl).withContext(shortname).toBe(target);
+      expect(res.statusCode).withContext(shortname).toBe(301);
+      expect(res._getRedirectUrl()).withContext(shortname).toBe(target);
     }
   });
 });
@@ -137,33 +106,33 @@ describe("w3c/group - LEGACY_SHORTNAMES behavior", () => {
 describe("w3c/group - no shortname", () => {
   it("returns JSON of all groups when no shortname and no html accept", async () => {
     const res = await run({}, { accept: "application/json" });
-    expect(res._jsonBody).toBeDefined();
-    expect(res._jsonBody.wg).toBeDefined();
-    expect(res._jsonBody.cg).toBeDefined();
-    expect(res._jsonBody.ig).toBeDefined();
+    expect(res._getJSONData()).toBeDefined();
+    expect(res._getJSONData().wg).toBeDefined();
+    expect(res._getJSONData().cg).toBeDefined();
+    expect(res._getJSONData().ig).toBeDefined();
   });
 
   it("renders HTML view when accept includes text/html", async () => {
     const res = await run({}, { accept: "text/html" });
-    expect(res._rendered).toBeDefined();
-    expect(res._rendered.view).toBe("w3c/groups.ts");
-    expect(res._rendered.data.groups).toBeDefined();
+    expect(res._getRenderView()).toBeDefined();
+    expect(res._getRenderView()).toBe("w3c/groups.ts");
+    expect(res._getRenderData().groups).toBeDefined();
   });
 });
 
 describe("w3c/group - error handling", () => {
   it("returns 404 for invalid group type", async () => {
     const res = await run({ shortname: "webapps", type: "invalid-type" });
-    expect(res._status).toBe(404);
-    expect(res._body).toContain("Invalid group type");
-    expect(res._body).toContain("invalid-type");
-    expect(res._headers["Content-Type"]).toBe("text/plain");
+    expect(res.statusCode).toBe(404);
+    expect(res._getData()).toContain("Invalid group type");
+    expect(res._getData()).toContain("invalid-type");
+    expect(res.getHeader("Content-Type")).toBe("text/plain");
   });
 
   it("returns 404 for unknown shortname with no type", async () => {
     const res = await run({ shortname: "totally-unknown-group" });
-    expect(res._status).toBe(404);
-    expect(res._body).toContain("totally-unknown-group");
+    expect(res.statusCode).toBe(404);
+    expect(res._getData()).toContain("totally-unknown-group");
   });
 });
 
@@ -172,7 +141,7 @@ describe("w3c/group - getGroupMeta disambiguation", () => {
   // When a shortname exists in only one type, it should work without specifying type.
   // When it exists in multiple types, it should return 409.
 
-  let originalFetch;
+  let originalFetch: typeof globalThis.fetch;
   beforeEach(() => {
     originalFetch = globalThis.fetch;
     // Stub the api.w3.org call so the test is deterministic and offline-safe.
@@ -200,8 +169,8 @@ describe("w3c/group - getGroupMeta disambiguation", () => {
     // 'css' exists only as a wg in the fixture, so the type is inferred (no
     // 409 ambiguity error) and the route returns that group's info.
     const res = await run({ shortname: "css" });
-    expect(res._status).not.toBe(409);
-    expect(res._jsonBody).toEqual(
+    expect(res.statusCode).not.toBe(409);
+    expect(res._getJSONData()).toEqual(
       jasmine.objectContaining({
         shortname: "css",
         type: "wg",
@@ -231,9 +200,9 @@ describe("w3c/group - reloadGroups()", () => {
     expect(reloadGroups()).toBe(true);
 
     const res = await run({}, { accept: "application/json" });
-    expect(res._jsonBody.wg.newgroup).toBeDefined();
-    expect(res._jsonBody.wg.newgroup.id).toBe(99999);
-    expect(res._jsonBody.wg.css).toBeUndefined();
+    expect(res._getJSONData().wg.newgroup).toBeDefined();
+    expect(res._getJSONData().wg.newgroup.id).toBe(99999);
+    expect(res._getJSONData().wg.css).toBeUndefined();
   });
 
   it("returns false when groups.json is missing", async () => {
@@ -241,7 +210,7 @@ describe("w3c/group - reloadGroups()", () => {
     expect(reloadGroups()).toBe(false);
 
     const res = await run({}, { accept: "application/json" });
-    expect(res._jsonBody.wg.css).toBeDefined();
+    expect(res._getJSONData().wg.css).toBeDefined();
   });
 
   it("returns false when groups.json contains invalid JSON", async () => {
@@ -249,6 +218,6 @@ describe("w3c/group - reloadGroups()", () => {
     expect(reloadGroups()).toBe(false);
 
     const res = await run({}, { accept: "application/json" });
-    expect(res._jsonBody.wg.css).toBeDefined();
+    expect(res._getJSONData().wg.css).toBeDefined();
   });
 });
