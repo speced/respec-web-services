@@ -19,16 +19,10 @@ jobs:
           cache: pnpm
       - run: pnpm install
 
-      - id: lint
-        run: pnpm lint
-        continue-on-error: true
-      - id: typecheck
-        run: pnpm typecheck
-        continue-on-error: true
-      - id: test
-        run: pnpm test
-        continue-on-error: true
-
-      - name: Fail if any of the above failed
-        if: steps.lint.outcome == 'failure' || steps.typecheck.outcome == 'failure' || steps.test.outcome == 'failure'
-        run: exit 1
+      - parallel:
+          - name: Lint
+            run: pnpm lint
+          - name: Typecheck
+            run: pnpm typecheck
+          - name: Test
+            run: pnpm test
