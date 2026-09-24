@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install
+
+      - id: lint
+        run: pnpm lint
+        continue-on-error: true
+      - id: typecheck
+        run: pnpm typecheck
+        continue-on-error: true
+      - id: test
+        run: pnpm test
+        continue-on-error: true
+
+      - name: Fail if any of the above failed
+        if: steps.lint.outcome == 'failure' || steps.typecheck.outcome == 'failure' || steps.test.outcome == 'failure'
+        run: exit 1
