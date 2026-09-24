@@ -19,8 +19,7 @@ jobs:
           cache: pnpm
       - run: pnpm install
 
-      - name: Lint, typecheck & test
-        parallel:
+      - parallel:
           - name: Lint
             run: pnpm lint
           - name: Typecheck
