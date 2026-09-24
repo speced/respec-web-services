@@ -2,7 +2,7 @@ import { env, getErrnoCode, HTTPError, ms, seconds } from "#utils/misc.ts";
 
 describe("utils/misc", () => {
   describe("env()", () => {
-    let savedEnv;
+    let savedEnv: Record<string, string | undefined>;
 
     beforeEach(() => {
       savedEnv = {};
@@ -23,10 +23,11 @@ describe("utils/misc", () => {
 
     it("throws when env variable is unset or an empty string", () => {
       // Both an absent variable and one set to "" are treated as "not set".
-      for (const [name, value] of [
+      const cases: [string, string | undefined][] = [
         ["SURELY_UNSET_VAR", undefined],
         ["EMPTY_VAR", ""],
-      ]) {
+      ];
+      for (const [name, value] of cases) {
         savedEnv[name] = process.env[name];
         if (value === undefined) delete process.env[name];
         else process.env[name] = value;
@@ -44,7 +45,7 @@ describe("utils/misc", () => {
 
   describe("seconds()", () => {
     it("parses each unit, fractions, spaces, and is case-insensitive", () => {
-      for (const [input, expected] of [
+      const cases: [string, number][] = [
         ["1s", 1],
         ["30s", 30],
         ["1m", 60],
@@ -65,7 +66,8 @@ describe("utils/misc", () => {
         ["1D", 86400],
         ["1W", 604800],
         ["1S", 1],
-      ]) {
+      ];
+      for (const [input, expected] of cases) {
         expect(seconds(input)).withContext(input).toBe(expected);
       }
     });

@@ -14,7 +14,8 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "jasmine"]
   },
-  "include": ["*.js", "*.ts", "routes", "scripts", "utils", "views", "@types"]
+  "include": ["*.ts", "routes", "scripts", "utils", "views", "@types", "tests"]
 }

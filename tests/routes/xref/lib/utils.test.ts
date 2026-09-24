@@ -22,9 +22,11 @@ describe("xref - utils", () => {
     expect(utils.pickFields(object, ["bar"])).toEqual({
       bar: object.bar,
     });
+    // @ts-expect-error intentionally passing a field that doesn't exist
     expect(utils.pickFields(object, ["foo", "nope", "bar"])).toEqual({
       foo: object.foo,
       bar: object.bar,
+      // @ts-expect-error intentionally checking a field that doesn't exist
       nope: undefined,
     });
     expect(utils.pickFields(object, ["bar"]).bar).toBe(object.bar);

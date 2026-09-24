@@ -1,4 +1,4 @@
-// GH_TOKEN is set by tests/helpers/env.js before any module loads; the tokens
+// GH_TOKEN is set by tests/helpers/env.ts before any module loads; the tokens
 // module reads it at import time. Assertions avoid the raw token value so a real
 // developer token can't leak into Jasmine failure diffs.
 const { getToken, updateRateLimit, getLimits } = await import(
@@ -25,7 +25,7 @@ describe("routes/github/lib/utils/tokens", () => {
   it("getLimits() masks each token to asterisks plus the last 4 chars", () => {
     // Exact-match proves the security property in one assertion: length is
     // preserved, only the last 4 chars show, and the prefix is hidden.
-    const token = process.env.GH_TOKEN;
+    const token = process.env.GH_TOKEN!;
     const masked = "*".repeat(token.length - 4) + token.slice(-4);
     expect(Object.keys(getLimits())).toEqual([masked]);
   });
