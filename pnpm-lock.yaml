@@ -194,8 +194,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1
       serialize-error:
-        specifier: ^13.0.1
-        version: 13.0.1
+        specifier: ^13.0.2
+        version: 13.0.2
       split2:
         specifier: ^4.2.0
         version: 4.2.0
@@ -939,8 +939,8 @@ packages:
     resolution: {integrity: sha512-1gnZf7DFcoIcajTjTwjwuDjzuz4PPcY2StKPlsGAQ1+YH20IRVrBaXSWmdjowTJ6u8Rc01PoYOGHXfP1mYcZNQ==}
     engines: {node: '>= 18'}
 
-  serialize-error@13.0.1:
-    resolution: {integrity: sha512-bBZaRwLH9PN5HbLCjPId4dP5bNGEtumcErgOX952IsvOhVPrm3/AeK1y0UHA/QaPG701eg0yEnOKsCOC6X/kaA==}
+  serialize-error@13.0.2:
+    resolution: {integrity: sha512-G+YKwp9I6IvWMe5RlwqxdmTPIcq/G8HK/sU51gdV1XAJznYkRSTB0ph+zB9AfSxG0fx6xrqYA6i9HeIcHFTXow==}
     engines: {node: '>=20'}
 
   serve-static@2.2.1:
@@ -1692,7 +1692,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  serialize-error@13.0.1:
+  serialize-error@13.0.2:
     dependencies:
       non-error: 0.1.0
       type-fest: 5.6.0
