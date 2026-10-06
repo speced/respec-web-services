@@ -31,7 +31,8 @@ export default function githubWebhookAuthenticator(secret: string) {
  */
 function isValidGithubSignature(req: RawRequest, secret: string) {
   const signature = req.get("X-Hub-Signature");
-  if (!signature) return false;
+  // express.raw() only reads application/json; other content types leave no Buffer to sign.
+  if (!signature || !Buffer.isBuffer(req.body)) return false;
   const expected = `sha1=${createHmac("sha1", secret).update(req.body).digest("hex")}`;
   const sigBuf = Buffer.from(signature);
   const expBuf = Buffer.from(expected);
