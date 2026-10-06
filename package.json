@@ -39,7 +39,7 @@
     "regenerate-docs": "node --trace-warnings ./scripts/regenerate-docs.ts",
     "update-data-sources": "node --env-file-if-exists=.env scripts/update-data-sources.ts"
   },
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@12.10.0",
   "simple-git-hooks": {
     "post-merge": "pnpm i"
   },
