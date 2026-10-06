@@ -1,7 +1,7 @@
 import { styleText } from "node:util";
 
 import type { Request, Response } from "express";
-import morgan, { type FormatFn, type Options } from "morgan";
+import morgan, { type FormatFn, type Options, type TokenIndexer } from "morgan";
 
 const prettyBytes = (bytes: number) => {
   const threshold = 1024;
@@ -43,39 +43,71 @@ const prettyJSON = (obj: Record<string, BasicTypes>, paint: Paint) => {
     .join(" ");
 };
 
+// A malformed escape like "%E0%A4%A" throws; log it undecoded instead.
+const safeDecode = (text: string) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+};
+
+const parseTokens = (
+  tokens: TokenIndexer<Request, Response>,
+  req: Request,
+  res: Response,
+) => {
+  // Paths like "///" don't parse; log them raw rather than throw.
+  const rawUrl = tokens.url(req, res) ?? "";
+  const url = URL.parse(rawUrl, "https://respec.org/");
+  const search = url?.search ?? "";
+  return {
+    date: tokens.date(req, res, "iso"),
+    remoteAddr: tokens["remote-addr"](req, res),
+    method: tokens.method(req, res),
+    status: parseInt(tokens.status(req, res) || "", 10),
+    pathname: url?.pathname ?? rawUrl,
+    // Cleaner searchParams, while making sure they stay in single line.
+    searchParams: search
+      ? safeDecode(search).replace(/(\s+)/g, encodeURIComponent)
+      : "",
+    referrer: URL.parse(tokens.referrer(req, res) ?? ""),
+    contentLength: res.getHeader("content-length") as number | undefined,
+    responseTime: tokens["response-time"](req, res),
+    locals: Object.keys(res.locals).length ? { ...res.locals } : null,
+  };
+};
+
 export const formatter = (
   stream: NodeJS.WritableStream,
 ): FormatFn<Request, Response> => {
   const paint = painter(stream);
   return (tokens, req, res) => {
-    const date = tokens.date(req, res, "iso");
-    const remoteAddr = tokens["remote-addr"](req, res);
-    const method = tokens.method(req, res);
-    const status = parseInt(tokens.status(req, res) || "", 10);
-    const url = URL.parse(tokens.url(req, res)!, "https://respec.org/")!;
-    const referrer = URL.parse(tokens.referrer(req, res) ?? "");
-    const contentLength = res.getHeader("content-length") as number | undefined;
-    const responseTime = tokens["response-time"](req, res);
-    const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
-
-    // Cleaner searchParams, while making sure they stay in single line.
-    const searchParams = url.search
-      ? decodeURIComponent(url.search).replace(/(\s+)/g, encodeURIComponent)
-      : "";
+    const {
+      date,
+      remoteAddr,
+      method,
+      status,
+      pathname,
+      searchParams,
+      referrer,
+      contentLength,
+      responseTime,
+      locals,
+    } = parseTokens(tokens, req, res);
     const color = status < 300 ? "green" : status >= 400 ? "red" : "yellow";
     const statusFormat: Format = res.locals.deprecated
       ? [color, "underline"]
       : color;
     const request =
       paint(statusFormat, `${method!.padEnd(4)} ${status}`) +
-      ` ${paint("blueBright", url.pathname)}${paint(["italic", "gray"], searchParams)}`;
+      ` ${paint("blueBright", pathname)}${paint(["italic", "gray"], searchParams)}`;
 
     let formattedReferrer: string | undefined;
     if (referrer) {
-      const { origin, pathname, search } = referrer;
       formattedReferrer =
-        paint("magenta", origin + paint("bold", pathname)) +
-        paint(["italic", "gray"], search);
+        paint("magenta", referrer.origin + paint("bold", referrer.pathname)) +
+        paint(["italic", "gray"], referrer.search);
     }
 
     const unknown = paint(["dim", "gray"], "-");
