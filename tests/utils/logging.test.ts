@@ -14,7 +14,13 @@ const colorStream = () =>
 
 const line = (
   stream: NodeJS.WritableStream,
-  { status = "200", url = "/test?q=1", locals = {} } = {},
+  {
+    status = "200",
+    url = "/test?q=1",
+    locals = {},
+    referrer = undefined as string | undefined,
+    contentLength = undefined as number | undefined,
+  } = {},
 ) => {
   const tokens: any = {
     date: () => "2026-10-06T00:00:00.000Z",
@@ -22,10 +28,10 @@ const line = (
     method: () => "GET",
     status: () => status,
     url: () => url,
-    referrer: () => undefined,
+    referrer: () => referrer,
     "response-time": () => "10",
   };
-  const res: any = { locals, getHeader: () => undefined };
+  const res: any = { locals, getHeader: () => contentLength };
   return formatter(stream)(tokens, {} as any, res) as string;
 };
 
@@ -84,6 +90,17 @@ describe("utils/logging", () => {
     expect(line(new PassThrough(), { locals })).toEqual(
       "2026-10-06T00:00:00.000Z |       127.0.0.1 | GET  200 /test?q=1 | - | - | 10 ms | deprecated=true user=1",
     );
+  });
+
+  it("colors the referrer and content-length", () => {
+    const parts = line(colorStream(), {
+      referrer: "https://example.com/p?x=1",
+      contentLength: 2048,
+    }).split(" | ");
+    expect(parts[3]).toEqual(
+      "\x1b[35mhttps://example.com\x1b[1m/p\x1b[22m\x1b[39m\x1b[3m\x1b[90m?x=1\x1b[39m\x1b[23m",
+    );
+    expect(parts[4]).toEqual("\x1b[36m2.00 KB\x1b[39m");
   });
 
   it("decides colors from the stream each logger writes to", async () => {
