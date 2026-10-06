@@ -15,10 +15,12 @@ const sign = (body: Buffer, secret: string) =>
 // `signature === undefined` means the header is absent.
 function run({
   body,
+  rawBody,
   signature,
   secret = SECRET,
 }: {
-  body: string;
+  body?: string;
+  rawBody?: Record<string, unknown>;
   signature: string | undefined;
   secret?: string;
 }) {
@@ -31,7 +33,8 @@ function run({
   const headers: Record<string, string> =
     signature === undefined ? {} : { "X-Hub-Signature": signature };
 
-  const req = createRequest<Request>({ body: Buffer.from(body), headers });
+  const reqBody = body !== undefined ? Buffer.from(body) : rawBody;
+  const req = createRequest<Request>({ body: reqBody, headers });
   const res = createResponse<Response>();
   let nextCalled = false;
   verifier(req, res, () => {
@@ -95,5 +98,16 @@ describe("utils/auth-github-webhook", () => {
     const { nextCalled, res } = run({ body, signature: nonAsciiSig });
     expect(nextCalled).toBeFalse();
     expect(res.statusCode).toBe(401);
+  });
+
+  it("returns 401 and does not throw when req.body is undefined or {}", () => {
+    for (const rawBody of [undefined, {}]) {
+      const getResult = () => run({ rawBody, signature: "sha1=dummy" });
+      expect(getResult).not.toThrow();
+
+      const { nextCalled, res } = getResult();
+      expect(nextCalled).toBeFalse();
+      expect(res.statusCode).toBe(401);
+    }
   });
 });
