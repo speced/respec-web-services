@@ -2,6 +2,15 @@ import chalk from "chalk";
 import type { Request, Response } from "express";
 import morgan, { type FormatFn, type Options } from "morgan";
 
+// A malformed escape like "%E0%A4%A" throws; log it undecoded instead.
+const safeDecode = (text: string) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+};
+
 const prettyBytes = (bytes: number) => {
   const threshold = 1024;
   let size = bytes;
@@ -38,15 +47,19 @@ const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
   const remoteAddr = tokens["remote-addr"](req, res);
   const method = tokens.method(req, res);
   const status = parseInt(tokens.status(req, res) || "", 10);
-  const url = URL.parse(tokens.url(req, res)!, "https://respec.org/")!;
+  // Paths like "///" don't parse; log them raw rather than throw.
+  const rawUrl = tokens.url(req, res) ?? "";
+  const url = URL.parse(rawUrl, "https://respec.org/");
+  const pathname = url?.pathname ?? rawUrl;
+  const search = url?.search ?? "";
   const referrer = URL.parse(tokens.referrer(req, res) ?? "");
   const contentLength = res.getHeader("content-length") as number | undefined;
   const responseTime = tokens["response-time"](req, res);
   const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
 
   // Cleaner searchParams, while making sure they stay in single line.
-  const searchParams = url.search
-    ? decodeURIComponent(url.search).replace(/(\s+)/g, encodeURIComponent)
+  const searchParams = search
+    ? safeDecode(search).replace(/(\s+)/g, encodeURIComponent)
     : "";
   let color =
     status < 300 ? chalk.green : status >= 400 ? chalk.red : chalk.yellow;
@@ -55,7 +68,7 @@ const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
   }
   const request =
     color(`${method!.padEnd(4)} ${status}`) +
-    ` ${chalk.blueBright(url.pathname)}${chalk.italic.gray(searchParams)}`;
+    ` ${chalk.blueBright(pathname)}${chalk.italic.gray(searchParams)}`;
 
   let formattedReferrer: string | undefined;
   if (referrer) {
