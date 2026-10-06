@@ -1,15 +1,7 @@
-import chalk from "chalk";
-import type { Request, Response } from "express";
-import morgan, { type FormatFn, type Options } from "morgan";
+import { styleText } from "node:util";
 
-// A malformed escape like "%E0%A4%A" throws; log it undecoded instead.
-const safeDecode = (text: string) => {
-  try {
-    return decodeURIComponent(text);
-  } catch {
-    return text;
-  }
-};
+import type { Request, Response } from "express";
+import morgan, { type FormatFn, type Options, type TokenIndexer } from "morgan";
 
 const prettyBytes = (bytes: number) => {
   const threshold = 1024;
@@ -24,70 +16,114 @@ const prettyBytes = (bytes: number) => {
   return bytes;
 };
 
-const prettyJSON = (() => {
-  type BasicTypes = number | boolean | null | string;
+type Format = Parameters<typeof styleText>[0];
+type Paint = (format: Format, text: string) => string;
+
+// Colors only when `stream` supports them (honors FORCE_COLOR and NO_COLOR).
+// Empty text stays empty, so it never becomes bare escape codes.
+const painter =
+  (stream: NodeJS.WritableStream): Paint =>
+  (format, text) =>
+    text ? styleText(format, text, { stream }) : text;
+
+type BasicTypes = number | boolean | null | string;
+const prettyJSON = (obj: Record<string, BasicTypes>, paint: Paint) => {
   const colored = (value: BasicTypes) => {
     switch (typeof value) {
       case "number":
-        return chalk.cyan(value.toString());
+        return paint("cyan", String(value));
       case "boolean":
-        return chalk.green(value.toString());
+        return paint("green", String(value));
       default:
-        return chalk.yellow(value);
+        return paint("yellow", String(value));
     }
   };
-  return (obj: Record<string, BasicTypes>) =>
-    Object.entries(obj)
-      .map(([key, value]) => chalk.magentaBright(`${key}=`) + colored(value))
-      .join(" ");
-})();
+  return Object.entries(obj)
+    .map(([key, value]) => paint("magentaBright", `${key}=`) + colored(value))
+    .join(" ");
+};
 
-const formatter: FormatFn<Request, Response> = (tokens, req, res) => {
-  const date = tokens.date(req, res, "iso");
-  const remoteAddr = tokens["remote-addr"](req, res);
-  const method = tokens.method(req, res);
-  const status = parseInt(tokens.status(req, res) || "", 10);
+// A malformed escape like "%E0%A4%A" throws; log it undecoded instead.
+const safeDecode = (text: string) => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+};
+
+const parseTokens = (
+  tokens: TokenIndexer<Request, Response>,
+  req: Request,
+  res: Response,
+) => {
   // Paths like "///" don't parse; log them raw rather than throw.
   const rawUrl = tokens.url(req, res) ?? "";
   const url = URL.parse(rawUrl, "https://respec.org/");
-  const pathname = url?.pathname ?? rawUrl;
   const search = url?.search ?? "";
-  const referrer = URL.parse(tokens.referrer(req, res) ?? "");
-  const contentLength = res.getHeader("content-length") as number | undefined;
-  const responseTime = tokens["response-time"](req, res);
-  const locals = Object.keys(res.locals).length ? { ...res.locals } : null;
+  return {
+    date: tokens.date(req, res, "iso"),
+    remoteAddr: tokens["remote-addr"](req, res),
+    method: tokens.method(req, res),
+    status: parseInt(tokens.status(req, res) || "", 10),
+    pathname: url?.pathname ?? rawUrl,
+    // Cleaner searchParams, while making sure they stay in single line.
+    searchParams: search
+      ? safeDecode(search).replace(/(\s+)/g, encodeURIComponent)
+      : "",
+    referrer: URL.parse(tokens.referrer(req, res) ?? ""),
+    contentLength: res.getHeader("content-length") as number | undefined,
+    responseTime: tokens["response-time"](req, res),
+    locals: Object.keys(res.locals).length ? { ...res.locals } : null,
+  };
+};
 
-  // Cleaner searchParams, while making sure they stay in single line.
-  const searchParams = search
-    ? safeDecode(search).replace(/(\s+)/g, encodeURIComponent)
-    : "";
-  let color =
-    status < 300 ? chalk.green : status >= 400 ? chalk.red : chalk.yellow;
-  if (res.locals.deprecated) {
-    color = color.underline;
-  }
-  const request =
-    color(`${method!.padEnd(4)} ${status}`) +
-    ` ${chalk.blueBright(pathname)}${chalk.italic.gray(searchParams)}`;
+export const formatter = (
+  stream: NodeJS.WritableStream,
+): FormatFn<Request, Response> => {
+  const paint = painter(stream);
+  return (tokens, req, res) => {
+    const {
+      date,
+      remoteAddr,
+      method,
+      status,
+      pathname,
+      searchParams,
+      referrer,
+      contentLength,
+      responseTime,
+      locals,
+    } = parseTokens(tokens, req, res);
+    const color = status < 300 ? "green" : status >= 400 ? "red" : "yellow";
+    const statusFormat: Format = res.locals.deprecated
+      ? [color, "underline"]
+      : color;
+    const request =
+      paint(statusFormat, `${method!.padEnd(4)} ${status}`) +
+      ` ${paint("blueBright", pathname)}${paint(["italic", "gray"], searchParams)}`;
 
-  let formattedReferrer: string | undefined;
-  if (referrer) {
-    const { origin, pathname, search } = referrer;
-    formattedReferrer =
-      chalk.magenta(origin + chalk.bold(pathname)) + chalk.italic.gray(search);
-  }
+    let formattedReferrer: string | undefined;
+    if (referrer) {
+      formattedReferrer =
+        paint("magenta", referrer.origin + paint("bold", referrer.pathname)) +
+        paint(["italic", "gray"], referrer.search);
+    }
 
-  const unknown = chalk.dim.gray("-");
+    const unknown = paint(["dim", "gray"], "-");
 
-  return [
-    chalk.gray(date),
-    remoteAddr ? chalk.gray(remoteAddr.padStart(15)) : unknown,
-    request,
-    formattedReferrer || unknown,
-    contentLength ? chalk.cyan(prettyBytes(contentLength)) : unknown,
-    chalk.cyan(`${responseTime} ms`),
-    locals ? prettyJSON(locals) : unknown,
-  ].join(" | ");
+    return [
+      paint("gray", String(date)),
+      remoteAddr ? paint("gray", remoteAddr.padStart(15)) : unknown,
+      request,
+      formattedReferrer || unknown,
+      contentLength
+        ? paint("cyan", String(prettyBytes(contentLength)))
+        : unknown,
+      paint("cyan", `${responseTime} ms`),
+      locals ? prettyJSON(locals, paint) : unknown,
+    ].join(" | ");
+  };
 };
 
 const skipCommon = (req: Request, res: Response) => {
@@ -116,5 +152,5 @@ const optionsStderr: Options<Request, Response> = {
   stream: process.stderr,
 };
 
-export const stdout = () => morgan(formatter, optionsStdout);
-export const stderr = () => morgan(formatter, optionsStderr);
+export const stdout = () => morgan(formatter(process.stdout), optionsStdout);
+export const stderr = () => morgan(formatter(process.stderr), optionsStderr);
