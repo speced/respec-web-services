@@ -39,7 +39,7 @@ export async function pullRelease() {
 
   const dir = path.resolve(PKG_DIR, "..");
   await mkdir(dir, { recursive: true });
-  await sh(`npm view respec dist.tarball | xargs curl -s | tar -xz --totals`, {
+  await sh(`npm view respec dist.tarball | xargs curl -s | tar -xmz --totals`, {
     cwd: dir,
     output: "stream",
   });
