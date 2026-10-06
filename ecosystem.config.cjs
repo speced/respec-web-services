@@ -5,6 +5,7 @@
 const app = {
   name: "respec.org",
   script: "./app.ts",
+  interpreter: "node",
   node_args: "--env-file-if-exists=.env",
   env_production: {
     NODE_ENV: "production",
