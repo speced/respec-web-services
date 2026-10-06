@@ -9,6 +9,7 @@ const app = {
   node_args: "--env-file-if-exists=.env",
   env_production: {
     NODE_ENV: "production",
+    FORCE_COLOR: "1",
   },
   max_memory_restart: "700M",
 };
