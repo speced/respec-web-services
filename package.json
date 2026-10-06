@@ -14,7 +14,7 @@
     "node": ">=24"
   },
   "dependencies": {
-    "chalk": "^6.0.0",
+    "chalk": "^6.0.1",
     "compression": "^1.8.2",
     "cors": "^2.8.6",
     "express": "^5.2.1",
@@ -22,7 +22,7 @@
     "helmet": "^8.3.0",
     "morgan": "^1.12.1",
     "nanoid": "^6.0.1",
-    "serialize-error": "^13.0.1",
+    "serialize-error": "^13.0.2",
     "split2": "^4.2.0",
     "ucontent": "^2.0.0"
   },
@@ -39,18 +39,18 @@
     "regenerate-docs": "node --trace-warnings ./scripts/regenerate-docs.ts",
     "update-data-sources": "node --env-file-if-exists=.env scripts/update-data-sources.ts"
   },
-  "packageManager": "pnpm@12.5.1",
+  "packageManager": "pnpm@12.10.0",
   "simple-git-hooks": {
     "post-merge": "pnpm i"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.14",
+    "@biomejs/biome": "2.5.15",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/jasmine": "^6.0.0",
+    "@types/jasmine": "^7.0.0",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.4",
     "@types/split2": "^4.2.3",
     "jasmine": "^7.0.0",
     "node-mocks-http": "^1.18.1",
