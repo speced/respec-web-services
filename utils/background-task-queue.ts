@@ -1,9 +1,9 @@
+import { randomBytes, randomUUID } from "node:crypto";
 import EventEmitter from "node:events";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { isMainThread, parentPort, Worker } from "node:worker_threads";
 
-import { nanoid } from "nanoid";
 import { deserializeError, serializeError } from "serialize-error";
 import split2 from "split2";
 
@@ -253,7 +253,7 @@ export class BackgroundTaskQueue<M extends TaskModule> {
   private async activate() {
     this.isActivated = true;
 
-    const id = nanoid();
+    const id = randomUUID();
     const modulePath = this.modulePath;
     const msg: OperationRequest = { id, type: "init", modulePath };
     this.worker.postMessage(msg);
@@ -296,6 +296,6 @@ export class BackgroundTaskQueue<M extends TaskModule> {
   private generateId() {
     const count = `${++this.jobCounter}`.padStart(3, "0");
     const now = new Date().toISOString().slice(0, 10);
-    return `${now}/${this.name}/${count}-${nanoid(5)}`;
+    return `${now}/${this.name}/${count}-${randomBytes(4).toString("base64url").slice(0, 5)}`;
   }
 }
