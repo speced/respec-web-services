@@ -3,7 +3,7 @@
 // - specs.json having data by spec shortname
 // - specmap.json having spec details
 
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -116,18 +116,51 @@ export default async function main(options: Partial<Options> = {}) {
   return true;
 }
 
-async function updateInputSource() {
+// Keep these unset: git hooks export them, and they point every git command at
+// the hook's repository.
+const GIT_HOOK_ENV = {
+  GIT_DIR: undefined,
+  GIT_WORK_TREE: undefined,
+  GIT_INDEX_FILE: undefined,
+};
+
+/**
+ * Clones Webref when `webref/` does not exist. Otherwise resets the clone's
+ * branch to its upstream, discarding local edits, commits and untracked files
+ * that git does not ignore. Rejects when `webref/` is not a repository of its
+ * own, or when HEAD is not on a branch with an upstream. Returns whether the
+ * clone changed: HEAD moved, or the clone held local changes.
+ */
+export async function updateInputSource() {
   await mkdir(DATA_DIR, { recursive: true });
-  const shouldClone = !existsSync(INPUT_DIR_BASE);
+  if (!existsSync(INPUT_DIR_BASE)) {
+    const command = `git clone ${INPUT_REPO_SRC} ${INPUT_REPO_NAME}`;
+    await sh(command, { output: "stream", cwd: DATA_DIR, env: GIT_HOOK_ENV });
+    return true;
+  }
 
-  const command = shouldClone
-    ? `git clone ${INPUT_REPO_SRC} ${INPUT_REPO_NAME}`
-    : `git pull`;
-  const cwd = shouldClone ? DATA_DIR : INPUT_DIR_BASE;
-
-  const stdout = await sh(command, { output: "stream", cwd });
-  const hasUpdated = !stdout.includes("Already up to date");
-  return hasUpdated;
+  const git = (args: string) =>
+    sh(`git ${args}`, {
+      output: "stream",
+      cwd: INPUT_DIR_BASE,
+      env: GIT_HOOK_ENV,
+    });
+  // Keep this check: `reset --hard` and `clean -fd` destroy work in whichever
+  // repository git finds, and git looks above `webref/` when it is not one.
+  const toplevel = await git("rev-parse --show-toplevel");
+  if (realpathSync.native(toplevel) !== realpathSync.native(INPUT_DIR_BASE)) {
+    throw new Error(
+      `${INPUT_DIR_BASE} is not the root of a git repository (git found ${toplevel})`,
+    );
+  }
+  const before = await git("rev-parse HEAD");
+  const wasDirty =
+    (await git("status --porcelain --untracked-files=normal")) !== "";
+  await git("fetch --prune");
+  await git("reset --hard @{u}");
+  // The headings reader ingests any `.json` in ed/headings/, so remove strays.
+  await git("clean -fd");
+  return wasDirty || before !== (await git("rev-parse HEAD"));
 }
 
 /**
