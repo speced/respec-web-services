@@ -4,6 +4,7 @@ import {
   type DataEntry,
   type Options,
   type Query,
+  validateSearchBody,
 } from "#routes/xref/lib/search.ts";
 import { buildTermLowerIndex, type Store } from "#routes/xref/lib/store.ts";
 import bySpecRaw from "./data-by-spec.ts";
@@ -641,6 +642,93 @@ describe("xref - search", () => {
         { all: true },
       );
       expect(results.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("prototype-key safety", () => {
+    // byTerm/bySpec are JSON-parsed plain objects; terms like "toString" must
+    // not resolve to inherited Object.prototype members (crashed with 500s).
+    it("returns empty results for Object.prototype member terms", () => {
+      for (const term of [
+        "toString",
+        "hasOwnProperty",
+        "__proto__",
+        "constructor",
+      ]) {
+        expect(search({ term, id: "" })).toEqual([]);
+      }
+    });
+
+    it("returns empty results for Object.prototype member specs", () => {
+      expect(search({ specs: [["toString"]], id: "" }, { all: true })).toEqual(
+        [],
+      );
+      expect(
+        search({ term: "concept-url", specs: [["__proto__"]], id: "" }),
+      ).toEqual([]);
+    });
+
+    it("finds a real term that is also an Object.prototype member", () => {
+      store.byTerm = { ...byTerm, toString: byTerm.URL };
+      try {
+        expect(
+          search({ term: "toString", id: "" }, { all: true }).length,
+        ).toBeGreaterThan(0);
+      } finally {
+        store.byTerm = byTerm;
+      }
+    });
+  });
+
+  describe("validateSearchBody", () => {
+    it("accepts valid bodies", () => {
+      expect(validateSearchBody([], undefined)).toBeNull();
+      expect(
+        validateSearchBody(
+          [{ term: "url", specs: [["url"]], types: ["dfn"], for: "x" }],
+          { all: true },
+        ),
+      ).toBeNull();
+      expect(
+        validateSearchBody([{ term: null, specs: ["url"] }], {}),
+      ).toBeNull();
+    });
+
+    it("rejects non-array queries", () => {
+      expect(validateSearchBody("x", undefined)).toMatch(/queries/);
+      expect(validateSearchBody(undefined, undefined)).toMatch(/queries/);
+      expect(validateSearchBody({}, undefined)).toMatch(/queries/);
+    });
+
+    it("rejects non-object query items", () => {
+      expect(validateSearchBody(["list"], undefined)).toMatch(/query/);
+      expect(validateSearchBody([null], undefined)).toMatch(/query/);
+    });
+
+    it("rejects malformed query fields", () => {
+      expect(validateSearchBody([{ term: 42 }], undefined)).toMatch(/term/);
+      expect(validateSearchBody([{ for: {} }], undefined)).toMatch(/for/);
+      expect(validateSearchBody([{ specs: "url" }], undefined)).toMatch(
+        /specs/,
+      );
+      expect(
+        validateSearchBody([{ specs: ["url", ["css"]] }], undefined),
+      ).toMatch(/specs/);
+      expect(validateSearchBody([{ types: "dfn" }], undefined)).toMatch(
+        /types/,
+      );
+    });
+
+    it("rejects non-object options", () => {
+      expect(validateSearchBody([], "all")).toMatch(/options/);
+      expect(validateSearchBody([], null)).toMatch(/options/);
+    });
+
+    it("rejects malformed option arrays", () => {
+      for (const field of ["fields", "spec_type", "types"]) {
+        expect(validateSearchBody([], { [field]: null })).toContain(field);
+        expect(validateSearchBody([], { [field]: [1] })).toContain(field);
+      }
     });
   });
 });

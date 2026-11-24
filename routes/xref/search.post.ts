@@ -5,6 +5,7 @@ import {
   type Options,
   type Query,
   searchOne,
+  validateSearchBody,
 } from "./lib/search.ts";
 import type { Store } from "./lib/store.ts";
 import { store } from "./lib/store-init.ts";
@@ -17,7 +18,18 @@ interface RequestBody {
 type IRequest = Request<never, any, RequestBody>;
 
 export default function route(req: IRequest, res: Response) {
+  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    res.status(400).json({ error: "body must be a JSON object" });
+    return;
+  }
   const { options = {}, queries = [] } = req.body;
+
+  const validationError = validateSearchBody(queries, options);
+  if (validationError) {
+    res.status(400).json({ error: validationError });
+    return;
+  }
+
   const results = search(queries, store, options);
 
   Object.assign(res.locals, {

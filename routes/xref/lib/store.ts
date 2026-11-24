@@ -13,6 +13,18 @@ export type SpecMapGroup = {
   };
 };
 
+/**
+ * Own-property lookup for JSON-parsed indexes. User-controlled keys like
+ * "toString" or "__proto__" must not resolve to inherited Object.prototype
+ * members.
+ */
+export function getOwn<T>(
+  obj: { [key: string]: T },
+  key: string,
+): T | undefined {
+  return Object.hasOwn(obj, key) ? obj[key] : undefined;
+}
+
 export class Store {
   version = -1;
   bySpec: { [shortname: string]: DataEntry[] } = {};
@@ -48,7 +60,7 @@ export class Store {
     const specHeadings = this.resolveHeadings(normalizedSpec);
     if (!specHeadings) return null;
 
-    const heading = specHeadings[id];
+    const heading = getOwn(specHeadings, id);
     if (!heading) return null;
 
     return {
@@ -61,13 +73,13 @@ export class Store {
   }
 
   private resolveHeadings(spec: string): Record<string, HeadingEntry> | null {
-    const direct = this.headings[spec];
+    const direct = getOwn(this.headings, spec);
     if (direct) return direct;
 
     // Try stripping version suffix (e.g., cssom-view-1 → cssom-view)
     const stripped = spec.replace(/-\d+$/, "");
     if (stripped !== spec) {
-      const unversioned = this.headings[stripped];
+      const unversioned = getOwn(this.headings, stripped);
       if (unversioned) return unversioned;
     }
 
