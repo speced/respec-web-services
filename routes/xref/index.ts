@@ -6,7 +6,12 @@ import express, { type Request, type Response } from "express";
 import authGithubWebhook from "#utils/auth-github-webhook.ts";
 import { env, ms } from "#utils/misc.ts";
 import headingsRoutePost from "./headings.post.ts";
-import { type Options, type Query, search } from "./lib/search.ts";
+import {
+  type Options,
+  type Query,
+  search,
+  validateSearchBody,
+} from "./lib/search.ts";
 import { store } from "./lib/store-init.ts";
 import metaRoute from "./meta.ts";
 import searchRouteGet from "./search.get.ts";
@@ -46,9 +51,21 @@ interface RequestBody {
 type IRequest = Request<any, any, RequestBody>;
 
 export function route(req: IRequest, res: Response) {
-  const { options } = req.body;
+  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    res.status(400).json({ error: "body must be a JSON object" });
+    return;
+  }
+  const { options, keys } = req.body;
   // req.body.keys for backward compatibility
-  const queries = req.body.queries || req.body.keys || [];
+  const queries =
+    req.body.queries === undefined ? (keys ?? []) : req.body.queries;
+
+  const validationError = validateSearchBody(queries, options);
+  if (validationError) {
+    res.status(400).json({ error: validationError });
+    return;
+  }
+
   const body = search(queries, store, options);
 
   const errors = getErrorCount(body.result);

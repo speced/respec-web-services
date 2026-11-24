@@ -1,6 +1,6 @@
 import { MemCache } from "#utils/mem-cache.ts";
 import { CONCEPT_TYPES, IDL_TYPES, QUERY_CACHE_DURATION } from "./constants.ts";
-import type { Store } from "./store.ts";
+import { getOwn, type Store } from "./store.ts";
 import { objectHash, pickFields, textVariations } from "./utils.ts";
 
 type Type =
@@ -73,6 +73,64 @@ export const defaultOptions: Options = {
 
 export const cache = new MemCache<DataEntry[]>(QUERY_CACHE_DURATION);
 
+export function validateSearchBody(
+  queries: unknown,
+  options: unknown,
+): string | null {
+  if (
+    options !== undefined &&
+    (typeof options !== "object" || options === null || Array.isArray(options))
+  ) {
+    return "options must be an object";
+  }
+  if (options !== undefined) {
+    const values = options as Record<string, unknown>;
+    for (const key of ["fields", "spec_type", "types"]) {
+      const value = values[key];
+      if (
+        value !== undefined &&
+        !(Array.isArray(value) && value.every(item => typeof item === "string"))
+      ) {
+        return `options.${key} must be an array of strings`;
+      }
+    }
+  }
+  if (!Array.isArray(queries)) {
+    return "queries must be an array";
+  }
+  for (const query of queries) {
+    if (typeof query !== "object" || query === null || Array.isArray(query)) {
+      return "each query must be an object";
+    }
+    const { term, for: forContext, specs, types } = query as Partial<Query>;
+    if (term != null && typeof term !== "string") {
+      return "query.term must be a string";
+    }
+    if (forContext != null && typeof forContext !== "string") {
+      return "query.for must be a string";
+    }
+    if (
+      specs != null &&
+      !(
+        Array.isArray(specs) &&
+        (specs.every(s => typeof s === "string") ||
+          specs.every(
+            s => Array.isArray(s) && s.every(ss => typeof ss === "string"),
+          ))
+      )
+    ) {
+      return "query.specs must be an array of strings or arrays of strings";
+    }
+    if (
+      types != null &&
+      !(Array.isArray(types) && types.every(t => typeof t === "string"))
+    ) {
+      return "query.types must be an array of strings";
+    }
+  }
+  return null;
+}
+
 export function search(
   queries: Query[],
   store: Store,
@@ -136,9 +194,7 @@ const BROWSE_LIMIT = 1000;
 
 function filter(query: Query, store: Store, options: Options) {
   const searchTerm = query.term;
-  // `== null` on purpose: a JSON body can carry {"term": null}, and the POST route
-  // passes req.body.queries to searchOne unvalidated. An explicit "" is NOT caught
-  // here, which is the whole point of this function.
+  // `== null` also accepts an explicit null; an empty string is a real term.
   if (searchTerm == null) {
     // No term at all means "browse everything in these specs". An explicit
     // empty string is NOT this case: it is a real term, so it falls through to
@@ -174,27 +230,27 @@ function filter(query: Query, store: Store, options: Options) {
 }
 
 function resolveSpecKey(spec: string, store: Store) {
-  if (store.bySpec[spec]) {
+  if (getOwn(store.bySpec, spec)) {
     return spec;
   }
 
   // specmap is { [group]: { [specid]: { shortname, url, title } } }
   for (const group of Object.values(store.specmap ?? {})) {
-    const entry = group[spec];
-    if (entry?.shortname && store.bySpec[entry.shortname]) {
+    const entry = getOwn(group, spec);
+    if (entry?.shortname && getOwn(store.bySpec, entry.shortname)) {
       return entry.shortname;
     }
   }
 
   const versionlessSpec = spec.replace(/-\d+$/, "");
   if (versionlessSpec !== spec) {
-    if (store.bySpec[versionlessSpec]) {
+    if (getOwn(store.bySpec, versionlessSpec)) {
       return versionlessSpec;
     }
 
     for (const group of Object.values(store.specmap ?? {})) {
-      const entry = group[versionlessSpec];
-      if (entry?.shortname && store.bySpec[entry.shortname]) {
+      const entry = getOwn(group, versionlessSpec);
+      if (entry?.shortname && getOwn(store.bySpec, entry.shortname)) {
         return entry.shortname;
       }
     }
@@ -210,7 +266,7 @@ function collectBySpecs(specsLists: string[][], store: Store) {
     specs
       .map(spec => resolveSpecKey(spec, store))
       .filter(spec => !seen.has(spec) && seen.add(spec))
-      .flatMap(spec => store.bySpec[spec] ?? []),
+      .flatMap(spec => getOwn(store.bySpec, spec) ?? []),
   );
 }
 
@@ -248,7 +304,7 @@ function* termCandidates(
   allowCaseFallback: boolean,
 ) {
   if (term == null) return;
-  const direct = store.byTerm[term];
+  const direct = getOwn(store.byTerm, term);
   if (direct) yield direct;
   if (!allowCaseFallback) return;
   const lower = term.toLowerCase();
@@ -257,7 +313,7 @@ function* termCandidates(
   const fallback = variants
     .filter(v => v !== term) // exclude the exact bucket already yielded above
     .flatMap(v =>
-      (store.byTerm[v] || []).map(entry => ({ ...entry, term: v })),
+      (getOwn(store.byTerm, v) || []).map(entry => ({ ...entry, term: v })),
     );
   if (fallback.length) yield fallback;
 }
